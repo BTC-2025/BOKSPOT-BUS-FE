@@ -1,0 +1,400 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary-brand: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent-brand: var(--accent);
+  
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  
+  --color-border-brand: var(--border);
+}
+
+:root {
+  --primary: #d4af37;
+  --primary-dark: #cca022;
+  --accent: #ff6325;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: rgba(252, 238, 167, 0.15);
+  
+  /* Defaults to Dark theme variable values */
+  --bg-primary: #0c0c10;
+  --bg-secondary: #111116;
+  --bg-tertiary: #18181f;
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --sidebar-bg: #111116;
+  --sidebar-text: #94a3b8;
+}
+
+.light {
+  --primary: #8b6508;
+  --primary-dark: #664a05;
+  --accent: #ff6325;
+  
+  --bg-primary: #fdfbf7;      /* warm beige background */
+  --bg-secondary: #ffffff;    /* clean white sidebar */
+  --bg-tertiary: #f5f0e1;     /* warmer beige card containers */
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --border: rgba(139, 101, 8, 0.2);
+  --sidebar-bg: #fdfbf7;
+  --sidebar-text: #475569;
+}
+
+.dark {
+  --primary: #d4af37;
+  --primary-dark: #cca022;
+  --accent: #ff6325;
+  
+  --bg-primary: #0c0c10;      /* near black body */
+  --bg-secondary: #111116;    /* dark charcoal sidebar */
+  --bg-tertiary: #18181f;     /* dark charcoal card backgrounds */
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --border: rgba(252, 238, 167, 0.15);
+  --sidebar-bg: #111116;
+  --sidebar-text: #94a3b8;
+}
+
+/* Global overrides for hardcoded Tailwind backgrounds and brand colors */
+.bg-\[\#030c17\] { background-color: var(--bg-primary) !important; }
+.bg-\[\#061528\] { background-color: var(--bg-secondary) !important; }
+.bg-\[\#0d1120\] { background-color: var(--bg-tertiary) !important; }
+
+/* Map old gold color class (#8b6508) to new variable primary color (#d4af37) */
+.text-\[\#8b6508\] { color: var(--primary) !important; }
+.bg-\[\#8b6508\] { background-color: var(--primary) !important; }
+.border-\[\#8b6508\] { border-color: var(--primary) !important; }
+
+.bg-\[\#8b6508\]\/10 { background-color: color-mix(in srgb, var(--primary) 10%, transparent) !important; }
+.bg-\[\#8b6508\]\/15 { background-color: color-mix(in srgb, var(--primary) 15%, transparent) !important; }
+.bg-\[\#8b6508\]\/20 { background-color: color-mix(in srgb, var(--primary) 20%, transparent) !important; }
+
+.border-\[\#8b6508\]\/20 { border-color: color-mix(in srgb, var(--primary) 20%, transparent) !important; }
+.border-\[\#8b6508\]\/30 { border-color: color-mix(in srgb, var(--primary) 30%, transparent) !important; }
+.border-\[\#8b6508\]\/15 { border-color: color-mix(in srgb, var(--primary) 15%, transparent) !important; }
+
+* { font-family: 'Inter', sans-serif; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.vendor-navbar {
+  background: #d4a729 !important;
+  border-bottom: 1px solid rgba(252, 238, 167, 0.4) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure all text, buttons, and icons inside vendor-navbar remain styled, dark-bronze-contrast on gold */
+.vendor-navbar,
+.vendor-navbar span,
+.vendor-navbar button,
+.vendor-navbar svg {
+  color: #fceea7 !important;
+}
+
+/* Adjust nested button fills for high contrast on the gold navbar */
+.vendor-navbar button,
+.vendor-navbar .relative > button {
+  background-color: #5a4409 !important;
+  border: 1px solid rgba(252, 238, 167, 0.28) !important;
+}
+
+.vendor-navbar button:hover,
+.vendor-navbar .relative > button:hover {
+  background-color: #72560c !important;
+  border-color: rgba(252, 238, 167, 0.45) !important;
+}
+
+/* Ensure all text, buttons, and icons inside vendor-navbar remain light and readable in light mode */
+.light .vendor-navbar {
+  .text-white,
+  .text-slate-100,
+  .text-slate-200,
+  .text-slate-300,
+  .text-slate-400,
+  .text-text-secondary,
+  .text-text-primary {
+    color: #cbd5e1 !important; /* light slate-300 */
+  }
+
+  .text-white:hover,
+  .text-slate-300:hover,
+  .text-text-primary:hover {
+    color: #ffffff !important;
+  }
+
+  button,
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/20,
+  .border-border-brand {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  button:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .text-\[\#fceea7\],
+  .bg-\[\#8b6508\]\/10 {
+    color: #fceea7 !important;
+    background-color: rgba(139, 101, 8, 0.2) !important;
+  }
+
+  /* Keep profile avatar icon white and deep blue */
+  .bg-white {
+    background-color: #ffffff !important;
+  }
+  .text-\[\#0a3161\] {
+    color: #0a3161 !important;
+  }
+
+  svg {
+    color: #94a3b8 !important;
+  }
+  
+  button:hover svg {
+    color: #ffffff !important;
+  }
+}
+
+
+.gradient-text {
+  background: linear-gradient(135deg, #8b6508, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-hover {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+
+/* ================================================================
+ * LIGHT MODE OVERRIDES FOR HARDCODED TAILWIND CLASSES
+ * ================================================================ */
+.light {
+  /* Backgrounds */
+  .bg-\[\#030c17\] { background-color: var(--bg-primary) !important; }
+  .bg-\[\#061528\] { background-color: var(--bg-secondary) !important; }
+  .bg-\[\#0d1120\] { background-color: var(--bg-tertiary) !important; }
+  .bg-white\/\[0\.01\] { background-color: rgba(0, 0, 0, 0.02) !important; }
+  .bg-white\/\[0\.02\] { background-color: rgba(0, 0, 0, 0.04) !important; }
+  .bg-white\/5 { background-color: rgba(0, 0, 0, 0.05) !important; }
+  .bg-white\/\[0\.04\] { background-color: rgba(0, 0, 0, 0.06) !important; }
+  
+  /* Hover states */
+  .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.06) !important; }
+  .hover\:bg-white\/\[0\.01\]:hover { background-color: rgba(0, 0, 0, 0.02) !important; }
+  .hover\:bg-white\/\[0\.02\]:hover { background-color: rgba(0, 0, 0, 0.04) !important; }
+  .hover\:bg-white\/\[0\.05\]:hover { background-color: rgba(0, 0, 0, 0.08) !important; }
+  .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
+  .hover\:bg-slate-800:hover { background-color: #f1f5f9 !important; }
+  
+  /* Borders */
+  .border-white\/5 { border-color: var(--border) !important; }
+  .border-white\/10 { border-color: rgba(139, 101, 8, 0.25) !important; }
+  .border-white\/15 { border-color: rgba(139, 101, 8, 0.3) !important; }
+  .border-b-white\/5 { border-bottom-color: var(--border) !important; }
+  .border-r-white\/5 { border-right-color: var(--border) !important; }
+  .divide-white\/5 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border) !important; }
+  .divide-y { border-color: var(--border) !important; }
+  .border-t { border-color: var(--border) !important; }
+  .border-b { border-color: var(--border) !important; }
+  
+  /* Text colors */
+  .text-white { color: var(--text-primary) !important; }
+  .text-slate-100 { color: var(--text-primary) !important; }
+  .text-slate-200 { color: var(--text-primary) !important; }
+  .text-slate-300 { color: var(--text-primary) !important; }
+  .text-slate-400 { color: var(--text-secondary) !important; }
+  .text-slate-500 { color: var(--text-muted) !important; }
+  
+  /* Yellow/gold text converted to bronze gold for readability */
+  .text-\[\#fceea7\] { color: #8b6508 !important; }
+  .bg-\[\#8b6508\]\/10 { background-color: rgba(139, 101, 8, 0.12) !important; }
+  
+  /* Inputs placeholder text */
+  .placeholder-slate-600::placeholder { color: #94a3b8 !important; }
+  
+  /* Exceptions: Buttons & badges containing white text should stay white */
+  button.text-white,
+  button .text-white,
+  button svg,
+  .bg-gradient-to-r,
+  .bg-gradient-to-r *,
+  .bg-indigo-600,
+  .bg-indigo-600 *,
+  .bg-indigo-500\/10 *,
+  .bg-rose-500,
+  .bg-emerald-500\/10 *,
+  .bg-emerald-500,
+  .text-emerald-400,
+  .text-indigo-400,
+  .text-amber-400,
+  .text-red-400 {
+    color: inherit;
+  }
+  
+  /* Keep quick login credentials readable in light mode */
+  .font-mono.text-slate-500 {
+    color: #475569 !important;
+  }
+}
+
+/* Sidebar Active & Inactive Links Theme Alignment */
+.sidebar-link-active {
+  background-color: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 6%, transparent) !important;
+}
+
+.sidebar-link-active svg {
+  color: var(--primary) !important;
+}
+
+.sidebar-link-inactive {
+  color: var(--text-secondary) !important;
+  border: 1px solid transparent !important;
+}
+
+.sidebar-link-inactive svg {
+  color: var(--text-muted) !important;
+  transition: color 0.2s ease;
+}
+
+.sidebar-link-inactive:hover {
+  color: var(--text-primary) !important;
+  background-color: color-mix(in srgb, var(--text-primary) 5%, transparent) !important;
+}
+
+.sidebar-link-inactive:hover svg {
+  color: var(--text-primary) !important;
+}
+
+/* Sidebar Badge (PARTNER / SUPERVISOR) */
+.sidebar-badge {
+  background-color: color-mix(in srgb, var(--primary) 15%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent) !important;
+  color: var(--primary) !important;
+}
+
+/* Sidebar Footer Details Container and Keys/Values */
+.sidebar-footer-container {
+  background-color: color-mix(in srgb, var(--bg-tertiary) 20%, transparent) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.sidebar-footer-val {
+  color: var(--primary) !important;
+}
+
+/* Capsule Menu Styling (from customer page navbar) */
+.custom-nav-capsule {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 9999px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dark .custom-nav-capsule, .light .custom-nav-capsule, .vendor-navbar .custom-nav-capsule {
+  background-color: #2b1f02 !important;
+  border: 1px solid rgba(252, 238, 167, 0.15) !important;
+}
+
+/* Link Items */
+.custom-nav-link-inactive {
+  transition: color 0.2s ease;
+}
+
+.dark .custom-nav-link-inactive, .light .custom-nav-link-inactive, .vendor-navbar .custom-nav-link-inactive {
+  color: rgba(252, 238, 167, 0.72) !important;
+}
+.dark .custom-nav-link-inactive:hover, .light .custom-nav-link-inactive:hover, .vendor-navbar .custom-nav-link-inactive:hover {
+  color: #ffffff !important;
+}
+
+/* Active Nav Link */
+.dark .custom-nav-link-active, .light .custom-nav-link-active, .vendor-navbar .custom-nav-link-active {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+}
+
+/* Active indicator background */
+.vendor-navbar .custom-nav-active-bg {
+  background-color: #8b6508 !important;
+  border: 1px solid rgba(252, 238, 167, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix profile dropdown menu option colors - make them high contrast dark black in light mode */
+.profile-dropdown-card span,
+.profile-dropdown-card button,
+.profile-dropdown-card a {
+  color: var(--text-primary) !important;
+}
+
+.light .profile-dropdown-card {
+  background-color: #ffffff !important;
+  border-color: rgba(139, 101, 8, 0.25) !important;
+}
+
+.light .profile-dropdown-card span,
+.light .profile-dropdown-card button,
+.light .profile-dropdown-card a {
+  color: #000000 !important;
+}
+
+.light .profile-dropdown-card .text-slate-500 {
+  color: #555555 !important;
+}
+
+.light .profile-dropdown-card a:hover,
+.light .profile-dropdown-card button:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
