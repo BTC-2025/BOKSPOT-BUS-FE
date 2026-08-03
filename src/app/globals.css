@@ -75,6 +75,30 @@
   --sidebar-text: #94a3b8;
 }
 
+.theme-medical {
+  --primary: #0ea5e9;
+  --primary-dark: #0284c7;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --border: rgba(14, 165, 233, 0.2);
+  --sidebar-bg: #f8fafc;
+}
+
+.theme-turf {
+  --primary: #22c55e;
+  --primary-dark: #16a34a;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --bg-tertiary: #262626;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --border: rgba(34, 197, 94, 0.25);
+  --sidebar-bg: #171717;
+  --sidebar-text: #94a3b8;
+}
+
 /* Global overrides for hardcoded Tailwind backgrounds and brand colors */
 .bg-\[\#030c17\] { background-color: var(--bg-primary) !important; }
 .bg-\[\#061528\] { background-color: var(--bg-secondary) !important; }
@@ -115,14 +139,14 @@ body {
 }
 
 /* Adjust nested button fills for high contrast on the gold navbar */
-.vendor-navbar button,
-.vendor-navbar .relative > button {
+.vendor-navbar button:not(.profile-dropdown-card button),
+.vendor-navbar .relative > button:not(.profile-dropdown-card button) {
   background-color: #5a4409 !important;
   border: 1px solid rgba(252, 238, 167, 0.28) !important;
 }
 
-.vendor-navbar button:hover,
-.vendor-navbar .relative > button:hover {
+.vendor-navbar button:not(.profile-dropdown-card button):hover,
+.vendor-navbar .relative > button:not(.profile-dropdown-card button):hover {
   background-color: #72560c !important;
   border-color: rgba(252, 238, 167, 0.45) !important;
 }

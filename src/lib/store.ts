@@ -47,6 +47,7 @@ export interface PersistedBooking {
   otp?: string;
   
   // Doctor/Medical specific fields
+  assignedDoctorId?: string;
   vitals?: {
     bp: string;
     temp: string;
@@ -76,6 +77,12 @@ export interface PersistedBooking {
   dietaryRestrictions?: string[];
   occasion?: string;
   preOrderedCourses?: string[];
+  
+  // Turf / Resource specific fields
+  teamName?: string;
+  equipmentRentals?: { item: string; qty: number; price: number }[];
+  matchNotes?: string;
+  refereeAssigned?: string;
 }
 
 export interface CatalogService {
@@ -97,8 +104,10 @@ export interface CatalogService {
   tableCapacity?: number;
 
   // Doctor/Medical specific
+  doctorId?: string; // Links this schedule to a specific sub-id
   doctorName?: string;
   roomNumber?: string;
+  timeSlots?: string[]; // E.g. ['10:00 AM', '11:00 AM']
 
   // Fitness specific
   trainerName?: string;
@@ -111,6 +120,10 @@ export interface CatalogService {
   // Dining specific
   cuisineType?: string;
   seatingSection?: string;
+
+  // Turf specific
+  pitchType?: string;
+  includesFloodlights?: boolean;
 
   // Cinema/Theatre specific
   moviePoster?: string;
@@ -136,15 +149,35 @@ export interface MerchantUser {
   supervisorPhone?: string;
   supervisorEmail?: string;
   supervisorAddress?: string;
+  archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining';
+}
+
+export interface StaffPermissions {
+  canManageVitals: boolean;
+  canAddPrescription: boolean;
+  canManageBilling: boolean;
+  canManageAppointments: boolean;
+}
+
+export interface StaffMember {
+  id: string; // e.g., nurse/ahhospital@bnxmail.com
+  merchantId: string;
+  name: string;
+  roleTitle: string;
+  isDoctor?: boolean;
+  passwordHash: string;
+  permissions: StaffPermissions;
 }
 
 interface VendorStoreState {
   currentMerchant: MerchantUser | null;
-  loginRole: 'vendor' | 'supervisor' | null;
+  loginRole: 'vendor' | 'supervisor' | 'staff' | null;
   supervisorId: string | null;
+  currentStaff: StaffMember | null;
   theme: 'system' | 'light' | 'dark';
   bookings: PersistedBooking[];
   services: CatalogService[];
+  staffAccounts: StaffMember[];
   
   // Theme actions
   setTheme: (theme: 'system' | 'light' | 'dark') => void;
@@ -158,6 +191,7 @@ interface VendorStoreState {
   checkInBooking: (bookingId: string) => void;
   completeBooking: (bookingId: string) => void;
   cancelBooking: (bookingId: string) => void;
+  rescheduleBooking: (bookingId: string, newDate: string, newTime: string) => void;
   updateBookingNotes: (bookingId: string, notes: string) => void;
   
   // Industry actions — Medical
@@ -181,6 +215,11 @@ interface VendorStoreState {
   addService: (service: CatalogService) => void;
   updateService: (updated: CatalogService) => void;
   deleteService: (serviceId: string) => void;
+
+  // Staff actions
+  addStaffMember: (staff: StaffMember) => void;
+  updateStaffPermissions: (staffId: string, permissions: StaffPermissions) => void;
+  deleteStaffMember: (staffId: string) => void;
 }
 
 export const PRESET_MERCHANTS: MerchantUser[] = [
@@ -192,7 +231,19 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     logoLetter: 'A',
     aboutText: 'Apollo Dental Care is a multi-specialty dental clinic network dedicated to providing high-quality oral health services. From preventive care to advanced orthodontics and restorative treatments, our certified specialists ensure comfort and clinical excellence for all patients.',
     vendorId: '2026050001',
-    email: 'doctor@bnxmail.com'
+    email: 'doctor@bnxmail.com',
+    archetype: 'Healthcare'
+  },
+  { 
+    id: 'mer-102', 
+    username: 'T102', 
+    merchantName: 'Arena 5 Football Turf', 
+    category: 'Sports / Turf Booking', 
+    logoLetter: 'A',
+    aboutText: 'Arena 5 is a premium 5-A-Side and 7-A-Side FIFA certified artificial turf facility. We offer hourly slots for corporate matches, local tournaments, and friendly games with premium floodlights and professional referees.',
+    vendorId: '2026050102',
+    email: 'arena5@bnxmail.com',
+    archetype: 'ResourceBooking'
   },
   { 
     id: 'mer-2', 
@@ -301,7 +352,11 @@ const INITIAL_SERVICES: CatalogService[] = [
   // Wellness / Spa
   { id: 'svc-w1', name: 'Aromatherapy Massage', merchant: 'Nirvana Wellness Spa', price: 2200, duration: 60, category: 'Spa & Wellness', active: true, rating: 4.8, bookingsCount: 78, description: 'Full body relaxation massage with organic lavender essential oils.', treatmentType: 'Massage', stylistName: 'Ananya Sen' },
   { id: 'svc-w2', name: 'Swedish Deep Tissue Massage', merchant: 'Nirvana Wellness Spa', price: 2800, duration: 90, category: 'Spa & Wellness', active: true, rating: 4.9, bookingsCount: 92, description: 'Deep tissue massage targeting muscle tension with eucalyptus oils.', treatmentType: 'Therapy', stylistName: 'Michael Chang' },
-  { id: 'svc-w3', name: 'Hot Stone Therapy', merchant: 'Nirvana Wellness Spa', price: 3200, duration: 75, category: 'Spa & Wellness', active: true, rating: 4.7, bookingsCount: 45, description: 'Rejuvenating massage using smooth heated basalt stones on key body energy paths.', treatmentType: 'Therapy', stylistName: 'David Raj' }
+  { id: 'svc-w3', name: 'Hot Stone Therapy', merchant: 'Nirvana Wellness Spa', price: 3200, duration: 75, category: 'Spa & Wellness', active: true, rating: 4.7, bookingsCount: 45, description: 'Rejuvenating massage using smooth heated basalt stones on key body energy paths.', treatmentType: 'Therapy', stylistName: 'David Raj' },
+
+  // Sports / Turf
+  { id: 'svc-t1', name: '5-A-Side Artificial Turf', merchant: 'Arena 5 Football Turf', price: 1500, duration: 60, category: 'Sports / Turf Booking', active: true, rating: 4.8, bookingsCount: 310, description: 'Standard 5-A-Side pitch with shock pad. Includes floodlights.', pitchType: '5-A-Side', includesFloodlights: true },
+  { id: 'svc-t2', name: '7-A-Side Premium Pitch', merchant: 'Arena 5 Football Turf', price: 2200, duration: 60, category: 'Sports / Turf Booking', active: true, rating: 4.9, bookingsCount: 145, description: 'Large 7-A-Side pitch suitable for corporate matches.', pitchType: '7-A-Side', includesFloodlights: true }
 ];
 
 const INITIAL_BOOKINGS: PersistedBooking[] = [
@@ -669,6 +724,80 @@ const INITIAL_BOOKINGS: PersistedBooking[] = [
     massageType: 'Hot Stone',
     roomNumber: 'Sauna Suite',
     notes: 'Hot stone treatment completed.'
+  },
+  
+  // Turf Bookings
+  {
+    id: 'bk-t1',
+    ref: 'BK-TRF221',
+    serviceId: 'svc-t1',
+    serviceName: '5-A-Side Artificial Turf',
+    merchantName: 'Arena 5 Football Turf',
+    category: 'Sports / Turf Booking',
+    date: '2026-05-26',
+    time: '06:00 PM',
+    amount: 1700,
+    status: 'CONFIRMED',
+    customerName: 'Rahul Verma',
+    customerEmail: 'rahul.v@gmail.com',
+    customerPhone: '+91 99001 12233',
+    teamName: 'Neon Strikers FC',
+    equipmentRentals: [{ item: 'Training Bibs', qty: 10, price: 200 }],
+    matchNotes: 'Friendly match. Payment partially received via UPI.'
+  },
+  {
+    id: 'bk-t2',
+    ref: 'BK-TRF225',
+    serviceId: 'svc-t2',
+    serviceName: '7-A-Side Premium Pitch',
+    merchantName: 'Arena 5 Football Turf',
+    category: 'Sports / Turf Booking',
+    date: '2026-05-26',
+    time: '08:00 PM',
+    amount: 2200,
+    status: 'PENDING',
+    customerName: 'IT Corporate Team',
+    customerEmail: 'sports@itcorp.com',
+    customerPhone: '+91 99881 11111',
+    teamName: 'Techies United',
+    equipmentRentals: [],
+    matchNotes: 'Corporate weekly booking.'
+  },
+  {
+    id: 'bk-t3',
+    ref: 'BK-TRF226',
+    serviceId: 'svc-t1',
+    serviceName: '5-A-Side Artificial Turf',
+    merchantName: 'Arena 5 Football Turf',
+    category: 'Sports / Turf Booking',
+    date: '2026-05-27',
+    time: '07:00 AM',
+    amount: 1500,
+    status: 'COMPLETED',
+    customerName: 'Samir Khan',
+    customerEmail: 'samir.k@gmail.com',
+    customerPhone: '+91 99881 22222',
+    teamName: 'Morning Glories',
+    equipmentRentals: [{ item: 'Football', qty: 1, price: 100 }],
+    matchNotes: 'Played full 60 mins. No issues.'
+  },
+  {
+    id: 'bk-t4',
+    ref: 'BK-TRF227',
+    serviceId: 'svc-t2',
+    serviceName: '7-A-Side Premium Pitch',
+    merchantName: 'Arena 5 Football Turf',
+    category: 'Sports / Turf Booking',
+    date: '2026-05-27',
+    time: '09:00 PM',
+    amount: 2500,
+    status: 'CHECKED_IN',
+    customerName: 'Arjun Das',
+    customerEmail: 'arjun.d@yahoo.com',
+    customerPhone: '+91 99881 33333',
+    teamName: 'Night Owls',
+    equipmentRentals: [{ item: 'Training Bibs', qty: 14, price: 280 }],
+    matchNotes: 'Teams arrived late. Extended by 15 mins.'
   }
 ];
 
@@ -780,7 +909,8 @@ export const SUB_ACCOUNTS: SubAccount[] = [
   { subId: 'G505', merchantId: 'mer-5', passwordHash: 'pass505' },
   { subId: 'U606', merchantId: 'mer-6', passwordHash: 'pass606' },
   { subId: 'C707', merchantId: 'mer-7', passwordHash: 'pass707' },
-  { subId: 'W808', merchantId: 'mer-8', passwordHash: 'pass808' }
+  { subId: 'W808', merchantId: 'mer-8', passwordHash: 'pass808' },
+  { subId: 'T102', merchantId: 'mer-102', passwordHash: 'pass102' }
 ];
 
 export const VENDOR_ACCOUNTS = [
@@ -794,15 +924,66 @@ export const useVendorStore = create<VendorStoreState>()(
       currentMerchant: null,
       loginRole: null,
       supervisorId: null,
+      currentStaff: null,
       theme: 'system',
       bookings: INITIAL_BOOKINGS,
       services: INITIAL_SERVICES,
+      staffAccounts: [
+        {
+          id: 'ref1@arena5.com',
+          merchantId: 'mer-102',
+          name: 'Vikram Singh',
+          roleTitle: 'Senior Referee',
+          isDoctor: true,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: true, canAddPrescription: true, canManageBilling: true, canManageAppointments: true }
+        },
+        {
+          id: 'manager@arena5.com',
+          merchantId: 'mer-102',
+          name: 'Ramesh Kumar',
+          roleTitle: 'Turf Manager',
+          isDoctor: true,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: true, canAddPrescription: true, canManageBilling: true, canManageAppointments: true }
+        },
+        {
+          id: 'doc1@apollo.com',
+          merchantId: 'mer-1',
+          name: 'Sanjay Gupta',
+          roleTitle: 'Cardiologist',
+          isDoctor: true,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: true, canAddPrescription: true, canManageBilling: false, canManageAppointments: true }
+        },
+        {
+          id: 'doc2@apollo.com',
+          merchantId: 'mer-1',
+          name: 'Priya Sharma',
+          roleTitle: 'Dentist',
+          isDoctor: true,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: true, canAddPrescription: true, canManageBilling: false, canManageAppointments: true }
+        }
+      ],
       
       setTheme: (theme) => set({ theme }),
       
       loginMerchant: (username, passwordHash) => {
         const cleanUser = username.trim();
         const lowerUser = cleanUser.toLowerCase();
+
+        // 0. Check Staff Account (Sub ID)
+        const staffAcc = get().staffAccounts.find(
+          (s) => s.id.toLowerCase() === lowerUser && s.passwordHash === passwordHash
+        );
+        if (staffAcc) {
+          const found = PRESET_MERCHANTS.find((m) => m.id === staffAcc.merchantId);
+          if (found) {
+            set({ currentMerchant: found, loginRole: 'staff', supervisorId: null, currentStaff: staffAcc });
+            return true;
+          }
+        }
 
         // 1. Check Sub ID (Supervisor)
         const subAcc = SUB_ACCOUNTS.find(
@@ -850,7 +1031,7 @@ export const useVendorStore = create<VendorStoreState>()(
       },
       
       logoutMerchant: () => {
-        set({ currentMerchant: null, loginRole: null, supervisorId: null });
+        set({ currentMerchant: null, loginRole: null, supervisorId: null, currentStaff: null });
       },
       
       switchStore: (merchantId) => {
@@ -887,21 +1068,26 @@ export const useVendorStore = create<VendorStoreState>()(
         }));
       },
       
-      completeBooking: (bookingId) => {
+      completeBooking: (bookingId) =>
         set((state) => ({
           bookings: state.bookings.map((b) =>
-            b.id === bookingId ? { ...b, status: 'COMPLETED' as const } : b
-          )
-        }));
-      },
-      
-      cancelBooking: (bookingId) => {
+            b.id === bookingId ? { ...b, status: 'COMPLETED' } : b
+          ),
+        })),
+
+      cancelBooking: (bookingId) =>
         set((state) => ({
           bookings: state.bookings.map((b) =>
-            b.id === bookingId ? { ...b, status: 'CANCELLED' as const } : b
-          )
-        }));
-      },
+            b.id === bookingId ? { ...b, status: 'CANCELLED' } : b
+          ),
+        })),
+
+      rescheduleBooking: (bookingId, newDate, newTime) =>
+        set((state) => ({
+          bookings: state.bookings.map((b) =>
+            b.id === bookingId ? { ...b, date: newDate, time: newTime } : b
+          ),
+        })),
 
       updateBookingNotes: (bookingId, notes) => {
         set((state) => ({
@@ -1034,8 +1220,32 @@ export const useVendorStore = create<VendorStoreState>()(
         set((state) => ({
           services: state.services.filter((s) => s.id !== serviceId)
         }));
+      },
+
+      // Staff actions
+      addStaffMember: (staff) => {
+        set((state) => ({
+          staffAccounts: [...state.staffAccounts, staff]
+        }));
+      },
+      
+      updateStaffPermissions: (staffId, permissions) => {
+        set((state) => ({
+          staffAccounts: state.staffAccounts.map((s) => 
+            s.id === staffId ? { ...s, permissions } : s
+          ),
+          currentStaff: state.currentStaff?.id === staffId 
+            ? { ...state.currentStaff, permissions } 
+            : state.currentStaff
+        }));
+      },
+      
+      deleteStaffMember: (staffId) => {
+        set((state) => ({
+          staffAccounts: state.staffAccounts.filter((s) => s.id !== staffId)
+        }));
       }
     }),
-    { name: 'vendor-portal-storage' }
+    { name: 'vendor-portal-storage-v2' }
   )
 );

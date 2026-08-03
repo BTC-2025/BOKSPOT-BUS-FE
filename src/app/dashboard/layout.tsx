@@ -8,7 +8,7 @@ import {
   Package, Menu, X, Bell, LogOut, Stethoscope, Dumbbell, 
   Scissors, Utensils, ShieldAlert, Check, Trash2, Info,
   ChevronDown, Building, Film, Sparkles, LogOut as LogOutIcon, Laptop, User,
-  Sun, Moon, Users, Mail, Search
+  Sun, Moon, Users, Mail, Search, UserCog
 } from 'lucide-react';
 import { UtilityDrawer } from '../../components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
@@ -51,6 +51,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   
+  // Vendor Info state
+  const [vendorInfoOpen, setVendorInfoOpen] = useState(false);
+  const vendorInfoRef = useRef<HTMLDivElement>(null);
+
   // Stateful Notifications
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -113,6 +117,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
+      }
+      
+      if (vendorInfoRef.current && !vendorInfoRef.current.contains(event.target as Node)) {
+        setVendorInfoOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -303,46 +311,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   const getDynamicNavItems = () => {
-    if (pathname === '/dashboard') {
+    const isOwner = loginRole !== 'staff';
+    const isTurf = currentMerchant?.archetype === 'ResourceBooking';
+    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: isTurf ? 'Ground Staff Roster' : 'Staff Access & Roster' } : null;
+
+    // HOME TAB (Dashboard & Quick Check-in)
+    if (pathname === '/dashboard' || pathname === '/dashboard/checkin') {
       return [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Home' },
-        { href: '/dashboard/checkin', icon: QrCode, label: 'Verify Code' },
-        { href: '/dashboard/customers', icon: User, label: 'Customer Directory' },
-        { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
+        { href: '/dashboard/checkin', icon: QrCode, label: isTurf ? 'Scan Player Pass' : 'Scan Patient Token' },
       ];
-    } else if (pathname.startsWith('/dashboard/bookings')) {
+    } 
+    // TRACKS TAB (Records & Patients)
+    else if (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') {
       return [
-        { href: '/dashboard/bookings', icon: BookOpen, label: 'Bookings Log' },
-        { href: '/dashboard/customers', icon: User, label: 'Customer Directory' },
-        { href: '/dashboard/checkin', icon: QrCode, label: 'Verify Code' },
-        { href: '/dashboard/contact', icon: Mail, label: 'Helpdesk' },
+        { href: '/dashboard/bookings', icon: BookOpen, label: isTurf ? 'Match Logs' : 'Medical Records' },
+        { href: '/dashboard/customers', icon: User, label: isTurf ? 'Teams & Players' : 'Patient Database' },
       ];
-    } else {
-      return [
-        { href: '/dashboard/services', icon: Package, label: 'Manage Listings' },
-        { href: '/dashboard/staff', icon: Users, label: 'Staff Management' },
-        { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
-        { href: '/dashboard/contact', icon: Mail, label: 'Support Ticket' },
+    } 
+    // WORKSPACE TAB (Management, Schedules, Settings)
+    else {
+      const items = [
+        { href: '/dashboard/services', icon: Package, label: isTurf ? 'Pitch Management' : 'Schedules & Shifts' },
+        { href: '/dashboard/settings', icon: Settings, label: isTurf ? 'Facility Settings' : 'Clinic Settings' },
       ];
+      if (accessLink) items.push(accessLink);
+      return items;
     }
   };
 
   const navItems = getDynamicNavItems();
+  const themeClass = currentMerchant?.archetype === 'ResourceBooking' ? 'theme-turf' : 'theme-medical';
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary">
+    <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
       {/* Top Header (100% width across the top) */}
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
-        {/* Left Column: Logo & Menu Toggle */}
+      <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
+        {/* Left Column: Logo */}
         <div className="flex-1 flex items-center gap-4">
-          <button 
-            onClick={() => setSidebarOpen(true)} 
-            className="lg:hidden rounded-xl p-2 bg-[#5a4409] hover:bg-[#72560c] text-white transition-colors"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
-          
-          <Link href="/dashboard" className="hidden lg:flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
+          <Link href="/dashboard" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
         </div>
@@ -353,12 +360,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link
               href="/dashboard"
               className={`w-20 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                pathname === '/dashboard'
+                (pathname === '/dashboard' || pathname === '/dashboard/checkin')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {pathname === '/dashboard' && (
+              {(pathname === '/dashboard' || pathname === '/dashboard/checkin') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -370,12 +377,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link
               href="/dashboard/services"
               className={`w-28 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                (pathname.startsWith('/dashboard/') && pathname !== '/dashboard' && !pathname.startsWith('/dashboard/bookings'))
+                (!['/dashboard', '/dashboard/checkin'].includes(pathname) && !pathname.startsWith('/dashboard/bookings') && pathname !== '/dashboard/customers')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {(pathname.startsWith('/dashboard/') && pathname !== '/dashboard' && !pathname.startsWith('/dashboard/bookings')) && (
+              {(!['/dashboard', '/dashboard/checkin'].includes(pathname) && !pathname.startsWith('/dashboard/bookings') && pathname !== '/dashboard/customers') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -387,12 +394,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link
               href="/dashboard/bookings"
               className={`w-24 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                pathname.startsWith('/dashboard/bookings')
+                (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {pathname.startsWith('/dashboard/bookings') && (
+              {(pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -515,77 +522,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-bg-secondary rounded-2xl shadow-2xl border border-border-brand z-50 overflow-hidden animate-fade-in text-left profile-dropdown-card">
-                {/* User Profile Header */}
-                <div className="px-5 py-4 bg-bg-tertiary border-b border-border-brand flex flex-col min-w-0 text-left">
-                  <span className="text-[9px] uppercase font-bold tracking-wider text-slate-500">Console User</span>
-                  <span className="font-extrabold text-[12.5px] mt-1 truncate max-w-full font-mono text-black dark:text-white" title={getBnxMailId()}>
+              <div className="absolute right-0 mt-3 w-[320px] bg-bg-secondary rounded-2xl shadow-2xl border border-border-brand z-50 overflow-hidden animate-fade-in text-left profile-dropdown-card">
+                {/* Google Style Profile Header */}
+                <div className="px-6 py-4 flex flex-col items-center min-w-0 text-center bg-bg-secondary">
+                  <div className="relative mb-2">
+                    <div className="h-14 w-14 rounded-full bg-[#0a3161] text-white flex items-center justify-center text-2xl font-bold">
+                      {(currentMerchant.username || 'P').charAt(0).toUpperCase()}
+                    </div>
+                    <button className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm hover:bg-slate-50">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </button>
+                  </div>
+                  <span className="font-extrabold text-[15px] truncate max-w-full text-black dark:text-white capitalize">
+                    {currentMerchant.username || 'Partner'}
+                  </span>
+                  <span className="text-xs text-slate-500 mt-0.5 truncate max-w-full" title={getBnxMailId()}>
                     {getBnxMailId()}
                   </span>
-                  <span className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-1 font-medium capitalize">
-                    🔑 Role: {loginRole || 'Partner'}
-                  </span>
+                  
+                  <Link 
+                    href="/dashboard/settings" 
+                    onClick={() => setProfileOpen(false)}
+                    className="mt-3 px-4 py-1.5 flex items-center justify-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <UserCog className="h-4 w-4" />
+                    <span>Manage your account</span>
+                  </Link>
                 </div>
-                
-                {/* Dropdown Options */}
-                <ul className="py-2 divide-y divide-white/[0.03]">
-                  <li>
-                    <Link href="/dashboard/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs font-bold text-black dark:text-white">
-                      <Settings className="h-4 w-4 text-slate-500" />
-                      <span>Business Settings</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/dashboard/services" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs font-bold text-black dark:text-white">
-                      <Package className="h-4 w-4 text-slate-500" />
-                      <span>Manage Services</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/dashboard/bookings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs font-bold text-black dark:text-white">
-                      <BookOpen className="h-4 w-4 text-slate-500" />
-                      <span>Bookings Log</span>
-                    </Link>
-                  </li>
 
-                  {/* Theme Switcher Segment */}
-                  <li className="px-5 py-3.5 bg-bg-tertiary/20">
-                    <div className="flex flex-col gap-2">
-                      <span className="text-[9px] uppercase font-bold tracking-wider text-slate-500 text-left">Display Theme</span>
-                      <div className="grid grid-cols-3 gap-1 bg-bg-secondary p-1 rounded-xl border border-border-brand/40">
-                        {(['light', 'dark', 'system'] as const).map((t) => {
-                          const isThemeActive = theme === t;
-                          return (
-                            <button
-                              key={t}
-                              onClick={() => setTheme(t)}
-                              className={`py-1.5 rounded-lg text-[10px] font-bold transition-all uppercase tracking-wider capitalize cursor-pointer flex items-center justify-center gap-1 ${
-                                isThemeActive
-                                  ? 'bg-[#8b6508] text-white shadow-sm'
-                                  : 'text-slate-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
-                              }`}
-                            >
-                              {t === 'light' ? <Sun className="h-3 w-3" /> : t === 'dark' ? <Moon className="h-3 w-3" /> : <Laptop className="h-3 w-3" />}
-                              <span>{t}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-                
-                {/* Bottom Divider & Sign Out */}
-                <div className="border-t border-border-brand px-2.5 py-2.5 bg-bg-tertiary">
-                  <button
+                <div className="border-t border-border-brand py-1">
+                  <button className="w-full flex items-center gap-4 px-6 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left cursor-pointer">
+                    <User className="h-5 w-5 text-slate-500 shrink-0" />
+                    <span className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">Add another account</span>
+                  </button>
+                </div>
+
+                <div className="border-t border-border-brand py-1">
+                  <button 
                     onClick={() => {
                       setProfileOpen(false);
                       handleLogout();
                     }}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-red-500 hover:text-red-600 hover:bg-red-500/10 transition-colors rounded-xl text-xs font-bold cursor-pointer"
+                    className="w-full flex items-center gap-4 px-6 py-2 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left cursor-pointer"
                   >
-                    <LogOut className="h-4 w-4 text-red-500" />
-                    <span>Sign out console</span>
+                    <LogOutIcon className="h-5 w-5 text-red-500 shrink-0" />
+                    <span className="text-[13px] font-semibold text-red-500">Sign out</span>
                   </button>
                 </div>
               </div>
@@ -609,61 +590,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      {/* Main Body Section (Sidebar + Content Side-by-side) */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-bg-secondary border-r border-border-brand/40 transition-transform duration-300 lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} h-full flex flex-col justify-between pt-4`}>
-          <div>
-            {loginRole === 'supervisor' && (
-              <div className="px-4.5 mb-4">
-                <span className="px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wider sidebar-badge shrink-0 select-none">
-                  SUPERVISOR SECURE MODE
-                </span>
+      {/* New Horizontal Navigation Bar */}
+      <div className="bg-[#f9fafb] dark:bg-bg-secondary flex items-center px-6 py-2 shrink-0 shadow-sm border-b border-border-brand/40 relative z-40">
+        {/* Empty flex-1 to push nav to center */}
+        <div className="flex-1 hidden md:block"></div>
+        
+        <div className="flex-auto overflow-x-auto custom-scrollbar flex justify-center">
+          <nav className="flex items-center gap-2 md:gap-4 mx-auto px-1 w-max">
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+            return (
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs uppercase tracking-wide font-bold transition-all whitespace-nowrap ${
+                  active 
+                    ? 'bg-[#8b6508] text-white shadow-md border border-[#8b6508]' 
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        </div>
+        
+        {/* Supervisor Badge & Vendor Info Dropdown - Aligned to right */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-4 pl-4 relative" ref={vendorInfoRef}>
+          {loginRole === 'supervisor' && (
+            <span className="px-2 py-1 rounded-md bg-black/10 dark:bg-black/40 text-slate-800 dark:text-white text-[9px] font-black uppercase tracking-wider select-none border border-black/10 dark:border-black/50 whitespace-nowrap">
+              SUPERVISOR SECURE MODE
+            </span>
+          )}
+          
+          <button 
+            onClick={() => setVendorInfoOpen(!vendorInfoOpen)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-brand/40 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors shadow-sm cursor-pointer"
+          >
+            <Building className="h-3.5 w-3.5 text-slate-500" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 capitalize">
+              {currentMerchant.username || 'Merchant'}
+            </span>
+            <ChevronDown className={`h-3 w-3 text-slate-500 transition-transform ${vendorInfoOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {vendorInfoOpen && (
+            <div className="absolute right-0 top-full mt-3 w-64 bg-bg-secondary rounded-xl shadow-2xl border border-border-brand z-50 p-4 animate-fade-in text-left">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border-brand">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                  <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Console Secured</span>
+                </div>
+                <p className="text-[10px] text-text-secondary flex justify-between">
+                  <span>Vendor ID:</span> 
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{currentMerchant.vendorId || 'N/A'}</span>
+                </p>
+                <p className="text-[10px] text-text-secondary flex justify-between">
+                  <span>Merchant key:</span> 
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 capitalize">{currentMerchant.username}</span>
+                </p>
+                <div className="text-[10px] text-text-secondary flex justify-between items-center pt-1">
+                  <span className="whitespace-nowrap mr-2">BNX Mail:</span> 
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate bg-black/5 dark:bg-white/5 p-1 rounded px-1.5" title={getBnxMailId()}>
+                    {getBnxMailId()}
+                  </span>
+                </div>
               </div>
-            )}
-            
-            <nav className="px-4 space-y-1">
-              {navItems.map((item) => {
-                const active = pathname === item.href;
-                return (
-                  <Link 
-                    key={item.href} 
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wide font-bold transition-all ${
-                      active 
-                        ? 'sidebar-link-active' 
-                        : 'sidebar-link-inactive'
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4 transition-colors duration-200" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-    
-          {/* Sidebar Footer Info */}
-          <div className="p-4 rounded-xl sidebar-footer-container space-y-1.5 m-4">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider">Console Secured</span>
             </div>
-            <p className="text-[9px] text-text-secondary">Vendor ID: <span className="font-mono sidebar-footer-val">{currentMerchant.vendorId || 'N/A'}</span></p>
-            <p className="text-[9px] text-text-secondary">Merchant key: <span className="font-mono sidebar-footer-val">{currentMerchant.username}</span></p>
-            <p className="text-[9px] text-text-secondary truncate" title={getBnxMailId()}>BNX Mail: <span className="font-mono sidebar-footer-val">{getBnxMailId()}</span></p>
-          </div>
-        </aside>
+          )}
+        </div>
+      </div>
 
-        {/* Overlay for mobile sidebar */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-xs lg:hidden" 
-            onClick={() => setSidebarOpen(false)} 
-          />
-        )}
-
+      {/* Main Body Section */}
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Main Content Workspace */}
         <main className={`flex-1 overflow-y-auto bg-bg-primary p-6 lg:p-8 custom-scrollbar transition-all duration-300 flex flex-col justify-between ${
           utilityDrawerOpen ? (activeUtilityTab ? 'lg:pr-[370px]' : 'lg:pr-[50px]') : ''

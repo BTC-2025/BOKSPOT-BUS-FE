@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useVendorStore } from '../lib/store';
 import { 
   Lock, User, Eye, EyeOff, ArrowRight, ShieldCheck, KeyRound, AlertCircle,
-  Stethoscope, Dumbbell, Scissors, Utensils, Sparkles, Film
+  Stethoscope, Dumbbell, Scissors, Utensils, Sparkles, Film, Goal
 } from 'lucide-react';
 
 export default function AdminGatePage() {
@@ -193,58 +193,7 @@ export default function AdminGatePage() {
             </button>
           </form>
  
-          {/* Divider */}
-          <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border-brand"></div></div>
-            <span className="relative bg-bg-primary px-3 text-[10px] text-text-muted font-bold uppercase tracking-wider">Console Accounts Directory</span>
-          </div>
 
-          {/* Console Accounts Guide */}
-          <div className="space-y-3">
-            <div>
-              <p className="text-[10px] text-slate-500 font-semibold mb-1.5">Main Vendor Access (Full Switcher Access):</p>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin', 'admin123')}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-[#8b6508]/30 bg-[#8b6508]/5 hover:bg-[#8b6508]/15 text-[#fceea7] text-[11px] font-bold transition-all cursor-pointer shadow-sm shadow-[#8b6508]/5"
-              >
-                <span className="flex items-center gap-2">
-                  <ShieldCheck size={14} className="text-[#fceea7]" />
-                  <span>Main Admin Console</span>
-                </span>
-                <span className="font-mono text-[9px] opacity-75">admin / admin123</span>
-              </button>
-            </div>
-
-            <div className="space-y-1.5">
-              <p className="text-[10px] text-slate-500 font-semibold">Supervisor Sub-accounts (Locked to Single Store):</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'Apollo Dental (D101)', subId: 'D101', pass: 'pass101', icon: Stethoscope, color: 'hover:border-sky-500/30 hover:text-sky-400' },
-                  { label: 'ZenFit Clinic (F202)', subId: 'F202', pass: 'pass202', icon: Dumbbell, color: 'hover:border-emerald-500/30 hover:text-emerald-400' },
-                  { label: 'Style Studio (S303)', subId: 'S303', pass: 'pass303', icon: Scissors, color: 'hover:border-rose-500/30 hover:text-rose-400' },
-                  { label: 'Grand Temple (R404)', subId: 'R404', pass: 'pass404', icon: Utensils, color: 'hover:border-purple-500/30 hover:text-purple-400' },
-                  { label: 'PVR IMAX (C707)', subId: 'C707', pass: 'pass707', icon: Film, color: 'hover:border-amber-500/30 hover:text-amber-400' },
-                  { label: 'Nirvana Spa (W808)', subId: 'W808', pass: 'pass808', icon: Sparkles, color: 'hover:border-teal-500/30 hover:text-teal-400' },
-                  { label: 'Glitz Parlour (G505)', subId: 'G505', pass: 'pass505', icon: Scissors, color: 'hover:border-rose-500/30 hover:text-[#fceea7]' },
-                  { label: 'Urban Haircut (U606)', subId: 'U606', pass: 'pass606', icon: Scissors, color: 'hover:border-rose-500/30 hover:text-[#fceea7]' }
-                ].map((p) => (
-                  <button
-                    key={p.subId}
-                    type="button"
-                    onClick={() => handleQuickLogin(p.subId, p.pass)}
-                    className="flex flex-col items-start p-2.5 rounded-xl border border-border-brand bg-bg-tertiary/20 hover:bg-bg-tertiary/45 text-left transition-all cursor-pointer group"
-                  >
-                    <span className="flex items-center gap-1.5 text-[10px] font-extrabold text-text-secondary group-hover:text-inherit transition-colors">
-                      <p.icon size={11} className="shrink-0" />
-                      <span>{p.label.split(' ')[0]}</span>
-                    </span>
-                    <span className="font-mono text-[8.5px] text-text-muted mt-1 block group-hover:text-text-secondary transition-colors">{p.subId} / {p.pass}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </main>

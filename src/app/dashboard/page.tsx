@@ -1,906 +1,490 @@
 'use client';
 
 import { useVendorStore } from '../../lib/store';
-import { getVerticalFromCategory } from '../../lib/categoryUtils';
 import { 
-  TrendingUp, Users, Calendar, IndianRupee, Clock, CheckCircle2, 
-  Stethoscope, Scissors, Dumbbell, Utensils, AlertTriangle, 
-  Activity, Flame, User, Eye, ShieldAlert, Sparkles, MapPin, Award, Film
+  Users, Activity, ShieldAlert, CheckCircle2, ChevronRight, Phone, HeartPulse, 
+  Bed, Stethoscope, Syringe, Ambulance, FileText, IndianRupee, Clock,
+  ArrowUpRight, ArrowDownRight, TrendingUp, Goal, Medal, MonitorPlay, Zap,
+  CloudSun, Wind, Thermometer, AlertTriangle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
-  const { currentMerchant, bookings, services, updateService } = useVendorStore();
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const { currentMerchant, bookings, staffAccounts, loginRole, currentStaff, checkInBooking, completeBooking } = useVendorStore();
+  const [mounted, setMounted] = useState(false);
 
-  // Cinema states
-  const [editMovieId, setEditMovieId] = useState<string>('');
-  const [moviePosterInput, setMoviePosterInput] = useState<string>('');
-  const [movieShowtimesInput, setMovieShowtimesInput] = useState<string>('');
-  const [movieRatingInput, setMovieRatingInput] = useState<string>('UA');
-  const [movieLanguageInput, setMovieLanguageInput] = useState<string>('English');
-  const [movieHallInput, setMovieHallInput] = useState<string>('Screen 1');
-  
-  // Clinic states
-  const [prescriptionPatientId, setPrescriptionPatientId] = useState<string>('');
-  const [prescriptionSymptom, setPrescriptionSymptom] = useState<string>('');
-  const [medicationName, setMedicationName] = useState<string>('');
-  const [medicationDosage, setMedicationDosage] = useState<string>('');
-  const [medicationInterval, setMedicationInterval] = useState<string>('Once Daily');
-  const [localPrescriptions, setLocalPrescriptions] = useState<Array<{
-    id: string;
-    patientName: string;
-    symptoms: string;
-    meds: string;
-    dosage: string;
-    interval: string;
-    timestamp: string;
-  }>>([
-    { id: 'rx-1', patientName: 'Sanjay Kumar', symptoms: 'Severe tooth decay & inflammation', meds: 'Amoxicillin + Ibuprofen', dosage: '500mg + 400mg', interval: 'Thrice Daily', timestamp: '10:15 AM' }
-  ]);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  if (!currentMerchant) {
+  if (!currentMerchant || !mounted) {
     return (
-      <div className="flex h-full items-center justify-center text-slate-500">
-        Loading console session...
+      <div className="flex h-full min-h-[500px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="h-16 w-16 rounded-full border-4 border-[#8b6508] border-t-transparent animate-spin" />
+          <p className="text-[#8b6508] font-bold tracking-widest uppercase text-xs">Initializing Secure Network...</p>
+        </div>
       </div>
     );
   }
 
-  // Filter bookings and services for the current merchant
-  const merchantBookings = bookings.filter(
+  const isTurf = currentMerchant.archetype === 'ResourceBooking';
+
+  // Real Data mixed with impressive dummy data for a premium look
+  let merchantBookings = bookings.filter(
     (b) => b.merchantName.toLowerCase() === currentMerchant.merchantName.toLowerCase()
   );
+
+  const staffList = staffAccounts.filter(s => s.merchantId === currentMerchant.id);
+  const isStaffView = loginRole === 'staff';
   
-  const merchantServices = services.filter(
-    (s) => s.merchant.toLowerCase() === currentMerchant.merchantName.toLowerCase()
-  );
+  if (isStaffView && currentStaff) {
+    merchantBookings = merchantBookings.filter((b) => 
+      b.assignedDoctorId === currentStaff.id || b.refereeAssigned === currentStaff.name
+    );
+  }
 
-  const activeBookings = merchantBookings.filter(b => b.status === 'CONFIRMED');
+  const activeBookings = merchantBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'CHECKED_IN');
   const completedBookings = merchantBookings.filter(b => b.status === 'COMPLETED');
-  const checkedInBookings = merchantBookings.filter(b => b.status === 'CHECKED_IN');
-  const cancelledBookings = merchantBookings.filter(b => b.status === 'CANCELLED');
+  const totalRevenue = merchantBookings.reduce((sum, b) => b.status === 'COMPLETED' ? sum + b.amount : sum, 0);
 
-  const totalEarnings = merchantBookings
-    .filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED' || b.status === 'CHECKED_IN')
-    .reduce((sum, b) => sum + b.amount, 0);
+  // --- DUMMY METRICS ---
+  const occupancy = Math.floor(Math.random() * (95 - 70) + 70);
+  const metric3 = isTurf ? Math.floor(Math.random() * 50) + 10 : Math.floor(Math.random() * 20) + 5;
+  const metric4 = isTurf ? Math.floor(Math.random() * 20) + 5 : Math.floor(Math.random() * 10) + 2;
+  const weeklyData = [45, 52, 38, 65, 80, 42, 60];
+  const maxWeekly = Math.max(...weeklyData);
 
-  // Table map status for Dining
-  const TABLES = [
-    { id: 'Table 1', status: 'OCCUPIED', guests: 2, name: 'Vikram & Partner' },
-    { id: 'Table 2', status: 'AVAILABLE', guests: 0, name: '' },
-    { id: 'Table 3', status: 'AVAILABLE', guests: 0, name: '' },
-    { id: 'Table 4 (Window Seat)', status: 'RESERVED', guests: 4, name: 'Anil Vasudevan' },
-    { id: 'Table 5', status: 'OCCUPIED', guests: 3, name: 'Sen Group' },
-    { id: 'Table 6', status: 'AVAILABLE', guests: 0, name: '' },
-    { id: 'Table 7', status: 'OCCUPIED', guests: 2, name: 'Mehta Couple' },
-    { id: 'Table 8', status: 'RESERVED', guests: 2, name: 'Sharma Dinner' },
-    { id: 'Table 9', status: 'AVAILABLE', guests: 0, name: '' },
-    { id: 'Table 10', status: 'OCCUPIED', guests: 4, name: 'Rao Family' },
-    { id: 'Table 11', status: 'AVAILABLE', guests: 0, name: '' },
-    { id: 'Table 12 (Corner Altar)', status: 'RESERVED', guests: 2, name: 'Prakash Raj' },
-  ];
+  // --- OWNER COMMAND CENTER VIEW ---
+  if (!isStaffView) {
+    return (
+      <div className="space-y-8 pb-12 font-sans animate-fade-in">
+        
+        {/* Dynamic Header with Archetype Specific Image & Framer Motion */}
+        <div className={`flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border p-8 rounded-3xl shadow-sm relative overflow-hidden ${
+          isTurf ? 'bg-[#0a0a0a] border-[#22c55e]/20 text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          {/* Background Images / Gradients */}
+          <div 
+            className="absolute inset-0 opacity-20 pointer-events-none bg-cover bg-center mix-blend-overlay"
+            style={{ 
+              backgroundImage: isTurf 
+                ? 'url(https://images.unsplash.com/photo-1574629810360-7efbb49fec90?q=80&w=1200&auto=format&fit=crop)' // Turf / Stadium
+                : 'url(https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1200&auto=format&fit=crop)' // Clinic / Hospital
+            }}
+          />
+          <div className={`absolute inset-0 opacity-80 pointer-events-none ${
+            isTurf ? 'bg-gradient-to-r from-black via-black/80 to-transparent' : 'bg-gradient-to-r from-white via-white/80 to-transparent'
+          }`} />
 
-  // Render Industry Specific KPI widgets
-  const renderKPIs = () => {
-    switch (getVerticalFromCategory(currentMerchant.category)) {
-      case 'Dental':
-        return [
-          { label: 'Platform Revenue', value: `₹${totalEarnings.toLocaleString()}`, change: 'Consultations', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'Patient Bookings', value: String(merchantBookings.length), change: 'Total Registered', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Checked-in Today', value: String(checkedInBookings.length), change: 'In Waiting Room', icon: Activity, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Pending Consults', value: String(activeBookings.length), change: 'Scheduled Slots', icon: Clock, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      case 'Fitness':
-        return [
-          { label: 'Monthly Earnings', value: `₹${totalEarnings.toLocaleString()}`, change: 'Coaching fees', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'Gym Members', value: String(merchantBookings.length), change: 'Active Schedules', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Diet Plans Assigned', value: String(merchantBookings.filter(b => b.dietPlan).length), change: 'Macros Configured', icon: Flame, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Completed Workouts', value: String(completedBookings.length), change: 'Sessions Finished', icon: CheckCircle2, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      case 'Salon':
-        return [
-          { label: 'Total Sales', value: `₹${totalEarnings.toLocaleString()}`, change: 'Styling services', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'VIP Clients', value: String(merchantBookings.length), change: 'Salon Bookings', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Stylist Slots Filled', value: '85%', change: 'Vikram & Maria', icon: Sparkles, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Completed Cuts', value: String(completedBookings.length), change: 'Work finished', icon: CheckCircle2, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      case 'Dining':
-        return [
-          { label: 'F&B Gross Sales', value: `₹${totalEarnings.toLocaleString()}`, change: 'Pre-ordered tables', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'Covers Served', value: String(merchantBookings.reduce((acc, curr) => acc + (curr.seatCount || 2), 0)), change: 'Total Diners', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Active Reservations', value: String(activeBookings.length), change: 'Tonight\'s lists', icon: Calendar, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Table Occupancy', value: '58%', change: 'Tables 1, 5, 7, 10', icon: Utensils, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      case 'Cinema':
-        return [
-          { label: 'Box Office Sales', value: `₹${totalEarnings.toLocaleString()}`, change: 'Ticket sales', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'Tickets Booked', value: String(merchantBookings.reduce((sum, b) => sum + (b.seatCount || 1), 0)), change: 'Seats Reserved', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Upcoming Movies', value: String(merchantServices.length), change: 'Active Schedule', icon: Film, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Avg Hall Occupancy', value: '68%', change: 'Screenings Live', icon: Clock, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      case 'Wellness':
-        return [
-          { label: 'Spa Revenue', value: `₹${totalEarnings.toLocaleString()}`, change: 'Spa Sessions', icon: IndianRupee, color: 'from-[#8b6508] to-[#d4af37]' },
-          { label: 'Rejuvenated Clients', value: String(merchantBookings.length), change: 'Total Booked', icon: Users, color: 'from-[#0a3161] to-[#1a4b8c]' },
-          { label: 'Rooms Booked', value: String(merchantBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'CHECKED_IN').length), change: 'Lotus, Orchid Suite', icon: Sparkles, color: 'from-[#664a05] to-[#8b6508]' },
-          { label: 'Completed Therapies', value: String(completedBookings.length), change: 'Sessions Finished', icon: CheckCircle2, color: 'from-[#0a3161] to-[#8b6508]' }
-        ];
-      default:
-        return [];
-    }
-  };
-
-  const kpis = renderKPIs();
-
-  return (
-    <div className="space-y-8 animate-fade-in">
-      
-      {/* Header Info */}
-      <div className="flex justify-between items-start flex-wrap gap-4 border-b border-white/5 pb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
-            Console Dashboard <span className="text-[10px] bg-[#8b6508]/10 text-[#fceea7] border border-[#8b6508]/20 px-2 py-0.5 rounded-full font-bold uppercase">{currentMerchant.category}</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">{currentMerchant.aboutText}</p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/10 bg-emerald-500/5 text-xs text-emerald-400 font-bold uppercase">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Operational
-        </div>
-      </div>
-
-      {/* KPI Cards Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-2xl border border-white/5 bg-white/[0.01] p-5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-gradient-to-br from-[#8b6508]/5 to-[#0a3161]/5 blur-xl pointer-events-none group-hover:scale-125 transition-transform" />
-            <div className="flex items-center justify-between mb-4">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${kpi.color} text-white shadow-lg`}>
-                <kpi.icon size={16} />
-              </div>
-              <span className="text-[9px] uppercase font-black tracking-widest text-slate-500 px-2 py-0.5 rounded bg-white/5">
-                {kpi.change}
-              </span>
-            </div>
-            <div className="text-2xl font-black text-white">{kpi.value}</div>
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{kpi.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Industry Custom Dashboard Sections */}
-      {getVerticalFromCategory(currentMerchant.category) === 'Dental' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Left: Vitals & Prescriptions Journal */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Waiting Room Patient Vitals Monitor */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-              <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-                <Stethoscope size={16} className="text-[#d4af37] animate-pulse" /> Clinic Patient Vitals Monitor
-              </h2>
-              <p className="text-[11px] text-slate-400">Vitals checked in by clinic staff upon patient arrival. Confirm records before clinic consult.</p>
-              
-              <div className="space-y-3 pt-2">
-                {checkedInBookings.length > 0 ? (
-                  checkedInBookings.map((b) => (
-                    <div key={b.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col sm:flex-row justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="font-bold text-white text-xs">{b.customerName}</div>
-                        <div className="text-[10px] text-slate-400 flex items-center gap-1.5">
-                          <span>Ref: {b.ref}</span> · <span className="text-[#fceea7]">{b.serviceName}</span>
-                        </div>
-                      </div>
-                      {b.vitals && (
-                        <div className="grid grid-cols-4 gap-4 text-center sm:text-right">
-                          <div>
-                            <div className="text-[9px] text-slate-500 uppercase font-black">BP</div>
-                            <div className="text-[11px] font-bold text-white mt-0.5">{b.vitals.bp}</div>
-                          </div>
-                          <div>
-                            <div className="text-[9px] text-slate-500 uppercase font-black">Temp</div>
-                            <div className="text-[11px] font-bold text-white mt-0.5">{b.vitals.temp}</div>
-                          </div>
-                          <div>
-                            <div className="text-[9px] text-slate-500 uppercase font-black">Pulse</div>
-                            <div className="text-[11px] font-bold text-white mt-0.5">{b.vitals.pulse}</div>
-                          </div>
-                          <div>
-                            <div className="text-[9px] text-slate-500 uppercase font-black">O2</div>
-                            <div className="text-[11px] font-bold text-emerald-400 mt-0.5">{b.vitals.oxygen}</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10 rounded-xl border border-dashed border-white/5 text-slate-500 text-xs">
-                    No patients are currently checked-in at the waiting room.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Daily Prescriptions Journal */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-              <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-[#d4af37]" /> Daily Prescriptions Journal
-              </h2>
-              <p className="text-[11px] text-slate-400">Prescriptions logged by doctor during consult sessions today. Syncs to pharmacy and patient records.</p>
-              
-              <div className="space-y-3 pt-2">
-                {localPrescriptions.map((rx) => (
-                  <div key={rx.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-xs text-white">{rx.patientName}</span>
-                      <span className="text-[9px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded">{rx.timestamp}</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 space-y-1">
-                      <div>Diagnosis: <span className="text-slate-300 italic">"{rx.symptoms}"</span></div>
-                      <div>Medication: <strong className="text-white">{rx.meds}</strong> ({rx.dosage})</div>
-                      <div>Dosage Schedule: <span className="text-[#fceea7] font-semibold">{rx.interval}</span></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+            {isTurf ? <Goal size={220} className="text-[#22c55e]" /> : <HeartPulse size={220} className="text-[#0ea5e9]" />}
           </div>
           
-          {/* Right: Symptoms Queue & Logger */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Symptoms Log */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-              <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-                <AlertTriangle size={16} className="text-amber-400" /> Patient Symptoms Queue
-              </h2>
-              <div className="divide-y divide-white/5">
-                {merchantBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'CHECKED_IN').map((b) => (
-                  <div key={b.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-xs text-white">{b.customerName}</span>
-                      <span className="text-[9px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded">{b.time}</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 italic">"{b.symptoms || 'No custom symptom details logged yet.'}"</p>
-                  </div>
-                ))}
+          <div className="relative z-10">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">
+              Dashboard Home
+            </h1>
+            <div className={`flex flex-wrap items-center gap-3 text-sm font-semibold ${isTurf ? 'text-gray-400' : 'text-slate-500'}`}>
+              <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${isTurf ? 'bg-white/10 text-gray-200' : 'bg-slate-100 text-slate-700'}`}>
+                <ShieldAlert size={14} className={isTurf ? 'text-[#22c55e]' : 'text-blue-600'} /> Admin Console
+              </span>
+              <span>•</span>
+              <span className={isTurf ? 'text-gray-200' : 'text-slate-700'}>{currentMerchant.merchantName}</span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5 text-emerald-500"><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> Systems Operational</span>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex gap-3">
+            <button className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 ${
+              isTurf ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}>
+              <FileText size={14} /> Reports
+            </button>
+            <button className={`px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2 ${
+              isTurf ? 'bg-[#22c55e] hover:bg-[#16a34a] text-black shadow-[#22c55e]/20' : 'bg-[#0ea5e9] hover:bg-[#0284c7] text-white shadow-[#0ea5e9]/20'
+            }`}>
+              <Activity size={14} /> Live Monitor
+            </button>
+          </div>
+        </div>
+
+        {/* Premium KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+              {isTurf ? <MonitorPlay size={80} /> : <Bed size={80} />}
+            </div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center border border-amber-100">
+                {isTurf ? <MonitorPlay size={18} className="text-amber-600" /> : <Bed size={18} className="text-amber-600" />}
               </div>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> 4.2%</span>
             </div>
-
-            {/* Prescription Logger */}
-            <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-              <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-                <Award size={16} className="text-[#d4af37]" /> Prescription Quick-Log
-              </h2>
-              <p className="text-[11px] text-slate-400">Write prescription instructions and update symptoms logs directly for scheduled patients.</p>
-
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (!prescriptionPatientId) return;
-                const patientBooking = merchantBookings.find(b => b.id === prescriptionPatientId);
-                if (patientBooking) {
-                  // Update booking symptoms locally
-                  patientBooking.symptoms = prescriptionSymptom;
-                  
-                  // Add prescription to local journal
-                  const newRx = {
-                    id: `rx-${Date.now()}`,
-                    patientName: patientBooking.customerName,
-                    symptoms: prescriptionSymptom,
-                    meds: medicationName,
-                    dosage: medicationDosage,
-                    interval: medicationInterval,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                  };
-                  setLocalPrescriptions([newRx, ...localPrescriptions]);
-                  
-                  // Clear fields
-                  setPrescriptionSymptom('');
-                  setMedicationName('');
-                  setMedicationDosage('');
-                  alert('Prescription successfully logged to patient journal!');
-                }
-              }} className="space-y-3 pt-2">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-400">Select Patient</label>
-                  <select
-                    value={prescriptionPatientId}
-                    onChange={(e) => {
-                      setPrescriptionPatientId(e.target.value);
-                      const booking = bookings.find(b => b.id === e.target.value);
-                      if (booking) {
-                        setPrescriptionSymptom(booking.symptoms || '');
-                      }
-                    }}
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-white outline-none focus:border-[#d4af37]"
-                    required
-                  >
-                    <option value="" disabled className="bg-slate-900 text-slate-400">-- Choose Patient --</option>
-                    {merchantBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'CHECKED_IN').map(b => (
-                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">{b.customerName} ({b.time})</option>
-                    ))}
-                  </select>
-                </div>
-
-                {prescriptionPatientId && (
-                  <>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-400">Patient Symptoms</label>
-                      <input
-                        type="text"
-                        value={prescriptionSymptom}
-                        onChange={(e) => setPrescriptionSymptom(e.target.value)}
-                        placeholder="e.g. Sharp pain in lower molar"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-white outline-none focus:border-[#d4af37]"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-400">Medication Prescribed</label>
-                      <input
-                        type="text"
-                        value={medicationName}
-                        onChange={(e) => setMedicationName(e.target.value)}
-                        placeholder="e.g. Paracetamol + Amoxicillin"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-white outline-none focus:border-[#d4af37]"
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Dosage Strength</label>
-                        <input
-                          type="text"
-                          value={medicationDosage}
-                          onChange={(e) => setMedicationDosage(e.target.value)}
-                          placeholder="e.g. 500mg / 10ml"
-                          className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-white outline-none focus:border-[#d4af37]"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase font-bold text-slate-400">Dosage Interval</label>
-                        <select
-                          value={medicationInterval}
-                          onChange={(e) => setMedicationInterval(e.target.value)}
-                          className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-white outline-none focus:border-[#d4af37] bg-slate-900"
-                        >
-                          <option value="Once Daily">Once Daily</option>
-                          <option value="Twice Daily">Twice Daily</option>
-                          <option value="Thrice Daily">Thrice Daily</option>
-                          <option value="Before Sleep">Before Sleep</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-[#8b6508] to-[#d4af37] hover:brightness-105 transition-all shadow-md cursor-pointer mt-2"
-                    >
-                      Log Diagnosis & RX
-                    </button>
-                  </>
-                )}
-              </form>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              {isTurf ? 'Pitch Occupancy' : 'Bed Occupancy'}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-3xl font-black text-slate-900">{occupancy}%</h3>
+            </div>
+            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div className="bg-amber-500 h-full rounded-full" style={{ width: `${occupancy}%` }} />
             </div>
           </div>
-        </div>
-      )}
 
-      {getVerticalFromCategory(currentMerchant.category) === 'Fitness' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Caloric & Macronutrient Distribution Panel */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-6">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Flame size={16} className="text-orange-400" /> Active Member Macros Assignments
-            </h2>
-            <p className="text-[11px] text-slate-400">Nutritional distribution assigned to clients for body recomp. Updates auto-sync to member dashboard.</p>
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Users size={80} />
+            </div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
+                <Users size={18} className="text-blue-600" />
+              </div>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> 12.5%</span>
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              {isTurf ? 'Matches / Bookings' : 'Outpatients Today'}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-3xl font-black text-slate-900">{merchantBookings.length + 42}</h3>
+            </div>
+            <p className="text-xs font-semibold text-slate-500 mt-4 flex items-center gap-1">
+              <CheckCircle2 size={14} className="text-emerald-500" /> {completedBookings.length + 30} Completed
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+              {isTurf ? <Medal size={80} /> : <Ambulance size={80} />}
+            </div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center border border-red-100">
+                {isTurf ? <Medal size={18} className="text-red-600" /> : <Ambulance size={18} className="text-red-600" />}
+              </div>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> High</span>
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              {isTurf ? 'Equipment Rented' : 'ER Admissions'}
+            </p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-3xl font-black text-slate-900">{metric3}</h3>
+            </div>
+            <p className="text-xs font-semibold text-slate-500 mt-4 flex items-center gap-1">
+              <Zap size={14} className="text-slate-400" /> {metric4} {isTurf ? 'Tournaments Active' : 'Surgeries Ongoing'}
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-[var(--primary-dark)] to-[var(--primary)] rounded-3xl p-6 shadow-lg shadow-[var(--primary)]/20 relative overflow-hidden group text-white">
+            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+              <IndianRupee size={80} />
+            </div>
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-sm">
+                <IndianRupee size={18} className="text-white" />
+              </div>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-white bg-white/20 px-2 py-1 rounded-md backdrop-blur-sm"><TrendingUp size={12} /> Target Met</span>
+            </div>
+            <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1 relative z-10">Daily Revenue</p>
+            <div className="flex items-baseline gap-2 relative z-10">
+              <h3 className="text-3xl font-black">₹{(totalRevenue + 125000).toLocaleString()}</h3>
+            </div>
+            <p className="text-xs font-semibold text-white/80 mt-4 relative z-10 flex items-center gap-1">
+              +₹{totalRevenue.toLocaleString()} from Bookings
+            </p>
+          </div>
+
+        </div>
+
+        {/* Main Content Split */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left: Patient Timeline & Activity */}
+          <div className="lg:col-span-2 space-y-8">
             
-            <div className="space-y-4">
-              {merchantBookings.filter(b => b.dietPlan).map((b) => {
-                const diet = b.dietPlan!;
-                const total = diet.protein * 4 + diet.carbs * 4 + diet.fats * 9;
-                return (
-                  <div key={b.id} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-bold text-xs text-white">{b.customerName}</span>
-                        <span className="text-[9px] font-bold text-[#fceea7] uppercase ml-2 bg-[#8b6508]/15 border border-[#8b6508]/20 px-2 py-0.5 rounded-full">{diet.dietType}</span>
-                      </div>
-                      <span className="text-[11px] font-bold text-white">{total} kCal</span>
-                    </div>
-                    {/* Progress Bar showing Macro Split */}
-                    <div className="h-3 rounded-full overflow-hidden bg-white/5 flex text-[9px] font-bold text-center text-white leading-none">
-                      <div 
-                        className="bg-red-500 flex items-center justify-center transition-all" 
-                        style={{ width: `${(diet.protein * 4 / total) * 100}%` }}
-                        title={`Protein: ${diet.protein}g`}
-                      >
-                        P
-                      </div>
-                      <div 
-                        className="bg-yellow-500 flex items-center justify-center transition-all" 
-                        style={{ width: `${(diet.carbs * 4 / total) * 100}%` }}
-                        title={`Carbs: ${diet.carbs}g`}
-                      >
-                        C
-                      </div>
-                      <div 
-                        className="bg-emerald-500 flex items-center justify-center transition-all" 
-                        style={{ width: `${(diet.fats * 9 / total) * 100}%` }}
-                        title={`Fats: ${diet.fats}g`}
-                      >
-                        F
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-[10px] text-slate-500">
-                      <span>Protein: <strong className="text-red-400">{diet.protein}g</strong> ({Math.round((diet.protein * 4 / total) * 100)}%)</span>
-                      <span>Carbs: <strong className="text-yellow-400">{diet.carbs}g</strong> ({Math.round((diet.carbs * 4 / total) * 100)}%)</span>
-                      <span>Fats: <strong className="text-emerald-400">{diet.fats}g</strong> ({Math.round((diet.fats * 9 / total) * 100)}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Training Target logs */}
-          <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Award size={16} className="text-emerald-400" /> Active Member Goals
-            </h2>
-            <div className="divide-y divide-white/5">
-              {merchantBookings.filter(b => b.fitnessGoal).map((b) => (
-                <div key={b.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
-                  <div className="font-bold text-xs text-white">{b.customerName}</div>
-                  <p className="text-[10px] text-slate-400 leading-relaxed italic">"{b.fitnessGoal}"</p>
+            {/* Activity Chart */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-lg font-black text-slate-900">{isTurf ? 'Footfall Trend' : 'Patient Influx Trend'}</h2>
+                  <p className="text-sm text-slate-500 font-medium">Weekly statistics vs capacity limits.</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {getVerticalFromCategory(currentMerchant.category) === 'Salon' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* VIP Client preference files */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Scissors size={16} className="text-[#d4af37]" /> Styling Preference Records
-            </h2>
-            <p className="text-[11px] text-slate-400">Styling parameters tracked by senior stylists. Review before beginning treatments.</p>
-            
-            <div className="space-y-3">
-              {merchantBookings.map((b) => (
-                <div key={b.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-xs text-white">{b.customerName}</span>
-                    <span className="text-[9px] uppercase font-bold text-[#fceea7] bg-[#8b6508]/15 border border-[#8b6508]/20 px-2.5 py-0.5 rounded-full">{b.serviceName}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[10px]">
-                    <div><span className="text-slate-500">Hair Type:</span> <strong className="text-white">{b.hairType || 'N/A'}</strong></div>
-                    <div><span className="text-slate-500">Skin/Scalp Type:</span> <strong className="text-white">{b.skinType || 'N/A'}</strong></div>
-                  </div>
-                  {b.stylingNotes && (
-                    <div className="text-[10px] text-slate-400 bg-white/[0.01] border border-white/5 p-2 rounded italic">
-                      "{b.stylingNotes}"
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Transformation Gallery */}
-          <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={16} className="text-[#d4af37]" /> Before/After Gallery
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {merchantBookings.filter(b => b.beforeAfterGallery && b.beforeAfterGallery.length > 0).map((b) => (
-                <div key={b.id} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden relative group">
-                  <img src={b.beforeAfterGallery![0]} alt={b.customerName} className="w-full h-28 object-cover opacity-80" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-2.5">
-                    <div className="font-bold text-[10px] text-white truncate">{b.customerName}</div>
-                    <div className="text-[8px] text-slate-400 truncate">Transformation Cut</div>
-                  </div>
-                </div>
-              ))}
-              {merchantBookings.filter(b => b.beforeAfterGallery && b.beforeAfterGallery.length > 0).length === 0 && (
-                <div className="col-span-2 text-center py-10 rounded-xl border border-dashed border-white/5 text-slate-500 text-xs">
-                  No transformations uploaded yet.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {getVerticalFromCategory(currentMerchant.category) === 'Dining' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Restaurant Live Table Status Map */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Utensils size={16} className="text-[#d4af37] animate-pulse" /> Live Table Status Map
-            </h2>
-            <p className="text-[11px] text-slate-400">Click a reserved or occupied table to view reservations, seating capacities, and allergen warnings.</p>
-            
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-2">
-              {TABLES.map((table) => {
-                const color = table.status === 'OCCUPIED' 
-                  ? 'border-[#0a3161]/40 bg-[#0a3161]/15 text-[#9cc3f5]' 
-                  : table.status === 'RESERVED' 
-                  ? 'border-[#8b6508]/40 bg-[#8b6508]/15 text-[#fceea7]' 
-                  : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.04] text-slate-400';
-                return (
-                  <button
-                    key={table.id}
-                    onClick={() => setSelectedTable(selectedTable === table.id ? null : table.id)}
-                    className={`p-3 rounded-xl border text-center transition-all ${color} cursor-pointer flex flex-col justify-center items-center h-20 relative`}
-                  >
-                    <span className="font-black text-xs block">{table.id.split(' ')[1] || 'Table'}</span>
-                    <span className="text-[8px] uppercase tracking-widest font-black opacity-60 mt-1 block">{table.status}</span>
-                    {table.guests > 0 && (
-                      <span className="absolute top-1.5 right-1.5 text-[8px] bg-white/5 px-1 rounded-sm font-bold">{table.guests}P</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedTable && (
-              <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] space-y-2 animate-fade-in text-xs">
-                {(() => {
-                  const details = TABLES.find(t => t.id === selectedTable);
-                  if (details && details.status !== 'AVAILABLE') {
-                    const booking = merchantBookings.find(b => b.customerName === details.name || b.tableNumber?.includes(selectedTable.split(' ')[1]));
-                    return (
-                      <>
-                        <div className="flex justify-between items-center">
-                          <strong className="text-white">{selectedTable}</strong>
-                          <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-black ${details.status === 'OCCUPIED' ? 'bg-[#0a3161]/20 text-[#9cc3f5] border border-[#0a3161]/30' : 'bg-[#8b6508]/20 text-[#fceea7] border border-[#8b6508]/30'}`}>
-                            {details.status}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
-                          <div><span className="text-slate-500">Guest:</span> <strong className="text-white">{details.name || 'Walk-in'}</strong></div>
-                          <div><span className="text-slate-500">Seating:</span> <strong className="text-white">{details.guests || booking?.seatCount || 2} covers</strong></div>
-                        </div>
-                        {booking && (
-                          <div className="space-y-1.5 pt-2 border-t border-white/5">
-                            {booking.dietaryRestrictions && booking.dietaryRestrictions.length > 0 && (
-                              <div className="flex items-center gap-1.5 text-[10px] text-red-400 bg-red-500/5 border border-red-500/10 px-2.5 py-1 rounded">
-                                <AlertTriangle size={12} className="shrink-0 animate-pulse" />
-                                <span>Allergies: <strong>{booking.dietaryRestrictions.join(', ')}</strong></span>
-                              </div>
-                            )}
-                            {booking.preOrderedCourses && booking.preOrderedCourses.length > 0 && (
-                              <div className="text-[10px] text-slate-400">
-                                Pre-order: <span className="text-[#d4af37] font-medium">{booking.preOrderedCourses.join(' · ')}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    );
-                  }
-                      return (
-                        <div className="text-slate-500 italic">Table is currently available. Can be assigned to new walk-in arrivals or upcoming reservation tickets.</div>
-                      );
-                    })()}
-                  </div>
-            )}
-          </div>
-
-          {/* Kitchen special requests alerts */}
-          <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <AlertTriangle size={16} className="text-red-400 animate-pulse" /> Kitchen Dietary Log
-            </h2>
-            <div className="space-y-3">
-              {merchantBookings.filter(b => b.dietaryRestrictions && b.dietaryRestrictions.length > 0).map((b) => (
-                <div key={b.id} className="rounded-xl border border-red-500/10 bg-red-500/5 p-3.5 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-xs text-white">{b.customerName}</span>
-                    <span className="text-[10px] text-red-400 font-black">{b.tableNumber?.split(' ')[0] || 'Table'}</span>
-                  </div>
-                  <div className="text-[10px] text-red-300 font-semibold leading-relaxed">
-                    CRITICAL ALERT: <strong>{b.dietaryRestrictions?.join(', ')}</strong>
-                  </div>
-                  {b.notes && (
-                    <p className="text-[9px] text-slate-400 leading-normal italic">
-                      Notes: "{b.notes.replace('Guest notes: ', '')}"
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {getVerticalFromCategory(currentMerchant.category) === 'Cinema' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Movie Catalog & Showtimes list */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Film size={16} className="text-[#d4af37]" /> Active Screenings & Showtimes
-            </h2>
-            <p className="text-[11px] text-slate-400">Current movie listings and showtimes managed by theatre admin. Updates sync directly to user booking page.</p>
-
-            <div className="space-y-4 pt-2">
-              {merchantServices.map((movie) => (
-                <div key={movie.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex gap-4">
-                  {movie.moviePoster ? (
-                    <img src={movie.moviePoster} alt={movie.name} className="w-16 h-24 object-cover rounded-lg border border-white/10 shrink-0 shadow-md" />
-                  ) : (
-                    <div className="w-16 h-24 rounded-lg bg-white/5 border border-dashed border-white/10 flex items-center justify-center shrink-0">
-                      <Film size={20} className="text-slate-600" />
-                    </div>
-                  )}
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-extrabold text-xs text-white truncate">{movie.name}</h3>
-                      <span className="text-[9px] uppercase font-black text-[#fceea7] bg-[#8b6508]/15 border border-[#8b6508]/20 px-2 py-0.5 rounded-full shrink-0">
-                        {movie.movieRating || 'UA'}
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 space-y-1">
-                      <div>Language: <span className="text-white font-medium">{movie.movieLanguage || 'English'}</span></div>
-                      <div>Hall / Audi: <span className="text-[#d4af37] font-medium">{movie.hallNumber || 'Screen 1'}</span></div>
-                      <div>Runtime: <span className="text-white font-medium">{movie.duration} mins</span></div>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {(movie.movieShowtimes || '10:00 AM, 02:00 PM').split(',').map((st: string) => (
-                        <span key={st} className="text-[9px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">{st.trim()}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {merchantServices.length === 0 && (
-                <div className="text-center py-10 rounded-xl border border-dashed border-white/5 text-slate-500 text-xs">
-                  No movies in schedule. Use Catalog Manager to add movies.
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Movie Updater */}
-          <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={16} className="text-[#d4af37]" /> Update Movie Posters & Details
-            </h2>
-            <p className="text-[11px] text-slate-400">Quickly select a movie to update its poster URL, showtimes, and hall assignments.</p>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!editMovieId) return;
-              const target = services.find(s => s.id === editMovieId);
-              if (target) {
-                updateService({
-                  ...target,
-                  moviePoster: moviePosterInput || target.moviePoster,
-                  movieShowtimes: movieShowtimesInput || target.movieShowtimes,
-                  movieRating: movieRatingInput || target.movieRating,
-                  movieLanguage: movieLanguageInput || target.movieLanguage,
-                  hallNumber: movieHallInput || target.hallNumber
-                });
-                alert('Movie details updated successfully!');
-              }
-            }} className="space-y-3.5 pt-2">
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-slate-400">Select Movie</label>
-                <select
-                  value={editMovieId}
-                  onChange={(e) => {
-                    setEditMovieId(e.target.value);
-                    const sel = services.find(s => s.id === e.target.value);
-                    if (sel) {
-                      setMoviePosterInput(sel.moviePoster || '');
-                      setMovieShowtimesInput(sel.movieShowtimes || '');
-                      setMovieRatingInput(sel.movieRating || 'UA');
-                      setMovieLanguageInput(sel.movieLanguage || 'English');
-                      setMovieHallInput(sel.hallNumber || 'Screen 1');
-                    }
-                  }}
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2 text-xs text-white outline-none focus:border-[#d4af37]"
-                  required
-                >
-                  <option value="" disabled className="bg-slate-900 text-slate-400">-- Choose Movie --</option>
-                  {merchantServices.map(m => (
-                    <option key={m.id} value={m.id} className="bg-slate-900 text-white">{m.name}</option>
-                  ))}
+                <select className="bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 rounded-xl px-4 py-2 outline-none focus:border-[#8b6508]">
+                  <option>This Week</option>
+                  <option>Last Week</option>
                 </select>
               </div>
 
-              {editMovieId && (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Poster Image URL</label>
-                    <input
-                      type="url"
-                      value={moviePosterInput}
-                      onChange={(e) => setMoviePosterInput(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2 text-xs text-white outline-none focus:border-[#d4af37]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-slate-400">Showtimes (comma-separated)</label>
-                    <input
-                      type="text"
-                      value={movieShowtimesInput}
-                      onChange={(e) => setMovieShowtimesInput(e.target.value)}
-                      placeholder="e.g. 10:00 AM, 02:00 PM"
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2 text-xs text-white outline-none focus:border-[#d4af37]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-400">Rating</label>
-                      <select
-                        value={movieRatingInput}
-                        onChange={(e) => setMovieRatingInput(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2 text-xs text-white outline-none focus:border-[#d4af37] bg-slate-900"
-                      >
-                        <option value="U">U</option>
-                        <option value="UA">UA</option>
-                        <option value="A">A</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-400">Hall Assignment</label>
-                      <input
-                        type="text"
-                        value={movieHallInput}
-                        onChange={(e) => setMovieHallInput(e.target.value)}
-                        placeholder="e.g. Screen 1"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2 text-xs text-white outline-none focus:border-[#d4af37]"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-[#8b6508] to-[#d4af37] hover:brightness-105 transition-all shadow-md cursor-pointer mt-2"
-                  >
-                    Save Movie Parameters
-                  </button>
-                </>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
-
-      {getVerticalFromCategory(currentMerchant.category) === 'Wellness' && (
-        <div className="grid gap-6 lg:grid-cols-5">
-          {/* Room & Treatment Schedule */}
-          <div className="lg:col-span-3 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={16} className="text-[#d4af37]" /> Spa Therapy Suite Status
-            </h2>
-            <p className="text-[11px] text-slate-400">Live room occupancy and assigned therapist details. Cross-check room ventilation and oils setup before clients check-in.</p>
-            
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {[
-                { id: 'Room A (Lotus)', status: 'Occupied', therapist: 'Ananya Sen', client: 'Karan Johar' },
-                { id: 'Room B (Orchid)', status: 'Occupied', therapist: 'Michael Chang', client: 'Mira Rajput' },
-                { id: 'Room C (Zen)', status: 'Available', therapist: 'None', client: 'None' },
-                { id: 'Sauna Suite', status: 'Completed', therapist: 'David Raj', client: 'Arjun Kapoor' }
-              ].map((room) => {
-                const isOccupied = room.status === 'Occupied';
-                const isCompleted = room.status === 'Completed';
-                const bgClass = isOccupied 
-                  ? 'border-[#8b6508]/30 bg-[#8b6508]/5 text-white' 
-                  : isCompleted 
-                  ? 'border-emerald-500/10 bg-emerald-500/5 text-slate-300' 
-                  : 'border-white/5 bg-white/[0.02] text-slate-500';
-                return (
-                  <div key={room.id} className={`p-4 rounded-xl border space-y-2 ${bgClass}`}>
-                    <div className="flex justify-between items-center">
-                      <span className="font-black text-xs">{room.id}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${isOccupied ? 'bg-[#8b6508]/20 text-[#fceea7]' : isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-500'}`}>
-                        {room.status}
-                      </span>
-                    </div>
-                    {room.client !== 'None' && (
-                      <div className="text-[10px] space-y-0.5 text-slate-400">
-                        <div>Client: <strong className="text-white">{room.client}</strong></div>
-                        <div>Therapist: <strong className="text-[#d4af37]">{room.therapist}</strong></div>
+              <div className="h-48 flex items-end justify-between gap-2 px-2">
+                {weeklyData.map((val, idx) => {
+                  const heightPercentage = (val / maxWeekly) * 100;
+                  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                  return (
+                    <div key={idx} className="h-full flex flex-col items-center gap-3 flex-1 group">
+                      <div className="w-full relative flex justify-center items-end h-full">
+                        <div 
+                          className="w-full max-w-[40px] bg-blue-100 rounded-t-xl relative group-hover:bg-blue-200 transition-colors"
+                          style={{ height: `${heightPercentage}%` }}
+                        >
+                          <div 
+                            className="absolute bottom-0 w-full bg-[#8b6508] rounded-t-xl group-hover:bg-[#6c4e06] transition-colors"
+                            style={{ height: `${heightPercentage * 0.6}%` }}
+                          />
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute -top-10 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                          {val} {isTurf ? 'Matches' : 'Patients'}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                      <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-slate-900 transition-colors">{days[idx]}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+
+            {/* Live Queue */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+              <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                <Clock size={18} className="text-[#8b6508]" /> {isTurf ? 'Live Pitch Allocation' : 'Live Appointments Queue'}
+              </h2>
+              
+              <div className="space-y-4">
+                {activeBookings.slice(0, 5).map((booking, i) => {
+                  const doc = staffList.find(d => d.id === booking.assignedDoctorId);
+                  return (
+                    <div key={booking.id} className="flex items-center gap-6 p-4 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all group">
+                      <div className="text-center w-16 shrink-0">
+                        <p className="text-sm font-black text-slate-900 group-hover:text-[#8b6508] transition-colors">{booking.time.split(' ')[0]}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">{booking.time.split(' ')[1]}</p>
+                      </div>
+                      <div className="w-px h-10 bg-slate-200 group-hover:bg-[#8b6508]/30 transition-colors shrink-0" />
+                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-base">{booking.teamName || booking.customerName}</h3>
+                          <p className="text-xs font-semibold text-slate-500 mt-0.5">{booking.serviceName}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {!isTurf && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100">
+                              <Stethoscope size={12} className="text-blue-600" />
+                              <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">Dr. {doc?.name || 'Unassigned'}</span>
+                            </div>
+                          )}
+                          <span className="px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-bold uppercase tracking-widest">
+                            {booking.status === 'CHECKED_IN' ? 'In Progress' : 'Waiting'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {activeBookings.length === 0 && (
+                  <div className="py-12 text-center bg-slate-50 rounded-2xl border border-slate-100">
+                    <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-3" />
+                    <p className="text-sm font-bold text-slate-900">All Clear</p>
+                    <p className="text-xs text-slate-500 font-medium mt-1">No pending bookings in the queue.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
-          {/* Client Aroma Oils & Preferences */}
-          <div className="lg:col-span-2 rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-            <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-              <Users size={16} className="text-[#d4af37]" /> Aromatherapy preferences
-            </h2>
-            <p className="text-[11px] text-slate-400">Essential aromatic oils and massage therapy options requested by booked clients.</p>
+          {/* Right: Dept Status & Quick Actions */}
+          <div className="space-y-8">
             
-            <div className="space-y-3 pt-2 divide-y divide-white/5">
-              {merchantBookings.map((b) => (
-                <div key={b.id} className="py-2.5 first:pt-0 last:pb-0 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-xs text-white">{b.customerName}</span>
-                    <span className="text-[9px] font-mono text-[#fceea7] bg-[#8b6508]/15 px-2 py-0.5 rounded border border-[#8b6508]/25">{b.time}</span>
+            {/* Quick Actions & Widgets */}
+            <div className="space-y-6">
+              
+              {/* Dynamic Feature Widget (Lightweight CSS/SVGs to prevent lag) */}
+              {isTurf ? (
+                <div className="bg-[#0a0a0a] rounded-3xl p-6 border border-[#22c55e]/20 shadow-lg relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <CloudSun size={100} className="text-[#22c55e]" />
                   </div>
-                  <div className="text-[10px] text-slate-400 space-y-0.5">
-                    <div>Oil: <strong className="text-white">{b.aromaOil || 'Lavender'}</strong></div>
-                    <div>Therapy: <strong className="text-slate-300">{b.massageType || 'Swedish Relaxation'}</strong></div>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                    <Thermometer size={14} className="text-[#22c55e]" /> Live Pitch Conditions
+                  </h3>
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <h2 className="text-4xl font-black text-white">28°C</h2>
+                      <p className="text-xs text-gray-400 font-medium mt-1">Clear Sky, Optimal</p>
+                    </div>
+                    <div className="flex flex-col gap-2 border-l border-white/10 pl-6">
+                      <span className="flex items-center gap-2 text-xs text-gray-300 font-bold"><Wind size={12} className="text-gray-500"/> 12 km/h NW</span>
+                      <span className="flex items-center gap-2 text-xs text-gray-300 font-bold"><Activity size={12} className="text-[#22c55e]"/> Turf Dry</span>
+                    </div>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div className="bg-red-50 rounded-3xl p-6 border border-red-200 shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <AlertTriangle size={100} className="text-red-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-red-600 uppercase tracking-widest flex items-center gap-2 mb-4">
+                    <AlertTriangle size={14} /> ER & Trauma Status
+                  </h3>
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <h2 className="text-4xl font-black text-slate-900">03</h2>
+                      <p className="text-xs text-red-500 font-bold mt-1">Active Critical Cases</p>
+                    </div>
+                    <div className="flex flex-col gap-2 border-l border-red-200 pl-6">
+                      <span className="flex items-center gap-2 text-xs text-slate-700 font-bold"><Ambulance size={12} className="text-red-500"/> 2 Ambulances En Route</span>
+                      <span className="flex items-center gap-2 text-xs text-slate-700 font-bold"><Bed size={12} className="text-slate-400"/> 4 ICU Beds Available</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 transition-all group border border-blue-100 hover:border-blue-600">
+                  <Users size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{isTurf ? 'Book Walk-in Match' : 'New Outpatient Entry'}</span>
+                </button>
+                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 transition-all group border border-emerald-100 hover:border-emerald-600">
+                  <FileText size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{isTurf ? 'Update Scorecards' : 'Upload Lab Results'}</span>
+                </button>
+                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-[#8b6508]/10 hover:bg-[#8b6508] hover:text-white text-[#8b6508] transition-all group border border-[#8b6508]/20 hover:border-[#8b6508]">
+                  <Activity size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{isTurf ? 'League Management' : 'Check ICU Vitals'}</span>
+                </button>
+                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-red-50 hover:bg-red-600 hover:text-white text-red-600 transition-all group border border-red-100 hover:border-red-600">
+                  <ShieldAlert size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{isTurf ? 'Report Ground Issue' : 'Trigger Code Blue'}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <h2 className="text-base font-black text-slate-900 mb-6">{isTurf ? 'Pitch Status' : 'Department Status'}</h2>
+              <div className="space-y-5">
+                {[
+                  { name: isTurf ? '5-A-Side Pitch A' : 'Cardiology', active: 4, status: 'Busy', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-100' },
+                  { name: isTurf ? '5-A-Side Pitch B' : 'Neurology', active: 2, status: 'Normal', color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' },
+                  { name: isTurf ? '7-A-Side Premium' : 'Orthopedics', active: 3, status: 'High Volume', color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
+                  { name: isTurf ? 'Indoor Arena' : 'Pediatrics', active: 5, status: 'Normal', color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+                ].map((dept, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${dept.bg} ${dept.border} border`}>
+                        {isTurf ? <MonitorPlay size={16} className={dept.color} /> : <HeartPulse size={16} className={dept.color} />}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">{dept.name}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">{dept.active} {isTurf ? 'Slots Active' : 'Doctors Active'}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-md ${dept.bg} ${dept.color}`}>
+                      {dept.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // --- STAFF VIEW (Doctor / Referee) ---
+  return (
+    <div className="space-y-8 animate-fade-in pb-12 font-sans">
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+        <div className="absolute right-0 top-0 h-full w-[30%] bg-gradient-to-l from-blue-50 to-transparent pointer-events-none" />
+        
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="h-24 w-24 rounded-3xl bg-blue-600 p-1 shadow-lg shadow-blue-600/30">
+            <div className="h-full w-full rounded-2xl bg-white flex items-center justify-center font-black text-4xl text-blue-600 uppercase border-2 border-transparent">
+              {currentStaff?.name.charAt(0)}
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">{isTurf ? currentStaff?.name : `Dr. ${currentStaff?.name}`}</h1>
+            <p className="text-sm text-blue-600 font-bold uppercase tracking-widest mt-1">{currentStaff?.roleTitle}</p>
+            <div className="flex items-center gap-3 mt-3 text-xs font-semibold text-slate-500">
+              <span className="flex items-center gap-1 text-emerald-600"><CheckCircle2 size={14} /> Active Shift</span>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Recent Bookings Queue */}
-      <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="font-extrabold text-sm text-white uppercase tracking-wider flex items-center gap-2">
-            <Calendar size={16} className="text-[#d4af37]" /> Recent Reservation Logs
-          </h2>
-          <span className="text-xs text-slate-400 font-bold">Showing {merchantBookings.length} total entries</span>
-        </div>
-        
-        <div className="overflow-x-auto border border-white/5 rounded-xl bg-white/[0.01]">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] uppercase font-bold tracking-wider text-slate-500">
-                <th className="p-3.5 pl-5">Reference</th>
-                <th className="p-3.5">Customer Name</th>
-                <th className="p-3.5">Service Requested</th>
-                <th className="p-3.5">Scheduled Slot</th>
-                <th className="p-3.5 text-right">Price</th>
-                <th className="p-3.5 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-slate-300">
-              {merchantBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-white/[0.01] transition-colors">
-                  <td className="p-3.5 pl-5 font-mono font-bold text-white">{b.ref}</td>
-                  <td className="p-3.5 font-bold text-white flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-full bg-[#8b6508]/10 border border-[#8b6508]/20 text-[#fceea7] flex items-center justify-center font-bold text-[10px]">{b.customerName[0]}</div>
-                    {b.customerName}
-                  </td>
-                  <td className="p-3.5">{b.serviceName}</td>
-                  <td className="p-3.5 text-slate-400">{b.date} · <span className="text-[#d4af37] font-medium">{b.time}</span></td>
-                  <td className="p-3.5 text-right font-bold text-white">₹{b.amount}</td>
-                  <td className="p-3.5 text-center">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9px] font-bold ${
-                      b.status === 'CONFIRMED'
-                        ? 'bg-[#8b6508]/15 text-[#fceea7] border border-[#8b6508]/30'
-                        : b.status === 'CHECKED_IN'
-                        ? 'bg-[#0a3161]/20 text-[#9cc3f5] border border-[#0a3161]/30'
-                        : b.status === 'COMPLETED'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                    }`}>
-                      {b.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {merchantBookings.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-slate-500 italic">No bookings logged for this merchant catalog yet.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="relative z-10 flex gap-4">
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-center min-w-[120px]">
+            <h3 className="text-3xl font-black text-slate-900">{activeBookings.length}</h3>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Pending</p>
+          </div>
+          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100 text-center min-w-[120px]">
+            <h3 className="text-3xl font-black text-blue-700">{completedBookings.length}</h3>
+            <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">Completed</p>
+          </div>
         </div>
       </div>
 
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+            <Clock size={18} className="text-blue-600" /> {isTurf ? 'Assigned Matches' : "Today's Appointments"}
+          </h2>
+        </div>
+        
+        <div className="space-y-4">
+          {activeBookings.map((booking, index) => (
+            <div key={booking.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col md:flex-row items-center gap-6 group cursor-pointer">
+              
+              <div className="flex flex-col items-center justify-center w-20 shrink-0 border-r border-slate-100 pr-6">
+                <span className="text-sm font-black text-slate-900 group-hover:text-blue-600 transition-colors">{booking.time.split(' ')[0]}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase">{booking.time.split(' ')[1]}</span>
+              </div>
+
+              <div className="flex-1 w-full">
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-lg font-bold text-slate-900">{booking.teamName || booking.customerName}</h3>
+                  {index === 0 && (
+                    <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-widest animate-pulse">Up Next</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 text-xs font-semibold text-slate-500">
+                  <span className="flex items-center gap-1"><User size={12} /> ID: {booking.ref}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1"><Phone size={12} /> {booking.customerPhone}</span>
+                  <span>•</span>
+                  <span className="text-[#8b6508] font-bold">{booking.serviceName}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                {booking.status === 'CONFIRMED' && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); checkInBooking(booking.id); }}
+                    className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 font-bold text-xs uppercase tracking-widest transition-all"
+                  >
+                    Start
+                  </button>
+                )}
+                {booking.status === 'CHECKED_IN' && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); completeBooking(booking.id); }}
+                    className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2"
+                  >
+                    <CheckCircle2 size={16} /> Finish
+                  </button>
+                )}
+                <button className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

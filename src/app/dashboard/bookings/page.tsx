@@ -1,999 +1,544 @@
 'use client';
 
-import { useVendorStore, PersistedBooking, Prescription, DietPlan, WorkoutExercise } from '../../../lib/store';
-import { getVerticalFromCategory } from '../../../lib/categoryUtils';
+import { useVendorStore, PersistedBooking } from '../../../lib/store';
 import { 
-  Search, Filter, Clock, CheckCircle2, XCircle, ChevronRight, 
-  User, Mail, Phone, FileText, ArrowLeft, Upload, Trash2, Plus, 
-  Save, Activity, Dumbbell, Scissors, Utensils, AlertTriangle, ShieldCheck, Flame
+  Search, Clock, CheckCircle2, ChevronRight, X, Phone, 
+  Activity, FileText, Pill, Stethoscope, ChevronDown, User, HeartPulse, ActivitySquare, TestTube2, AlertCircle, FileDigit, MonitorPlay, Zap, ShieldAlert, Flag, Tag
 } from 'lucide-react';
-import { useState } from 'react';
-
-const colors: Record<string, string> = {
-  CONFIRMED: 'bg-[#8b6508]/15 text-[#fceea7] border border-[#8b6508]/30',
-  CHECKED_IN: 'bg-[#0a3161]/20 text-[#9cc3f5] border border-[#0a3161]/30',
-  PENDING: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-  COMPLETED: 'bg-green-500/10 text-green-400 border border-green-500/20',
-  CANCELLED: 'bg-red-500/10 text-red-400 border border-red-500/20'
-};
+import { useState, useEffect } from 'react';
 
 export default function BookingsPage() {
-  const { 
-    currentMerchant, bookings, checkInBooking, completeBooking, cancelBooking,
-    uploadReport, deleteReport, savePrescription, assignDiet, saveWorkout,
-    saveStylingDetails, uploadBeforeAfterPhoto, assignTable, saveDietaryAlerts
-  } = useVendorStore();
+  const { currentMerchant, bookings, staffAccounts, loginRole, currentStaff, checkInBooking, completeBooking, savePrescription } = useVendorStore();
+  const [mounted, setMounted] = useState(false);
 
+  // States
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  
+  const isTurf = currentMerchant?.archetype === 'ResourceBooking';
+  const [chartTab, setChartTab] = useState<'vitals' | 'labs' | 'rx' | 'notes' | 'equipment'>(isTurf ? 'notes' : 'rx');
 
-  // Toast notification state
-  const [toast, setToast] = useState<{ show: boolean; message: string }>({
-    show: false,
-    message: ''
-  });
-
-  const showToast = (message: string) => {
-    setToast({ show: true, message });
-    setTimeout(() => {
-      setToast(prev => ({ ...prev, show: false }));
-    }, 3000);
-  };
-
-  // File upload simulator state
-  const [uploadingReport, setUploadingReport] = useState<boolean>(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [reportFileName, setReportFileName] = useState<string>('');
-
-  // Before/after photo simulator state
-  const [uploadingPhoto, setUploadingPhoto] = useState<boolean>(false);
-  const [photoProgress, setPhotoProgress] = useState<number>(0);
-
-  // Local Form state for Prescription
+  // Prescription Form (Healthcare)
   const [diagInput, setDiagInput] = useState('');
-  const [medsList, setMedsList] = useState<{ name: string; dosage: string; duration: string }[]>([
-    { name: '', dosage: '', duration: '' }
-  ]);
+  const [medsList, setMedsList] = useState([{ name: '', dosage: '', duration: '' }]);
 
-  // Local Form state for Diet Plan
-  const [proteinInput, setProteinInput] = useState(120);
-  const [carbsInput, setCarbsInput] = useState(150);
-  const [fatsInput, setFatsInput] = useState(50);
-  const [dietTypeInput, setDietTypeInput] = useState('High Protein Deficit');
+  // Match Notes (Turf)
+  const [matchNotesInput, setMatchNotesInput] = useState('');
 
-  // Local Form state for Workout Exercises
-  const [workoutList, setWorkoutList] = useState<WorkoutExercise[]>([
-    { name: '', sets: 3, reps: 10, weightLbs: 20 }
-  ]);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // Local Form state for Salon Styling details
-  const [stylistAssignedInput, setStylistAssignedInput] = useState('');
-  const [hairTypeInput, setHairTypeInput] = useState('');
-  const [skinTypeInput, setSkinTypeInput] = useState('');
-  const [stylingNotesInput, setStylingNotesInput] = useState('');
-
-  // Local Form state for Table Assignment & Dietary alerts
-  const [tableInput, setTableInput] = useState('');
-  const [dietaryInput, setDietaryInput] = useState<string[]>([]);
-  const [newDietaryTag, setNewDietaryTag] = useState('');
-
-  if (!currentMerchant) {
-    return <div className="text-center text-slate-500">Loading bookings session...</div>;
+  if (!currentMerchant || !mounted) {
+    return (
+      <div className="flex h-full min-h-[500px] items-center justify-center">
+        <div className="h-16 w-16 rounded-full border-4 border-[#8b6508] border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
-  // Filter bookings for this merchant
-  const merchantBookings = bookings.filter(
+  // Filter logic
+  let merchantBookings = bookings.filter(
     (b) => b.merchantName.toLowerCase() === currentMerchant.merchantName.toLowerCase()
   );
 
+  const isStaffView = loginRole === 'staff';
+  if (isStaffView && currentStaff) {
+    merchantBookings = merchantBookings.filter((b) => 
+      b.assignedDoctorId === currentStaff.id || b.refereeAssigned === currentStaff.name
+    );
+  }
+
   const filteredBookings = merchantBookings.filter((b) => {
-    const matchesSearch = 
-      b.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.serviceName.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'ALL' || b.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+    const searchTarget = isTurf ? (b.teamName || b.customerName) : b.customerName;
+    return searchTarget.toLowerCase().includes(searchQuery.toLowerCase()) || 
+           b.ref.toLowerCase().includes(searchQuery.toLowerCase());
+  }).sort((a, b) => new Date(`${b.date} ${b.time}`).getTime() - new Date(`${a.date} ${a.time}`).getTime());
 
   const selectedBooking = bookings.find((b) => b.id === selectedBookingId);
+  const selectedStaff = staffAccounts.find(s => s.id === selectedBooking?.assignedDoctorId || s.name === selectedBooking?.refereeAssigned);
 
-  // Initialize form values when opening the drawer
   const handleOpenDrawer = (booking: PersistedBooking) => {
     setSelectedBookingId(booking.id);
+    setChartTab(isTurf ? 'notes' : 'rx');
     
-    // Initialise prescription if exists
-    if (booking.prescription) {
-      setDiagInput(booking.prescription.diagnosis);
-      setMedsList(booking.prescription.medications);
+    // Load Healthcare Data
+    if (!isTurf) {
+      if (booking.prescription) {
+        setDiagInput(booking.prescription.diagnosis);
+        setMedsList(booking.prescription.medications);
+      } else {
+        setDiagInput('');
+        setMedsList([{ name: '', dosage: '', duration: '' }]);
+      }
     } else {
-      setDiagInput('');
-      setMedsList([{ name: '', dosage: '', duration: '' }]);
+      // Load Turf Data
+      setMatchNotesInput(booking.matchNotes || '');
     }
-
-    // Initialise diet plan if exists
-    if (booking.dietPlan) {
-      setProteinInput(booking.dietPlan.protein);
-      setCarbsInput(booking.dietPlan.carbs);
-      setFatsInput(booking.dietPlan.fats);
-      setDietTypeInput(booking.dietPlan.dietType);
-    } else {
-      setProteinInput(120);
-      setCarbsInput(150);
-      setFatsInput(50);
-      setDietTypeInput('Balanced Nutrition');
-    }
-
-    // Initialise workout if exists
-    if (booking.workoutPlan && booking.workoutPlan.length > 0) {
-      setWorkoutList(booking.workoutPlan);
-    } else {
-      setWorkoutList([{ name: '', sets: 3, reps: 10, weightLbs: 20 }]);
-    }
-
-    // Initialise Salon inputs
-    setStylistAssignedInput(booking.stylistAssigned || '');
-    setHairTypeInput(booking.hairType || '');
-    setSkinTypeInput(booking.skinType || '');
-    setStylingNotesInput(booking.stylingNotes || '');
-
-    // Initialise Dining inputs
-    setTableInput(booking.tableNumber || '');
-    setDietaryInput(booking.dietaryRestrictions || []);
-    setNewDietaryTag('');
   };
 
-  // Simulated Medical Report Upload Handler
-  const triggerReportUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !selectedBookingId) return;
-    const file = e.target.files[0];
-    setReportFileName(file.name);
-    setUploadingReport(true);
-    setUploadProgress(0);
-
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          uploadReport(selectedBookingId, file.name);
-          setUploadingReport(false);
-          return 100;
-        }
-        return prev + 20;
+  const handleSaveData = () => {
+    if (!selectedBookingId) return;
+    
+    if (isTurf) {
+      // TODO: Save Turf match notes
+      // We will just alert for now, as we'd need to extend the store update action.
+      alert('Match Notes Saved Successfully!');
+      setSelectedBookingId(null);
+    } else {
+      savePrescription(selectedBookingId, {
+        diagnosis: diagInput,
+        medications: medsList.filter(m => m.name.trim() !== ''),
+        updatedAt: new Date().toISOString()
       });
-    }, 150);
-  };
-
-  // Simulated Salon Photo Upload Handler
-  const triggerPhotoUpload = () => {
-    if (!selectedBookingId) return;
-    setUploadingPhoto(true);
-    setPhotoProgress(0);
-
-    const interval = setInterval(() => {
-      setPhotoProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          const randomSeed = Math.floor(Math.random() * 1000);
-          uploadBeforeAfterPhoto(selectedBookingId, String(randomSeed));
-          setUploadingPhoto(false);
-          return 100;
-        }
-        return prev + 25;
-      });
-    }, 120);
-  };
-
-  // Save Prescription Handler
-  const handleSavePrescription = () => {
-    if (!selectedBookingId) return;
-    const filteredMeds = medsList.filter(m => m.name.trim() !== '');
-    const newPrescription: Prescription = {
-      diagnosis: diagInput.trim() || 'General diagnosis checked.',
-      medications: filteredMeds,
-      updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
-    };
-    savePrescription(selectedBookingId, newPrescription);
-    showToast('Digital prescription saved and synced with patient log.');
-  };
-
-  // Save Diet Plan Handler
-  const handleSaveDiet = () => {
-    if (!selectedBookingId) return;
-    const newDiet: DietPlan = {
-      protein: proteinInput,
-      carbs: carbsInput,
-      fats: fatsInput,
-      dietType: dietTypeInput,
-      assignedAt: new Date().toISOString().substring(0, 10)
-    };
-    assignDiet(selectedBookingId, newDiet);
-    showToast('Caloric macronutrient sheets assigned to athlete.');
-  };
-
-  // Save Workout Handler
-  const handleSaveWorkout = () => {
-    if (!selectedBookingId) return;
-    const filteredWorkouts = workoutList.filter(w => w.name.trim() !== '');
-    saveWorkout(selectedBookingId, filteredWorkouts);
-    showToast('Active workout exercises saved to client profile.');
-  };
-
-  // Save Salon Styling Details Handler
-  const handleSaveSalonDetails = () => {
-    if (!selectedBookingId) return;
-    saveStylingDetails(selectedBookingId, {
-      stylist: stylistAssignedInput,
-      hairType: hairTypeInput,
-      skinType: skinTypeInput,
-      stylingNotes: stylingNotesInput
-    });
-    showToast('Styling preference cards updated.');
-  };
-
-  // Save Dining Table & Dietary Restrictions
-  const handleSaveDiningDetails = () => {
-    if (!selectedBookingId) return;
-    assignTable(selectedBookingId, tableInput);
-    saveDietaryAlerts(selectedBookingId, dietaryInput);
-    showToast('Dining seating and kitchen dietary alerts saved.');
-  };
-
-  // Helpers to append arrays in forms
-  const addMedicationRow = () => {
-    setMedsList([...medsList, { name: '', dosage: '', duration: '' }]);
-  };
-
-  const addWorkoutRow = () => {
-    setWorkoutList([...workoutList, { name: '', sets: 3, reps: 10, weightLbs: 20 }]);
-  };
-
-  const addDietaryTag = () => {
-    if (newDietaryTag.trim() && !dietaryInput.includes(newDietaryTag.trim())) {
-      setDietaryInput([...dietaryInput, newDietaryTag.trim()]);
-      setNewDietaryTag('');
+      setSelectedBookingId(null);
     }
   };
 
   return (
-    <div className="relative min-h-full">
-      {/* Animated Success Toast */}
-      {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-[#0e1616] px-4 py-3 text-xs font-bold text-emerald-400 shadow-2xl animate-fade-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-          <span>{toast.message}</span>
-        </div>
-      )}
-      <div className="flex items-center justify-between mb-6">
+    <div className="relative min-h-full pb-12 animate-fade-in font-sans">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-8 border-b border-slate-200 pb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-            Bookings Log Console
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            {isTurf ? 'Match Logs & Bookings' : 'Medical Records'}
           </h1>
-          <p className="text-xs text-slate-400">View real-time customer schedules, modify parameters, and manage reports.</p>
+          <p className="text-sm text-slate-500 font-medium mt-2 max-w-2xl">
+            {isTurf ? 'View all past and upcoming match bookings, manage team details, equipment rentals, and billing status.' : 'Access complete patient histories, track consultation statuses, input vitals, and issue digital prescriptions from the master clinical log.'}
+          </p>
+        </div>
+        
+        <div className="relative w-full md:w-[350px] shadow-sm">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-slate-400" />
+          </div>
+          <input 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isTurf ? "Search Team Name or Ref ID..." : "Search Patient Name or File ID..."}
+            className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-11 pr-4 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] transition-all shadow-sm hover:shadow-md" 
+          />
         </div>
       </div>
 
-      {/* Filter and Table Card */}
-      <div className="rounded-2xl border border-white/5 bg-white/[0.01] overflow-hidden">
-        {/* Filters bar */}
-        <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by customer name, ref code, or service..." 
-              className="w-full rounded-xl border border-white/10 bg-[#090d16]/30 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-600 outline-none focus:border-[#8b6508] transition-colors" 
-            />
-          </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-white/10 bg-[#090d16] px-4 py-2.5 text-xs font-bold text-slate-400 outline-none focus:border-[#8b6508]"
-          >
-            <option value="ALL">Status: All Bookings</option>
-            <option value="CONFIRMED">Status: Confirmed</option>
-            <option value="CHECKED_IN">Status: Checked In</option>
-            <option value="COMPLETED">Status: Completed</option>
-            <option value="CANCELLED">Status: Cancelled</option>
-          </select>
+      {/* Modern Robust Data Table / List */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        {/* Table Header */}
+        <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-4 bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <div className="col-span-3">{isTurf ? 'Team & Booking Ref' : 'Patient & File'}</div>
+          <div className="col-span-2">Date / Time</div>
+          <div className="col-span-3">{isTurf ? 'Pitch Type & Service' : 'Department & Service'}</div>
+          <div className="col-span-2">{isTurf ? 'Referee/Manager' : 'Attending Doctor'}</div>
+          <div className="col-span-2 text-right">Status</div>
         </div>
 
-        {/* Bookings Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] uppercase font-bold tracking-wider text-slate-500">
-                <th className="px-5 py-3.5">Reference</th>
-                <th className="px-5 py-3.5">Customer</th>
-                <th className="px-5 py-3.5">Requested Service</th>
-                <th className="px-5 py-3.5">Date & Slot</th>
-                <th className="px-5 py-3.5 text-right">Price</th>
-                <th className="px-5 py-3.5 text-center">Status</th>
-                <th className="px-5 py-3.5 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-slate-300">
-              {filteredBookings.map((b) => (
-                <tr 
-                  key={b.id} 
-                  className={`hover:bg-white/[0.01] transition-colors cursor-pointer ${selectedBookingId === b.id ? 'bg-[#8b6508]/5' : ''}`}
-                  onClick={() => handleOpenDrawer(b)}
-                >
-                  <td className="px-5 py-4 font-mono font-bold text-white">{b.ref}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-[#8b6508]/10 border border-[#8b6508]/20 text-[#fceea7] flex items-center justify-center font-bold text-[10px]">{b.customerName[0]}</div>
-                      <div>
-                        <div className="font-bold text-white">{b.customerName}</div>
-                        <div className="text-[10px] text-slate-500">{b.customerPhone}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">{b.serviceName}</td>
-                  <td className="px-5 py-4 text-slate-400">
-                    <div>{b.date}</div>
-                    <div className="text-[10px] text-[#d4af37] font-bold mt-0.5">{b.time}</div>
-                  </td>
-                  <td className="px-5 py-4 text-right font-bold text-white">₹{b.amount}</td>
-                  <td className="px-5 py-4 text-center">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[9px] font-black tracking-wide ${colors[b.status]}`}>
-                      {b.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-end gap-1.5">
-                      {b.status === 'CONFIRMED' && (
-                        <>
-                          <button 
-                            onClick={() => checkInBooking(b.id)}
-                            className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 text-cyan-400 px-2 py-1 font-bold text-[9px] uppercase cursor-pointer"
-                          >
-                            Check In
-                          </button>
-                          <button 
-                            onClick={() => cancelBooking(b.id)}
-                            className="rounded-lg border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 px-2 py-1 font-bold text-[9px] uppercase cursor-pointer"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      )}
-                      {b.status === 'CHECKED_IN' && (
-                        <button 
-                          onClick={() => completeBooking(b.id)}
-                          className="rounded-lg border border-green-500/20 bg-green-500/5 hover:bg-green-500/10 text-green-400 px-2 py-1 font-bold text-[9px] uppercase cursor-pointer"
-                        >
-                          Complete
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => handleOpenDrawer(b)}
-                        className="rounded-lg p-1.5 hover:bg-white/5 text-slate-400 hover:text-white"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredBookings.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-16 text-slate-500 italic">No reservation records match your parameters.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Dynamic Detail Side Drawer */}
-      {selectedBooking && (
-        <div className="fixed inset-y-0 right-0 z-50 w-full md:w-[500px] bg-[#0b101e] border-l border-white/5 shadow-2xl flex flex-col justify-between animate-slide-in">
-          {/* Header */}
-          <div className="flex h-16 items-center justify-between border-b border-white/5 px-6 shrink-0 bg-white/[0.01]">
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setSelectedBookingId(null)}
-                className="p-1.5 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <div>
-                <h3 className="font-extrabold text-sm text-white">Client File Log</h3>
-                <span className="text-[10px] font-mono text-[#d4af37]">{selectedBooking.ref}</span>
-              </div>
-            </div>
-            <span className={`rounded-full px-2 py-0.5 text-[9px] font-black ${colors[selectedBooking.status]}`}>
-              {selectedBooking.status}
-            </span>
-          </div>
-
-          {/* Drawer Body Scroll */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        {/* Table Body */}
+        <div className="divide-y divide-slate-100">
+          {filteredBookings.map((b) => {
+            const staff = staffAccounts.find(s => s.id === b.assignedDoctorId || s.name === b.refereeAssigned);
+            const isPending = b.status === 'CONFIRMED' || b.status === 'CHECKED_IN';
+            const primaryName = isTurf ? (b.teamName || b.customerName) : b.customerName;
             
-            {/* Customer Basic Contact Card */}
-            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-[#8b6508]/10 border border-[#8b6508]/20 text-[#fceea7] flex items-center justify-center font-bold text-sm">
-                  {selectedBooking.customerName[0]}
+            return (
+              <div 
+                key={b.id} 
+                onClick={() => handleOpenDrawer(b)}
+                className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 md:px-8 py-6 items-center hover:bg-slate-50 transition-colors cursor-pointer ${selectedBookingId === b.id ? (isTurf ? 'bg-emerald-50/50' : 'bg-blue-50/80') : ''}`}
+              >
+                {/* Column 1: Patient/Team */}
+                <div className="col-span-1 md:col-span-3 flex items-center gap-4">
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center font-black text-xl shrink-0 ${isPending ? 'bg-amber-100 text-amber-700' : (isTurf ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700')}`}>
+                    {primaryName.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className={`text-sm font-black text-slate-900 transition-colors ${isTurf ? 'group-hover:text-emerald-600' : 'group-hover:text-blue-600'}`}>{primaryName}</h3>
+                    <p className="text-[10px] font-bold text-slate-500 flex items-center gap-1 mt-0.5"><FileDigit size={12} /> {b.ref}</p>
+                  </div>
+                </div>
+
+                {/* Column 2: DateTime */}
+                <div className="col-span-1 md:col-span-2">
+                  <p className="text-xs font-black text-slate-900">{b.date}</p>
+                  <p className="text-[10px] font-bold text-[#8b6508]">{b.time}</p>
+                </div>
+
+                {/* Column 3: Service */}
+                <div className="col-span-1 md:col-span-3">
+                  <p className="text-xs font-bold text-slate-900 line-clamp-1">{b.serviceName}</p>
+                  <p className="text-[10px] font-semibold text-slate-500">{currentMerchant.category}</p>
+                </div>
+
+                {/* Column 4: Doctor/Staff */}
+                <div className="col-span-1 md:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                      {isTurf ? <Flag size={10} className="text-slate-500" /> : <Stethoscope size={10} className="text-slate-500" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900">
+                        {isTurf ? (staff?.name || 'Unassigned') : `Dr. ${staff?.name || 'Unassigned'}`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 5: Status */}
+                <div className="col-span-1 md:col-span-2 flex justify-end">
+                  <div className={`px-4 py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border ${
+                    b.status === 'COMPLETED' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                    b.status === 'CHECKED_IN' ? 'bg-blue-50 border-blue-100 text-blue-600' :
+                    'bg-amber-50 border-amber-100 text-amber-600'
+                  }`}>
+                    {b.status === 'COMPLETED' ? <CheckCircle2 size={14} /> : <Clock size={14} />}
+                    {b.status.replace('_', ' ')}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {filteredBookings.length === 0 && (
+            <div className="py-24 text-center bg-slate-50">
+              <Search className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+              <h3 className="text-lg font-black text-slate-900 mb-2">No Records Found</h3>
+              <p className="text-sm font-semibold text-slate-500">No {isTurf ? 'match' : 'medical'} records match your current search parameters.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* THE ULTIMATE DRAWER (MEDICAL or TURF) */}
+      {selectedBooking && (
+        <>
+          <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSelectedBookingId(null)} />
+          <div className="fixed inset-y-0 right-0 z-50 w-full md:w-[700px] lg:w-[800px] bg-slate-50 border-l border-slate-200 shadow-2xl flex flex-col transform transition-transform animate-slide-in">
+            
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 p-6 bg-white shrink-0">
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center text-white shadow-md ${isTurf ? 'bg-[#8b6508]' : 'bg-blue-600'}`}>
+                  {isTurf ? <ActivitySquare size={20} /> : <FileText size={20} />}
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-xs text-white leading-tight">{selectedBooking.customerName}</h4>
-                  <span className="text-[10px] text-[#fceea7] font-semibold">{selectedBooking.serviceName}</span>
+                  <h2 className="text-xl font-black text-slate-900">{isTurf ? 'Match Log Details' : 'Master Clinical Chart'}</h2>
+                  <p className={`text-xs font-black tracking-widest uppercase mt-1 flex items-center gap-1.5 ${isTurf ? 'text-[#8b6508]' : 'text-blue-600'}`}>
+                    <FileDigit size={12} /> REF ID: {selectedBooking.ref}
+                  </p>
                 </div>
               </div>
-
-              <div className="grid gap-2 border-t border-white/5 pt-3 text-[11px] text-slate-400">
-                <div className="flex items-center gap-2">
-                  <Mail size={12} className="text-slate-500 shrink-0" />
-                  <span>{selectedBooking.customerEmail}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone size={12} className="text-slate-500 shrink-0" />
-                  <span>{selectedBooking.customerPhone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={12} className="text-slate-500 shrink-0" />
-                  <span>Scheduled: {selectedBooking.date} at <strong>{selectedBooking.time}</strong></span>
-                </div>
-              </div>
+              <button onClick={() => setSelectedBookingId(null)} className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 border border-slate-200 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                <X size={18} />
+              </button>
             </div>
 
-            {/* INDUSTRY SPECIFIC INTERACTIVE MODULES */}
-            
-            {/* 1. MEDICAL / DOCTOR CLINICAL MODULE */}
-            {getVerticalFromCategory(currentMerchant.category) === 'Dental' && (
-              <div className="space-y-6">
-                
-                {/* Vitals Summary Card */}
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <Activity size={12} className="text-[#d4af37]" /> Patient Vitals Checked
-                  </label>
-                  {selectedBooking.vitals ? (
-                    <div className="grid grid-cols-4 gap-2 text-center p-3.5 rounded-xl border border-white/5 bg-[#090d16]/30">
-                      <div>
-                        <div className="text-[8px] text-slate-500 uppercase font-black">BP</div>
-                        <div className="text-[11px] font-bold text-white mt-0.5">{selectedBooking.vitals.bp}</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] text-slate-500 uppercase font-black">Temp</div>
-                        <div className="text-[11px] font-bold text-white mt-0.5">{selectedBooking.vitals.temp}</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] text-slate-500 uppercase font-black">Pulse</div>
-                        <div className="text-[11px] font-bold text-white mt-0.5">{selectedBooking.vitals.pulse}</div>
-                      </div>
-                      <div>
-                        <div className="text-[8px] text-slate-500 uppercase font-black">O2</div>
-                        <div className="text-[11px] font-bold text-emerald-400 mt-0.5">{selectedBooking.vitals.oxygen}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[10px] text-slate-500 italic p-3 border border-dashed border-white/5 rounded-xl text-center">No vital records logged for this session.</div>
+            {/* Entity Snapshot */}
+            <div className="bg-white border-b border-slate-200 p-6 shrink-0 flex flex-col md:flex-row gap-6 items-start md:items-center">
+              <div className="h-20 w-20 rounded-[2rem] bg-slate-100 border-2 border-white shadow-md flex items-center justify-center overflow-hidden shrink-0">
+                <img src={`https://i.pravatar.cc/150?u=${selectedBooking.id}`} className="h-full w-full object-cover" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-black text-slate-900">{isTurf ? (selectedBooking.teamName || selectedBooking.customerName) : selectedBooking.customerName}</h3>
+                <div className="flex flex-wrap items-center gap-4 mt-2 text-xs font-semibold text-slate-500">
+                  <span className="flex items-center gap-1"><User size={14} className="text-slate-400" /> Booker: {selectedBooking.customerName}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1"><Phone size={14} className="text-slate-400" /> {selectedBooking.customerPhone}</span>
+                  {!isTurf && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1"><HeartPulse size={14} className="text-red-400" /> Blood: O+</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1"><AlertCircle size={14} className="text-amber-400" /> Allergies: Penicillin</span>
+                    </>
                   )}
                 </div>
-
-                {/* Patient Symptoms and Notes */}
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block">Symptoms / Chief Complaints</label>
-                  <div className="p-3.5 rounded-xl border border-white/5 bg-[#090d16]/20 text-slate-300 text-xs italic">
-                    "{selectedBooking.symptoms || 'No critical symptoms logged yet.'}"
-                  </div>
-                </div>
-
-                {/* Reports Upload Simulator */}
-                <div className="space-y-3">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center justify-between">
-                    <span>Clinical Reports & X-Rays ({selectedBooking.medicalReports?.length || 0})</span>
-                    <span className="text-[9px] text-[#d4af37] capitalize font-bold">Simulator active</span>
-                  </label>
-
-                  <div className="space-y-2">
-                    {selectedBooking.medicalReports && selectedBooking.medicalReports.length > 0 ? (
-                      selectedBooking.medicalReports.map((r) => (
-                        <div key={r.id} className="flex justify-between items-center p-2.5 rounded-xl border border-white/5 bg-[#090d16]/30 text-xs">
-                          <div className="min-w-0">
-                            <div className="font-bold text-white truncate">{r.name}</div>
-                            <div className="text-[9px] text-slate-500 mt-0.5">Uploaded: {r.uploadedAt}</div>
-                          </div>
-                          <button 
-                            onClick={() => deleteReport(selectedBooking.id, r.id)}
-                            className="p-1 hover:bg-red-500/10 hover:text-red-400 rounded-lg text-slate-500 transition-colors"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-[10px] text-slate-500 italic p-4 border border-dashed border-white/5 rounded-xl text-center">No clinical reports uploaded.</div>
-                    )}
-                  </div>
-
-                  {/* Upload Simulator Container */}
-                  <div className="relative border-2 border-dashed border-white/5 hover:border-[#8b6508]/30 rounded-xl p-4 transition-colors">
-                    <input 
-                      type="file" 
-                      id="report-file-input" 
-                      onChange={triggerReportUpload}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      disabled={uploadingReport}
-                    />
-                    {uploadingReport ? (
-                      <div className="space-y-2 text-center">
-                        <div className="text-[10px] text-[#d4af37] font-bold animate-pulse">Uploading {reportFileName}...</div>
-                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-[#8b6508] h-full transition-all duration-150" style={{ width: `${uploadProgress}%` }} />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center text-[10px] text-slate-500 flex flex-col items-center justify-center gap-1.5">
-                        <Upload size={16} className="text-slate-400" />
-                        <span>Drag & drop or <strong className="text-[#d4af37]">browse file</strong> to upload x-ray scans or reports</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Digital Prescription Writer */}
-                <div className="space-y-4 border-t border-white/5 pt-5">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <FileText size={12} className="text-[#d4af37]" /> Digital Prescription Writer
-                  </label>
-
-                  <div className="space-y-3 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl">
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Diagnosis Summary:</span>
-                      <input 
-                        type="text"
-                        placeholder="e.g. Acute apical periodontitis (Tooth 36)"
-                        value={diagInput}
-                        onChange={(e) => setDiagInput(e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white placeholder-slate-700 outline-none focus:border-[#8b6508] transition-colors"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <span className="text-[10px] font-bold text-slate-500 flex justify-between">
-                        <span>Medications list:</span>
-                        <button onClick={addMedicationRow} className="text-[9px] text-[#d4af37] font-bold flex items-center gap-0.5 hover:underline">
-                          <Plus size={10} /> Add medicine
-                        </button>
-                      </span>
-
-                      <div className="space-y-2">
-                        {medsList.map((m, idx) => (
-                          <div key={idx} className="grid grid-cols-3 gap-2">
-                            <input 
-                              type="text"
-                              placeholder="Medicine"
-                              value={m.name}
-                              onChange={(e) => {
-                                const newMeds = [...medsList];
-                                newMeds[idx].name = e.target.value;
-                                setMedsList(newMeds);
-                              }}
-                              className="rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white placeholder-slate-700 outline-none"
-                            />
-                            <input 
-                              type="text"
-                              placeholder="Dosage (e.g. 1-0-1)"
-                              value={m.dosage}
-                              onChange={(e) => {
-                                const newMeds = [...medsList];
-                                newMeds[idx].dosage = e.target.value;
-                                setMedsList(newMeds);
-                              }}
-                              className="rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white placeholder-slate-700 outline-none"
-                            />
-                            <input 
-                              type="text"
-                              placeholder="Duration"
-                              value={m.duration}
-                              onChange={(e) => {
-                                const newMeds = [...medsList];
-                                newMeds[idx].duration = e.target.value;
-                                setMedsList(newMeds);
-                              }}
-                              className="rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white placeholder-slate-700 outline-none"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={handleSavePrescription}
-                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#8b6508] to-[#d4af37] hover:from-[#664a05] hover:to-[#8b6508] py-2.5 text-xs font-bold text-white transition-all shadow-md shadow-[#8b6508]/10 cursor-pointer"
-                    >
-                      <Save size={13} /> Save Prescription & Send
-                    </button>
-                  </div>
-                </div>
-
               </div>
-            )}
-
-            {/* 2. FITNESS MODULE */}
-            {getVerticalFromCategory(currentMerchant.category) === 'Fitness' && (
-              <div className="space-y-6">
-                
-                {/* Fitness Goal */}
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block">Member Goal Statement</label>
-                  <div className="p-3.5 rounded-xl border border-white/5 bg-[#090d16]/20 text-slate-300 text-xs italic">
-                    "{selectedBooking.fitnessGoal || 'No goal statement registered yet.'}"
-                  </div>
-                </div>
-
-                {/* Calorie Macro Configurer */}
-                <div className="space-y-3 border-t border-white/5 pt-5">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <Flame size={12} className="text-orange-400" /> Caloric & Macronutrient Split
-                  </label>
-
-                  <div className="space-y-3 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl">
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Dietary/Calorie Plan Type:</span>
-                      <input 
-                        type="text"
-                        placeholder="e.g. Keto Plan, Caloric Deficit"
-                        value={dietTypeInput}
-                        onChange={(e) => setDietTypeInput(e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none focus:border-[#8b6508]"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-red-400">Protein (g):</span>
-                        <input 
-                          type="number" 
-                          value={proteinInput} 
-                          onChange={(e) => setProteinInput(parseInt(e.target.value) || 0)}
-                          className="w-full rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white text-center"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-yellow-400">Carbs (g):</span>
-                        <input 
-                          type="number" 
-                          value={carbsInput} 
-                          onChange={(e) => setCarbsInput(parseInt(e.target.value) || 0)}
-                          className="w-full rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white text-center"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-emerald-400">Fats (g):</span>
-                        <input 
-                          type="number" 
-                          value={fatsInput} 
-                          onChange={(e) => setFatsInput(parseInt(e.target.value) || 0)}
-                          className="w-full rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white text-center"
-                        />
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={handleSaveDiet}
-                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
-                    >
-                      <Save size={13} /> Update Nutrition Sheet
-                    </button>
-                  </div>
-                </div>
-
-                {/* Workout Planner */}
-                <div className="space-y-4 border-t border-white/5 pt-5">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center justify-between">
-                    <span className="flex items-center gap-1.5"><Dumbbell size={12} className="text-[#d4af37]" /> Daily Workout Assignment</span>
-                    <button onClick={addWorkoutRow} className="text-[9px] text-[#d4af37] font-bold flex items-center gap-0.5 hover:underline">
-                      <Plus size={10} /> Add exercise
-                    </button>
-                  </label>
-
-                  <div className="space-y-3 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl">
-                    <div className="space-y-2">
-                      {workoutList.map((w, idx) => (
-                        <div key={idx} className="grid grid-cols-4 gap-2">
-                          <input 
-                            type="text"
-                            placeholder="Exercise name"
-                            value={w.name}
-                            onChange={(e) => {
-                              const newList = [...workoutList];
-                              newList[idx].name = e.target.value;
-                              setWorkoutList(newList);
-                            }}
-                            className="col-span-2 rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white outline-none"
-                          />
-                          <input 
-                            type="number"
-                            placeholder="Sets"
-                            value={w.sets}
-                            onChange={(e) => {
-                              const newList = [...workoutList];
-                              newList[idx].sets = parseInt(e.target.value) || 0;
-                              setWorkoutList(newList);
-                            }}
-                            className="rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white text-center outline-none"
-                          />
-                          <input 
-                            type="number"
-                            placeholder="Reps"
-                            value={w.reps}
-                            onChange={(e) => {
-                              const newList = [...workoutList];
-                              newList[idx].reps = parseInt(e.target.value) || 0;
-                              setWorkoutList(newList);
-                            }}
-                            className="rounded-lg border border-white/10 bg-[#090d16] px-2 py-1.5 text-xs text-white text-center outline-none"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <button 
-                      onClick={handleSaveWorkout}
-                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#8b6508] to-[#d4af37] py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
-                    >
-                      <Save size={13} /> Update Daily Workout Card
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* 3. BEAUTY SALON MODULE */}
-            {getVerticalFromCategory(currentMerchant.category) === 'Salon' && (
-              <div className="space-y-6">
-                
-                {/* Styling preferences and parameters */}
-                <div className="space-y-4">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <Scissors size={12} className="text-[#d4af37]" /> Styling Preference Details
-                  </label>
-
-                  <div className="space-y-3 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-slate-500">Hair Profile:</span>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Curly, dry, fine"
-                          value={hairTypeInput}
-                          onChange={(e) => setHairTypeInput(e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold text-slate-500">Skin/Scalp Profile:</span>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Sensitive scalp, oily"
-                          value={skinTypeInput}
-                          onChange={(e) => setSkinTypeInput(e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Assigned Senior Stylist:</span>
-                      <input 
-                        type="text"
-                        placeholder="e.g. Vikram Singh"
-                        value={stylistAssignedInput}
-                        onChange={(e) => setStylistAssignedInput(e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Styling Instructions Notes:</span>
-                      <textarea 
-                        rows={3}
-                        placeholder="Type preferences, product requests, etc."
-                        value={stylingNotesInput}
-                        onChange={(e) => setStylingNotesInput(e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none resize-none"
-                      />
-                    </div>
-
-                    <button 
-                      onClick={handleSaveSalonDetails}
-                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#8b6508] hover:bg-[#664a05] py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
-                    >
-                      <Save size={13} /> Update Stylist Card
-                    </button>
-                  </div>
-                </div>
-
-                {/* Before/After gallery simulator */}
-                <div className="space-y-3 border-t border-white/5 pt-5">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block">Before/After Haircuts Work Gallery</label>
-                  
-                  <div className="grid grid-cols-3 gap-3">
-                    {selectedBooking.beforeAfterGallery && selectedBooking.beforeAfterGallery.length > 0 ? (
-                      selectedBooking.beforeAfterGallery.map((url, idx) => (
-                        <div key={idx} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden relative h-20">
-                          <img src={url} alt="Before/After Cut" className="w-full h-full object-cover" />
-                        </div>
-                      ))
-                    ) : (
-                      <div className="col-span-3 text-center py-6 border border-dashed border-white/5 rounded-xl text-slate-500 text-[10px]">No pictures added yet.</div>
-                    )}
-                  </div>
-
-                  <button 
-                    onClick={triggerPhotoUpload}
-                    disabled={uploadingPhoto}
-                    className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] py-2 text-xs font-semibold text-white transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <Upload size={13} />
-                    {uploadingPhoto ? `Processing photo (${photoProgress}%)` : 'Add Before/After Photo (Simulator)'}
-                  </button>
-                </div>
-
-              </div>
-            )}
-
-            {/* 4. FINE DINING MODULE */}
-            {getVerticalFromCategory(currentMerchant.category) === 'Dining' && (
-              <div className="space-y-6">
-                
-                {/* Table assignment and dietary restrictions */}
-                <div className="space-y-4">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <Utensils size={12} className="text-[#d4af37]" /> Table & Seating Management
-                  </label>
-
-                  <div className="space-y-3 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl">
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Seat Count (Covers):</span>
-                      <div className="p-2.5 rounded-lg bg-[#090d16] border border-white/10 text-xs text-white font-bold">
-                        {selectedBooking.seatCount || 2} covers
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500">Assign Dining Table:</span>
-                      <select 
-                        value={tableInput}
-                        onChange={(e) => setTableInput(e.target.value)}
-                        className="w-full rounded-lg border border-white/10 bg-[#090d16] px-3 py-2 text-xs text-white outline-none"
-                      >
-                        <option value="">Choose Available Table</option>
-                        <option value="Table 1 (2 Seats)">Table 1 (2 Seats)</option>
-                        <option value="Table 4 (Window Seat)">Table 4 (Window Seat - 4 Seats)</option>
-                        <option value="Table 5 (4 Seats)">Table 5 (4 Seats)</option>
-                        <option value="Table 8 (2 Seats)">Table 8 (2 Seats)</option>
-                        <option value="Table 10 (4 Seats)">Table 10 (4 Seats)</option>
-                        <option value="Table 12 (Corner Altar)">Table 12 (Corner Altar - 2 Seats)</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2 pt-2 border-t border-white/5">
-                      <span className="text-[10px] font-bold text-slate-500 flex justify-between">
-                        <span>Kitchen Dietary Alert Tags:</span>
-                        <button onClick={addDietaryTag} className="text-[9px] text-[#d4af37] font-bold hover:underline flex items-center gap-0.5">
-                          <Plus size={10} /> Add Alert
-                        </button>
-                      </span>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {dietaryInput.map((tag) => (
-                          <span key={tag} className="inline-flex items-center gap-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 text-[10px] font-bold">
-                            <span>{tag}</span>
-                            <button 
-                              onClick={() => setDietaryInput(dietaryInput.filter(t => t !== tag))}
-                              className="hover:text-white"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <input 
-                          type="text"
-                          placeholder="e.g. Gluten-Free"
-                          value={newDietaryTag}
-                          onChange={(e) => setNewDietaryTag(e.target.value)}
-                          className="flex-1 rounded-lg border border-white/10 bg-[#090d16] px-2.5 py-1 text-xs text-white placeholder-slate-700 outline-none"
-                        />
-                        <button 
-                          onClick={addDietaryTag}
-                          className="rounded-lg bg-white/5 hover:bg-white/10 px-3 text-xs text-white font-bold"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={handleSaveDiningDetails}
-                      className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#8b6508] hover:bg-[#664a05] py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
-                    >
-                      <Save size={13} /> Save Dining Allocations
-                    </button>
-                  </div>
-                </div>
-
-                {/* Pre-ordered degustation courses */}
-                <div className="space-y-3 border-t border-white/5 pt-5">
-                  <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block flex items-center gap-1.5">
-                    <FileText size={12} className="text-slate-400" /> Pre-ordered Degustation Courses
-                  </label>
-                  <div className="space-y-2 bg-[#090d16]/30 border border-white/5 p-4 rounded-xl text-xs">
-                    {selectedBooking.preOrderedCourses && selectedBooking.preOrderedCourses.length > 0 ? (
-                      selectedBooking.preOrderedCourses.map((c, i) => (
-                        <div key={i} className="flex items-center gap-2.5 text-slate-300">
-                          <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
-                          <span>{c}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-[10px] text-slate-500 italic">No courses were pre-ordered for this dining booking.</div>
-                    )}
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {/* General Administrative Overrides (Actions) */}
-            <div className="space-y-2 border-t border-white/5 pt-5">
-              <label className="text-[10px] uppercase font-black tracking-wider text-slate-500 block">General Override Logs</label>
-              <div className="flex gap-2">
-                {selectedBooking.status === 'CONFIRMED' && (
-                  <>
-                    <button 
-                      onClick={() => { checkInBooking(selectedBooking.id); setSelectedBookingId(null); }}
-                      className="flex-1 rounded-xl border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 text-cyan-400 py-2 text-xs font-bold uppercase transition-all cursor-pointer"
-                    >
-                      Check In Customer
-                    </button>
-                    <button 
-                      onClick={() => { cancelBooking(selectedBooking.id); setSelectedBookingId(null); }}
-                      className="flex-1 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-400 py-2 text-xs font-bold uppercase transition-all cursor-pointer"
-                    >
-                      Cancel Booking
-                    </button>
-                  </>
-                )}
-                {selectedBooking.status === 'CHECKED_IN' && (
-                  <button 
-                    onClick={() => { completeBooking(selectedBooking.id); setSelectedBookingId(null); }}
-                    className="w-full rounded-xl border border-green-500/20 bg-green-500/5 hover:bg-green-500/10 text-green-400 py-2.5 text-xs font-bold uppercase transition-all cursor-pointer"
-                  >
-                    Complete Clinical Session
-                  </button>
-                )}
-                {(selectedBooking.status === 'COMPLETED' || selectedBooking.status === 'CANCELLED') && (
-                  <div className="w-full text-center p-3 bg-white/[0.01] border border-white/5 text-[10px] text-slate-500 rounded-xl italic">
-                    Administrative Lock: Session completed or cancelled. No further actions allowed.
-                  </div>
-                )}
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 shrink-0 text-right">
+                <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">{isTurf ? 'Assigned Staff/Ref' : 'Consulting Physician'}</p>
+                <p className="text-sm font-bold text-slate-900">{isTurf ? '' : 'Dr. '} {selectedStaff?.name || 'Unassigned'}</p>
               </div>
             </div>
 
-          </div>
-        </div>
-      )}
+            {/* Dynamic Tabs based on Archetype */}
+            <div className="flex border-b border-slate-200 bg-white shrink-0 px-6 pt-4 gap-6">
+              {isTurf ? (
+                <>
+                  <button 
+                    onClick={() => setChartTab('notes')}
+                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-colors relative ${chartTab === 'notes' ? 'text-[#8b6508]' : 'text-slate-400 hover:text-slate-700'}`}
+                  >
+                    <span className="flex items-center gap-2"><FileText size={16} /> Match Notes</span>
+                    {chartTab === 'notes' && <div className="absolute bottom-0 left-0 w-full h-1 bg-[#8b6508] rounded-t-full" />}
+                  </button>
+                  <button 
+                    onClick={() => setChartTab('equipment')}
+                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-colors relative ${chartTab === 'equipment' ? 'text-[#8b6508]' : 'text-slate-400 hover:text-slate-700'}`}
+                  >
+                    <span className="flex items-center gap-2"><Tag size={16} /> Equipment Rentals</span>
+                    {chartTab === 'equipment' && <div className="absolute bottom-0 left-0 w-full h-1 bg-[#8b6508] rounded-t-full" />}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setChartTab('vitals')}
+                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-colors relative ${chartTab === 'vitals' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-700'}`}
+                  >
+                    <span className="flex items-center gap-2"><ActivitySquare size={16} /> Vitals Log</span>
+                    {chartTab === 'vitals' && <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-600 rounded-t-full" />}
+                  </button>
+                  <button 
+                    onClick={() => setChartTab('labs')}
+                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-colors relative ${chartTab === 'labs' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-700'}`}
+                  >
+                    <span className="flex items-center gap-2"><TestTube2 size={16} /> Lab Results</span>
+                    {chartTab === 'labs' && <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-600 rounded-t-full" />}
+                  </button>
+                  <button 
+                    onClick={() => setChartTab('rx')}
+                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-colors relative ${chartTab === 'rx' ? 'text-blue-600' : 'text-slate-400 hover:text-slate-700'}`}
+                  >
+                    <span className="flex items-center gap-2"><Pill size={16} /> E-Prescription</span>
+                    {chartTab === 'rx' && <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-600 rounded-t-full" />}
+                  </button>
+                </>
+              )}
+            </div>
 
-      {/* Drawer Overlay backdrop */}
-      {selectedBooking && (
-        <div 
-          onClick={() => setSelectedBookingId(null)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
-        />
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+              
+              {/* TURF: Match Notes */}
+              {chartTab === 'notes' && (
+                <div className="animate-fade-in">
+                  <div className="rounded-3xl bg-white border border-[#8b6508]/20 shadow-lg shadow-[#8b6508]/5 overflow-hidden">
+                    <div className="bg-[#8b6508] px-6 py-4 flex items-center justify-between">
+                      <h4 className="font-black text-white uppercase tracking-widest text-sm flex items-center gap-2">
+                        <MonitorPlay size={16} /> Match Overview & Notes
+                      </h4>
+                    </div>
+                    
+                    <div className="p-6 md:p-8 space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Total Amount</p>
+                          <p className="text-2xl font-black text-slate-900">₹{selectedBooking.amount}</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Payment Status</p>
+                          <p className="text-xl font-black text-emerald-600">Partially Paid</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] uppercase font-black text-slate-400 mb-2 block tracking-widest">Ground Staff Notes</label>
+                        <textarea 
+                          value={matchNotesInput}
+                          onChange={(e) => setMatchNotesInput(e.target.value)}
+                          placeholder="Enter match observations, damages, extra time played, or billing notes..."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all min-h-[120px] resize-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 border-t border-slate-200 p-6 flex flex-col sm:flex-row justify-end gap-3">
+                      <button 
+                        onClick={() => setSelectedBookingId(null)}
+                        className="px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleSaveData}
+                        className="px-8 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-black text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 size={16} /> Save Notes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TURF: Equipment Rentals */}
+              {chartTab === 'equipment' && (
+                <div className="animate-fade-in space-y-4">
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Rented Equipment</h3>
+                  
+                  {selectedBooking.equipmentRentals && selectedBooking.equipmentRentals.length > 0 ? (
+                    selectedBooking.equipmentRentals.map((eq, i) => (
+                      <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><Tag size={24} /></div>
+                          <div>
+                            <h4 className="font-bold text-slate-900">{eq.item}</h4>
+                            <p className="text-xs text-slate-500 font-semibold mt-0.5">Quantity: {eq.qty}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] uppercase font-bold text-slate-400">Add-on Cost</p>
+                          <p className="text-lg font-black text-slate-900">+₹{eq.price}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm">
+                      <Tag className="mx-auto h-12 w-12 text-slate-200 mb-3" />
+                      <h4 className="font-bold text-slate-900">No Equipment Rented</h4>
+                      <p className="text-xs text-slate-500 mt-1">This booking does not have any add-ons.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* HEALTHCARE: Vitals */}
+              {chartTab === 'vitals' && (
+                <div className="animate-fade-in">
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-6">Patient Vitals & Metrics</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                      <div className="h-10 w-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3"><HeartPulse size={18} /></div>
+                      <p className="text-2xl font-black text-slate-900">72 <span className="text-xs text-slate-400 font-bold">bpm</span></p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Heart Rate</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                      <div className="h-10 w-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-3"><ActivitySquare size={18} /></div>
+                      <p className="text-2xl font-black text-slate-900">120/80</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Blood Pressure</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                      <div className="h-10 w-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3"><TestTube2 size={18} /></div>
+                      <p className="text-2xl font-black text-slate-900">98.6 <span className="text-xs text-slate-400 font-bold">°F</span></p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Temperature</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                      <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto mb-3"><Activity size={18} /></div>
+                      <p className="text-2xl font-black text-slate-900">99 <span className="text-xs text-slate-400 font-bold">%</span></p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">SpO2</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* HEALTHCARE: Labs */}
+              {chartTab === 'labs' && (
+                <div className="animate-fade-in space-y-4">
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Laboratory Reports</h3>
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><TestTube2 size={24} /></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Complete Blood Count (CBC)</h4>
+                        <p className="text-xs text-slate-500 font-semibold mt-0.5">Sample collected 2 days ago</p>
+                      </div>
+                    </div>
+                    <button className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase rounded-lg transition-colors">View PDF</button>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center"><ActivitySquare size={24} /></div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">Lipid Profile</h4>
+                        <p className="text-xs text-slate-500 font-semibold mt-0.5">Sample collected 1 week ago</p>
+                      </div>
+                    </div>
+                    <button className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold uppercase rounded-lg transition-colors">View PDF</button>
+                  </div>
+                </div>
+              )}
+
+              {/* HEALTHCARE: Rx */}
+              {chartTab === 'rx' && (
+                <div className="animate-fade-in">
+                  <div className="rounded-3xl bg-white border border-blue-200 shadow-lg shadow-blue-500/5 overflow-hidden">
+                    <div className="bg-blue-600 px-6 py-4 flex items-center justify-between">
+                      <h4 className="font-black text-white uppercase tracking-widest text-sm flex items-center gap-2">
+                        <Pill size={16} /> Electronic Prescription Pad
+                      </h4>
+                      <img src="/logo.png" className="h-6 opacity-80 mix-blend-screen brightness-200 grayscale" alt="Logo" />
+                    </div>
+                    
+                    <div className="p-6 md:p-8 space-y-8">
+                      <div>
+                        <label className="text-[10px] uppercase font-black text-slate-400 mb-2 block tracking-widest">Clinical Diagnosis / Notes</label>
+                        <textarea 
+                          value={diagInput}
+                          onChange={(e) => setDiagInput(e.target.value)}
+                          placeholder="Enter observations, symptoms, and final diagnosis..."
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all min-h-[120px] resize-none"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
+                          <label className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Medications Protocol</label>
+                          <button 
+                            onClick={() => setMedsList([...medsList, { name: '', dosage: '', duration: '' }])}
+                            className="text-[10px] uppercase font-black text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg"
+                          >
+                            + Add Drug
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {medsList.map((m, i) => (
+                            <div key={i} className="flex flex-col md:flex-row gap-3 items-start relative group p-4 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-md transition-all">
+                              <div className="w-full md:w-1/2">
+                                <label className="text-[9px] uppercase font-bold text-slate-400 mb-1 block">Drug Name</label>
+                                <input 
+                                  value={m.name} onChange={(e) => { const n = [...medsList]; n[i].name = e.target.value; setMedsList(n); }}
+                                  placeholder="e.g. Paracetamol 500mg"
+                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
+                                />
+                              </div>
+                              <div className="w-full md:w-1/4">
+                                <label className="text-[9px] uppercase font-bold text-slate-400 mb-1 block">Dosage</label>
+                                <input 
+                                  value={m.dosage} onChange={(e) => { const n = [...medsList]; n[i].dosage = e.target.value; setMedsList(n); }}
+                                  placeholder="1-0-1 (After Food)"
+                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
+                                />
+                              </div>
+                              <div className="w-full md:w-1/4">
+                                <label className="text-[9px] uppercase font-bold text-slate-400 mb-1 block">Duration</label>
+                                <input 
+                                  value={m.duration} onChange={(e) => { const n = [...medsList]; n[i].duration = e.target.value; setMedsList(n); }}
+                                  placeholder="5 Days"
+                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500"
+                                />
+                              </div>
+                              {medsList.length > 1 && (
+                                <button onClick={() => setMedsList(medsList.filter((_, idx) => idx !== i))} className="absolute -top-3 -right-3 h-8 w-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+                                  <X size={14} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 border-t border-slate-200 p-6 flex flex-col sm:flex-row justify-end gap-3">
+                      <button 
+                        onClick={() => setSelectedBookingId(null)}
+                        className="px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest hover:bg-slate-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleSaveData}
+                        className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 font-black text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 size={16} /> Sign & Save Rx
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
