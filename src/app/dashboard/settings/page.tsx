@@ -1,6 +1,7 @@
 'use client';
 
 import { useVendorStore } from '../../../lib/store';
+import { getConfig } from '../../../lib/businessConfig';
 import { 
   Building2, Mail, Phone, Globe, MapPin, Save, Info, User,
   CheckCircle2, Clock, Camera, Settings, ShieldAlert,
@@ -51,7 +52,7 @@ export default function SettingsPage() {
     );
   }
 
-  const isTurf = currentMerchant.archetype === 'ResourceBooking';
+  const config = getConfig(currentMerchant.category);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 font-sans">
@@ -64,7 +65,7 @@ export default function SettingsPage() {
         
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">
-            {isTurf ? 'Facility Settings' : 'Clinic Settings'}
+            {config.words.settingsTitle}
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100"><Building2 size={14} className="text-blue-600" /> Business Profile</span>
@@ -178,6 +179,62 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
+              
+              <div className="pt-6 border-t border-slate-100">
+                <h3 className="text-sm font-black text-slate-900 mb-4">Operations & Preferences</h3>
+                
+                <div className="space-y-4">
+                  {config.themeClass === 'theme-hotel' && (
+                    <>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#8b6508]" />
+                        <span className="text-sm font-bold text-slate-700">Enable Auto-Checkout at 11:00 AM</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#8b6508]" />
+                        <span className="text-sm font-bold text-slate-700">Notify Housekeeping upon checkout</span>
+                      </label>
+                    </>
+                  )}
+                  {config.themeClass === 'theme-turf' && (
+                    <>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#22c55e]" />
+                        <span className="text-sm font-bold text-slate-700">Enable Automated Floodlights Integration</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#22c55e]" />
+                        <span className="text-sm font-bold text-slate-700">Allow Rain Bookings (Non-Refundable)</span>
+                      </label>
+                    </>
+                  )}
+                  {config.themeClass === 'theme-medical' && (
+                    <>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-red-200 bg-red-50 cursor-pointer hover:bg-red-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-red-600" />
+                        <span className="text-sm font-bold text-red-900">Require CMO Authorization for ER transfers</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-blue-600" />
+                        <span className="text-sm font-bold text-slate-700">Enable Patient Portal Sync</span>
+                      </label>
+                    </>
+                  )}
+                  {config.themeClass !== 'theme-turf' && config.themeClass !== 'theme-medical' && config.themeClass !== 'theme-hotel' && (
+                    <>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#8b6508]" />
+                        <span className="text-sm font-bold text-slate-700">Enable Auto-Confirmation for {config.words.bookings}</span>
+                      </label>
+                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                        <input type="checkbox" className="w-4 h-4 accent-[#8b6508]" />
+                        <span className="text-sm font-bold text-slate-700">Send SMS Reminders 2 Hours Before</span>
+                      </label>
+                    </>
+                  )}
+                </div>
+              </div>
+
             </form>
           </div>
         </div>
@@ -226,7 +283,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs font-bold text-slate-600">Mon - Fri</span>
-                <span className="text-xs font-black text-slate-900">09:00 AM - 08:00 PM</span>
+                <span className="text-xs font-black text-slate-900">{config.themeClass === 'theme-medical' ? '24 Hours Open' : '09:00 AM - 08:00 PM'}</span>
               </div>
               <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-xs font-bold text-slate-600">Saturday</span>
@@ -234,7 +291,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex justify-between items-center p-3 rounded-xl bg-red-50 border border-red-100">
                 <span className="text-xs font-bold text-red-600">Sunday</span>
-                <span className="text-xs font-black text-red-700">Closed</span>
+                <span className="text-xs font-black text-red-700">{config.themeClass === 'theme-medical' ? 'Emergency Only' : 'Closed'}</span>
               </div>
             </div>
           </div>

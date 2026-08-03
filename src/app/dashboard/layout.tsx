@@ -14,6 +14,7 @@ import { UtilityDrawer } from '../../components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
 import { useVendorStore, PRESET_MERCHANTS } from '../../lib/store';
 import { getVerticalFromCategory } from '../../lib/categoryUtils';
+import { getConfig } from '../../lib/businessConfig';
 
 const staticNavItems = [
   { href: '/dashboard/checkin', icon: QrCode, label: 'Verify Code' },
@@ -75,34 +76,58 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (currentMerchant) {
       const getMockNotifications = (): NotificationItem[] => {
-        switch (getVerticalFromCategory(currentMerchant.category)) {
-          case 'Dental':
-            return [
-              { id: '1', text: 'Aditya Sen checked in at clinic waiting room.', time: '10 mins ago', read: false, type: 'success' },
-              { id: '2', text: 'New orthodontic braces scan request received from Meera Deshmukh.', time: '1 hour ago', read: false, type: 'info' },
-              { id: '3', text: 'Dr. Apollo updated orthodontic scan files for Varun Nair.', time: '1 day ago', read: true, type: 'info' }
-            ];
-          case 'Fitness':
-            return [
-              { id: '1', text: 'Karan Mehra completed Kettlebell Romanian Deadlifts set logs.', time: '15 mins ago', read: false, type: 'success' },
-              { id: '2', text: 'Sanjana Roy submitted macro constraints update request.', time: '2 hours ago', read: false, type: 'info' },
-              { id: '3', text: 'ZenFit daily class grid updated for Yoga Vinyasa.', time: '1 day ago', read: true, type: 'info' }
-            ];
-          case 'Salon':
-            return [
-              { id: '1', text: 'Vikram Singh assigned as stylist to Rohan Sharma.', time: '5 mins ago', read: false, type: 'info' },
-              { id: '2', text: 'Deepika Iyer haircut & wash invoice completed successfully.', time: '3 hours ago', read: false, type: 'success' },
-              { id: '3', text: 'Weekly aesthetic treatment products stock restocked.', time: '2 days ago', read: true, type: 'info' }
-            ];
-          case 'Dining':
-            return [
-              { id: '1', text: 'Peanut allergy warning flagged for guest Anil Vasudevan (Table 4).', time: '12 mins ago', read: false, type: 'warning' },
-              { id: '2', text: 'Pre-ordered risotto courses verified by Kitchen Head.', time: '40 mins ago', read: false, type: 'success' },
-              { id: '3', text: 'Candlelight package booking confirmed for Prakash Raj (Table 12).', time: '5 hours ago', read: true, type: 'info' }
-            ];
-          default:
-            return [];
-        }
+        const config = getConfig(currentMerchant.category);
+        const theme = config.themeClass;
+        
+        const notifications: Record<string, NotificationItem[]> = {
+          'theme-medical': [
+            { id: '1', text: 'Patient checked in at clinic waiting room.', time: '10 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'New diagnostic scan request received.', time: '1 hour ago', read: false, type: 'info' },
+            { id: '3', text: 'Doctor updated treatment files.', time: '1 day ago', read: true, type: 'info' }
+          ],
+          'theme-turf': [
+            { id: '1', text: 'Team arrived for evening slot.', time: '15 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'Weather alert: Rain expected during next booking.', time: '2 hours ago', read: false, type: 'warning' },
+            { id: '3', text: 'Pitch floodlights maintenance completed.', time: '1 day ago', read: true, type: 'info' }
+          ],
+          'theme-salon': [
+            { id: '1', text: 'Stylist assigned to new appointment.', time: '5 mins ago', read: false, type: 'info' },
+            { id: '2', text: 'Premium service invoice completed successfully.', time: '3 hours ago', read: false, type: 'success' },
+            { id: '3', text: 'Weekly aesthetic products restocked.', time: '2 days ago', read: true, type: 'info' }
+          ],
+          'theme-dining': [
+            { id: '1', text: 'Dietary restriction flagged for Table 4.', time: '12 mins ago', read: false, type: 'warning' },
+            { id: '2', text: 'Pre-ordered courses verified by Kitchen.', time: '40 mins ago', read: false, type: 'success' },
+            { id: '3', text: 'Special package booking confirmed.', time: '5 hours ago', read: true, type: 'info' }
+          ],
+          'theme-hotel': [
+            { id: '1', text: 'VIP Guest checked into Room 302.', time: '5 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'Housekeeping requested for Room 104.', time: '20 mins ago', read: false, type: 'info' },
+            { id: '3', text: 'Late checkout approved for Room 505.', time: '3 hours ago', read: true, type: 'info' }
+          ],
+          'theme-trade': [
+            { id: '1', text: 'Technician dispatched for emergency repair.', time: '10 mins ago', read: false, type: 'info' },
+            { id: '2', text: 'Client approved the revised quote.', time: '1 hour ago', read: false, type: 'success' },
+            { id: '3', text: 'Parts order delayed by supplier.', time: '4 hours ago', read: false, type: 'warning' }
+          ],
+          'theme-workspace': [
+            { id: '1', text: 'Conference Room A booked for 3 hours.', time: '15 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'Wi-Fi guest pass generated.', time: '30 mins ago', read: false, type: 'info' },
+            { id: '3', text: 'Maintenance needed for printer in Zone B.', time: '2 hours ago', read: false, type: 'warning' }
+          ],
+          'theme-rental': [
+            { id: '1', text: 'Vehicle returned successfully. Inspection clear.', time: '5 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'Late return flagged for Booking #4092.', time: '1 hour ago', read: false, type: 'warning' },
+            { id: '3', text: 'New reservation for weekend package.', time: '3 hours ago', read: false, type: 'info' }
+          ],
+          'theme-service': [
+            { id: '1', text: 'Service appointment completed.', time: '10 mins ago', read: false, type: 'success' },
+            { id: '2', text: 'Client requested reschedule.', time: '1 hour ago', read: false, type: 'warning' },
+            { id: '3', text: 'Daily service report generated.', time: '1 day ago', read: true, type: 'info' }
+          ]
+        };
+
+        return notifications[theme] || notifications['theme-service'];
       };
       setNotifications(getMockNotifications());
     }
@@ -270,7 +295,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const originalEmail = currentMerchant.email || '';
     if (loginRole === 'supervisor') {
       const supName = supervisorId || 'SUPERVISOR';
-      return `${supName}/${originalEmail}`;
+      // Clean up the email. Instead of T102/arena5@bnxmail.com, just show the actual corporate mail
+      return originalEmail; 
     }
     return originalEmail;
   };
@@ -312,28 +338,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const getDynamicNavItems = () => {
     const isOwner = loginRole !== 'staff';
-    const isTurf = currentMerchant?.archetype === 'ResourceBooking';
-    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: isTurf ? 'Ground Staff Roster' : 'Staff Access & Roster' } : null;
+    const config = getConfig(currentMerchant?.category);
+    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: 'Staff Access & Roster' } : null;
 
     // HOME TAB (Dashboard & Quick Check-in)
     if (pathname === '/dashboard' || pathname === '/dashboard/checkin') {
       return [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Home' },
-        { href: '/dashboard/checkin', icon: QrCode, label: isTurf ? 'Scan Player Pass' : 'Scan Patient Token' },
+        { href: '/dashboard/checkin', icon: QrCode, label: `Scan ${config.words.customer} Pass` },
       ];
     } 
     // TRACKS TAB (Records & Patients)
     else if (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') {
       return [
-        { href: '/dashboard/bookings', icon: BookOpen, label: isTurf ? 'Match Logs' : 'Medical Records' },
-        { href: '/dashboard/customers', icon: User, label: isTurf ? 'Teams & Players' : 'Patient Database' },
+        { href: '/dashboard/bookings', icon: BookOpen, label: `${config.words.booking} Logs` },
+        { href: '/dashboard/customers', icon: User, label: config.words.directoryTitle },
       ];
     } 
     // WORKSPACE TAB (Management, Schedules, Settings)
     else {
       const items = [
-        { href: '/dashboard/services', icon: Package, label: isTurf ? 'Pitch Management' : 'Schedules & Shifts' },
-        { href: '/dashboard/settings', icon: Settings, label: isTurf ? 'Facility Settings' : 'Clinic Settings' },
+        { href: '/dashboard/services', icon: Package, label: 'Resource Management' },
+        { href: '/dashboard/settings', icon: Settings, label: config.words.settingsTitle },
+        { href: '/dashboard/contact', icon: Mail, label: 'Contact Us' }
       ];
       if (accessLink) items.push(accessLink);
       return items;
@@ -341,7 +368,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const navItems = getDynamicNavItems();
-  const themeClass = currentMerchant?.archetype === 'ResourceBooking' ? 'theme-turf' : 'theme-medical';
+  const config = getConfig(currentMerchant?.category);
+  const themeClass = config.themeClass;
 
   return (
     <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>

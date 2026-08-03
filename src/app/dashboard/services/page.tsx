@@ -2,11 +2,12 @@
 
 import { useVendorStore, CatalogService, StaffMember } from '../../../lib/store';
 import { 
-  Plus, Shield, UserPlus, Clock, Stethoscope, 
+  Plus, Shield, UserPlus, Clock, 
   Trash2, X, AlertCircle, Edit, CheckCircle2, ChevronRight, Mail, Key,
-  MoreVertical, Briefcase, Calendar as CalIcon, Activity, Phone, MonitorPlay, Users
+  MoreVertical, Briefcase, Calendar as CalIcon, Activity, Phone, MonitorPlay, Users, Settings
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { getConfig } from '../../../lib/businessConfig';
 
 export default function WorkspacePage() {
   const { currentMerchant, services, staffAccounts, addStaffMember, addService, updateService, deleteService, deleteStaffMember } = useVendorStore();
@@ -43,7 +44,7 @@ export default function WorkspacePage() {
     );
   }
 
-  const isTurf = currentMerchant.archetype === 'ResourceBooking';
+  const config = getConfig(currentMerchant.category);
 
   const merchantStaff = staffAccounts.filter(s => s.merchantId === currentMerchant.id && s.isDoctor);
   const merchantSchedules = services.filter(s => s.merchant.toLowerCase() === currentMerchant.merchantName.toLowerCase());
@@ -56,12 +57,12 @@ export default function WorkspacePage() {
       id: staffEmail.trim().toLowerCase(),
       merchantId: currentMerchant.id,
       name: staffName,
-      roleTitle: staffRole || (isTurf ? 'Referee' : 'Resident Doctor'),
+      roleTitle: staffRole || 'Staff Member',
       isDoctor: true,
       passwordHash: staffPassword,
       permissions: {
-        canManageVitals: !isTurf,
-        canAddPrescription: !isTurf,
+        canManageVitals: false,
+        canAddPrescription: false,
         canManageBilling: false,
         canManageAppointments: true
       }
@@ -86,7 +87,7 @@ export default function WorkspacePage() {
       name: serviceName.trim(),
       merchant: currentMerchant.merchantName,
       price: parseInt(consultationFee) || 0,
-      duration: parseInt(duration) || (isTurf ? 60 : 30),
+      duration: parseInt(duration) || 60,
       category: currentMerchant.category,
       active: true,
       rating: 5.0,
@@ -107,7 +108,7 @@ export default function WorkspacePage() {
     setServiceName('');
     setConsultationFee('');
     setSelectedStaffId('');
-    setTimeSlotsInput(isTurf ? '06:00 PM, 07:00 PM, 08:00 PM' : '09:00 AM, 11:00 AM, 02:00 PM, 04:30 PM');
+    setTimeSlotsInput('09:00 AM, 11:00 AM, 02:00 PM');
   };
 
   const openEditSchedule = (sch: CatalogService) => {
@@ -133,10 +134,10 @@ export default function WorkspacePage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-            {isTurf ? 'Ground Staff & Pitch Slots' : 'Staff & Schedules'}
+            Staff & Schedules
           </h1>
           <p className="text-sm text-slate-500 font-medium mt-2 max-w-2xl">
-            {isTurf ? 'Manage your referees, ground staff, and create pitch booking slots for teams.' : 'Manage your medical staff, create consultation services, and assign detailed shift timings across the hospital network.'}
+            Manage your staff, create resources, and assign detailed shift timings across the network.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -144,7 +145,7 @@ export default function WorkspacePage() {
             onClick={() => setShowAddStaffModal(true)}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-widest transition-colors shadow-md"
           >
-            <UserPlus size={16} /> {isTurf ? 'Add Staff' : 'Add Doctor'}
+            <UserPlus size={16} /> Add Staff
           </button>
           <button 
             onClick={() => {
@@ -156,7 +157,7 @@ export default function WorkspacePage() {
             }}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-bold text-xs uppercase tracking-widest transition-colors"
           >
-            <Plus size={16} /> {isTurf ? 'New Pitch Slot' : 'New Shift'}
+            <Plus size={16} /> New Schedule
           </button>
         </div>
       </div>
@@ -164,7 +165,7 @@ export default function WorkspacePage() {
       {/* Staff Roster Grid */}
       <div>
         <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-6">
-          <Briefcase size={20} className="text-blue-600" /> {isTurf ? 'Active Ground Staff' : 'Active Medical Professionals'}
+          <Briefcase size={20} className="text-blue-600" /> Active Staff / Resources
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -181,7 +182,7 @@ export default function WorkspacePage() {
                   <img src={getDummyImage(idx)} alt={staff.name} className="h-full w-full object-cover rounded-full" />
                   <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
                 </div>
-                <h3 className="font-black text-slate-900 text-lg">{isTurf ? staff.name : `Dr. ${staff.name}`}</h3>
+                <h3 className="font-black text-slate-900 text-lg">{staff.name}</h3>
                 <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1 mb-4">{staff.roleTitle}</p>
                 
                 <div className="w-full space-y-2 mt-2">
@@ -199,10 +200,10 @@ export default function WorkspacePage() {
           ))}
           {merchantStaff.length === 0 && (
             <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-              {isTurf ? <Users className="mx-auto h-12 w-12 text-slate-300 mb-4" /> : <Stethoscope className="mx-auto h-12 w-12 text-slate-300 mb-4" />}
-              <h3 className="text-lg font-bold text-slate-900 mb-2">{isTurf ? 'No Staff Found' : 'No Doctors Found'}</h3>
+              <Users className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+              <span className="text-sm font-bold text-slate-700">Add New Resource</span>
               <p className="text-sm text-slate-500 max-w-sm mx-auto">
-                {isTurf ? 'Onboard referees and managers to your platform.' : 'Onboard medical professionals to your platform to start accepting appointments.'}
+                Onboard resources or staff to your platform.
               </p>
             </div>
           )}
@@ -212,7 +213,7 @@ export default function WorkspacePage() {
       {/* Consultation Schedules / Calendar */}
       <div>
         <h2 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-6 mt-12">
-          <CalIcon size={20} className="text-[#8b6508]" /> {isTurf ? 'Pitch Booking Slots' : 'Consultation Shifts'}
+          <CalIcon size={20} className="text-[#8b6508]" /> Resource Schedules
         </h2>
 
         <div className="space-y-4">
@@ -227,13 +228,14 @@ export default function WorkspacePage() {
                     {staff ? (
                       <img src={getDummyImage(merchantStaff.findIndex(d => d.id === staff.id))} className="h-full w-full object-cover" />
                     ) : (
-                      isTurf ? <MonitorPlay size={24} className="text-slate-400" /> : <Stethoscope size={24} className="text-slate-400" />
+                      <Settings className="text-[#8b6508]" size={20} />
                     )}
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900">{sch.name}</h3>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Resource Management</h2>
+                    <p className="text-xs text-slate-500 mt-1 font-medium">Manage resources and schedules</p>
                     <p className="text-sm font-semibold text-slate-500 mt-1 flex items-center gap-2">
-                      <UserPlus size={14} className="text-blue-600" /> {isTurf ? '' : 'Dr. '} {sch.doctorName || 'Unassigned'}
+                      <UserPlus size={14} className="text-blue-600" /> {sch.doctorName || 'Unassigned'}
                     </p>
                   </div>
                 </div>
@@ -241,7 +243,7 @@ export default function WorkspacePage() {
                 <div className="flex-1 w-full flex flex-col md:flex-row items-start md:items-center gap-8 justify-end">
                   <div className="grid grid-cols-2 gap-8 w-full md:w-auto text-left md:text-right">
                     <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{isTurf ? 'Price' : 'Fee'}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Price</p>
                       <p className="text-xl font-black text-slate-900">₹{sch.price}</p>
                     </div>
                     <div>
@@ -280,9 +282,9 @@ export default function WorkspacePage() {
           {merchantSchedules.length === 0 && (
             <div className="py-20 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-white">
               <CalIcon className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-900 mb-2">{isTurf ? 'No Pitches Defined' : 'No Shifts Defined'}</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">No Schedules Defined</h3>
               <p className="text-sm text-slate-500 max-w-sm mx-auto">
-                {isTurf ? 'Create pitch availability slots for customers to book.' : 'Create shifts to allocate time slots for your doctors to receive patient bookings.'}
+                Create new schedules and time slots for your resources.
               </p>
             </div>
           )}
@@ -294,19 +296,19 @@ export default function WorkspacePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
           <div className="w-full max-w-lg rounded-[2rem] border border-slate-200 bg-white shadow-2xl p-8 animate-scale-up">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black text-slate-900">{isTurf ? 'Onboard Staff' : 'Onboard Doctor'}</h3>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Add New Staff</h3>
               <button onClick={() => setShowAddStaffModal(false)} className="h-10 w-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-500 transition-colors"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddStaff} className="space-y-6">
               
               <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Full Name {isTurf ? '' : '(with Title)'}</label>
-                  <input required type="text" value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder={isTurf ? "e.g. Ramesh Kumar" : "e.g. Dr. Sanjay Kumar"} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" />
+                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Full Name</label>
+                  <input required type="text" value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="e.g. Ramesh Kumar" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">{isTurf ? 'Role' : 'Department/Specialty'}</label>
-                  <input required type="text" value={staffRole} onChange={(e) => setStaffRole(e.target.value)} placeholder={isTurf ? "Referee" : "Cardiology"} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" />
+                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Role / Department</label>
+                  <input required type="text" value={staffRole} onChange={(e) => setStaffRole(e.target.value)} placeholder="e.g. Manager" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
                   <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Contact Number</label>
@@ -317,12 +319,12 @@ export default function WorkspacePage() {
               <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100 relative overflow-hidden">
                 <div className="absolute right-0 top-0 p-4 opacity-10 pointer-events-none"><Shield size={64} /></div>
                 <label className="text-[10px] uppercase font-black text-blue-700 mb-2 block tracking-widest">Portal Login Email</label>
-                <input required type="email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)} placeholder={isTurf ? "referee@arena5.com" : "dr.sanjay@hospital.com"} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                <input required type="email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)} placeholder="staff@business.com" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                 <p className="text-[10px] font-bold text-blue-600/70 mt-3 flex items-center gap-1.5"><AlertCircle size={12} /> Used by the staff to access their dashboard.</p>
               </div>
 
               <button type="submit" className="w-full mt-2 bg-slate-900 hover:bg-black text-white font-black py-4 rounded-2xl uppercase tracking-widest text-sm transition-colors shadow-xl shadow-slate-900/20">
-                {isTurf ? 'Create Staff ID' : 'Create Medical ID'}
+                Create Staff ID
               </button>
             </form>
           </div>
@@ -333,33 +335,33 @@ export default function WorkspacePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
           <div className="w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white shadow-2xl p-8 animate-scale-up">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black text-slate-900">{editingScheduleId ? (isTurf ? 'Edit Pitch Slot' : 'Edit Shift') : (isTurf ? 'Create Pitch Slot' : 'Create Shift')}</h3>
+              <h3 className="text-2xl font-black text-slate-900">{editingScheduleId ? 'Edit Record' : 'Create Record'}</h3>
               <button onClick={() => setShowScheduleModal(false)} className="h-10 w-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-500 transition-colors"><X size={20} /></button>
             </div>
             <form onSubmit={handleSaveSchedule} className="space-y-6">
               
               <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">{isTurf ? 'Pitch Title' : 'Service Title'}</label>
-                  <input required type="text" value={serviceName} onChange={(e) => setServiceName(e.target.value)} placeholder={isTurf ? "5-A-Side Pitch" : "General Consultation"} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
+                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Resource Name</label>
+                  <input required type="text" value={serviceName} onChange={(e) => setServiceName(e.target.value)} placeholder="e.g. Standard Consultation" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
                 </div>
                 
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">{isTurf ? 'Price (₹)' : 'Fee (₹)'}</label>
-                  <input required type="number" value={consultationFee} onChange={(e) => setConsultationFee(e.target.value)} placeholder={isTurf ? "1500" : "500"} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
+                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Pricing (₹)</label>
+                  <input required type="number" value={consultationFee} onChange={(e) => setConsultationFee(e.target.value)} placeholder="500" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
                 </div>
                 
                 <div className="col-span-2 sm:col-span-1">
                   <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Duration (Mins)</label>
-                  <input required type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder={isTurf ? "60" : "30"} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
+                  <input required type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="60" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all" />
                 </div>
                 
                 <div className="col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">{isTurf ? 'Assign Referee/Manager' : 'Assign Doctor'}</label>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 mb-2 block tracking-widest">Assign Staff</label>
                   <select required value={selectedStaffId} onChange={(e) => setSelectedStaffId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] focus:bg-white transition-all appearance-none cursor-pointer">
                     <option value="">-- Select Staff --</option>
                     {merchantStaff.map(staff => (
-                      <option key={staff.id} value={staff.id}>{isTurf ? '' : 'Dr. '} {staff.name} ({staff.roleTitle})</option>
+                      <option key={staff.id} value={staff.id}>{staff.name} ({staff.roleTitle})</option>
                     ))}
                   </select>
                 </div>
@@ -372,7 +374,7 @@ export default function WorkspacePage() {
               </div>
 
               <button type="submit" className="w-full mt-2 bg-[#8b6508] hover:bg-[#6c4e06] text-white font-black py-4 rounded-2xl uppercase tracking-widest text-sm transition-colors shadow-xl shadow-[#8b6508]/20">
-                {isTurf ? 'Deploy Pitch Slot' : 'Deploy Shift Schedule'}
+                Deploy Configuration
               </button>
             </form>
           </div>
