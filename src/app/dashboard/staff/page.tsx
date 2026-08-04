@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useVendorStore, StaffMember, StaffPermissions } from '../../../lib/store';
+import { useVendorStore, StaffMember, StaffPermissions } from '../../../lib/store'; 
+import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { 
   Users, UserPlus, Search, Star, Phone, Mail, Clock, 
   CheckCircle2, X, Plus, Trash2, Shield, Lock
@@ -9,7 +10,9 @@ import {
 
 export default function StaffPage() {
   const { currentMerchant, staffAccounts, addStaffMember, deleteStaffMember, updateStaffPermissions, loginRole } = useVendorStore();
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+        const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   
   // Filter for current merchant only
@@ -137,7 +140,7 @@ export default function StaffPage() {
                       <div>
                         <div className="font-bold text-text-primary flex items-center gap-2">
                           {staff.name} 
-                          {staff.isDoctor && <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-1.5 py-0.5 rounded uppercase">Doctor</span>}
+                          {staff.isDoctor && <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-1.5 py-0.5 rounded uppercase">{archetypeConfig.staffTitle || 'Staff'}</span>}
                         </div>
                         <div className="text-[10px] text-text-secondary font-medium">{staff.roleTitle}</div>
                       </div>
@@ -248,7 +251,7 @@ export default function StaffPage() {
                   onChange={(e) => setNewIsDoctor(e.target.checked)}
                   className="rounded border-border-brand bg-transparent text-[#8b6508] focus:ring-[#8b6508]"
                 />
-                <label htmlFor="isDoctor" className="text-xs font-bold text-text-primary cursor-pointer">This staff member is a Doctor</label>
+                <label htmlFor="isDoctor" className="text-xs font-bold text-text-primary cursor-pointer">This staff member is a Lead/Manager</label>
               </div>
 
               {/* Sub-ID Generation */}
@@ -296,7 +299,7 @@ export default function StaffPage() {
                       <div className="text-purple-400 bg-purple-400/10 p-1.5 rounded-md"><Plus size={14} /></div>
                       <div>
                         <div className="text-xs font-bold text-text-primary">Write Prescriptions & EMR</div>
-                        <div className="text-[9px] text-text-secondary">Can add medicines, view medical reports. (Ideal for Sub-Doctors)</div>
+                        <div className="text-[9px] text-text-secondary">{isTurf ? 'Can manage schedules and turf settings.' : isService ? 'Can view and assign technical tasks.' : isHotel ? 'Can manage reservations and rates.' : 'Can add medicines, view medical reports. (Ideal for Sub-Doctors)'}</div>
                       </div>
                     </div>
                     <div className={`w-8 h-4 rounded-full transition-colors relative ${permissions.canAddPrescription ? 'bg-[#0a3161]' : 'bg-slate-700'}`}>

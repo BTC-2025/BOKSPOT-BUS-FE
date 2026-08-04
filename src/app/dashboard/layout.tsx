@@ -5,16 +5,16 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Calendar, BookOpen, Settings, QrCode, 
-  Package, Menu, X, Bell, LogOut, Stethoscope, Dumbbell, 
+  Package, Menu, X, Bell, LogOut, Stethoscope, Dumbbell, Bed, 
   Scissors, Utensils, ShieldAlert, Check, Trash2, Info,
   ChevronDown, Building, Film, Sparkles, LogOut as LogOutIcon, Laptop, User,
   Sun, Moon, Users, Mail, Search, UserCog
 } from 'lucide-react';
 import { UtilityDrawer } from '../../components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
-import { useVendorStore, PRESET_MERCHANTS } from '../../lib/store';
+import { useVendorStore, PRESET_MERCHANTS } from '../../lib/store'; 
+import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { getVerticalFromCategory } from '../../lib/categoryUtils';
-import { getConfig } from '../../lib/businessConfig';
 
 const staticNavItems = [
   { href: '/dashboard/checkin', icon: QrCode, label: 'Verify Code' },
@@ -76,58 +76,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (currentMerchant) {
       const getMockNotifications = (): NotificationItem[] => {
-        const config = getConfig(currentMerchant.category);
-        const theme = config.themeClass;
-        
-        const notifications: Record<string, NotificationItem[]> = {
-          'theme-medical': [
-            { id: '1', text: 'Patient checked in at clinic waiting room.', time: '10 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'New diagnostic scan request received.', time: '1 hour ago', read: false, type: 'info' },
-            { id: '3', text: 'Doctor updated treatment files.', time: '1 day ago', read: true, type: 'info' }
-          ],
-          'theme-turf': [
-            { id: '1', text: 'Team arrived for evening slot.', time: '15 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'Weather alert: Rain expected during next booking.', time: '2 hours ago', read: false, type: 'warning' },
-            { id: '3', text: 'Pitch floodlights maintenance completed.', time: '1 day ago', read: true, type: 'info' }
-          ],
-          'theme-salon': [
-            { id: '1', text: 'Stylist assigned to new appointment.', time: '5 mins ago', read: false, type: 'info' },
-            { id: '2', text: 'Premium service invoice completed successfully.', time: '3 hours ago', read: false, type: 'success' },
-            { id: '3', text: 'Weekly aesthetic products restocked.', time: '2 days ago', read: true, type: 'info' }
-          ],
-          'theme-dining': [
-            { id: '1', text: 'Dietary restriction flagged for Table 4.', time: '12 mins ago', read: false, type: 'warning' },
-            { id: '2', text: 'Pre-ordered courses verified by Kitchen.', time: '40 mins ago', read: false, type: 'success' },
-            { id: '3', text: 'Special package booking confirmed.', time: '5 hours ago', read: true, type: 'info' }
-          ],
-          'theme-hotel': [
-            { id: '1', text: 'VIP Guest checked into Room 302.', time: '5 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'Housekeeping requested for Room 104.', time: '20 mins ago', read: false, type: 'info' },
-            { id: '3', text: 'Late checkout approved for Room 505.', time: '3 hours ago', read: true, type: 'info' }
-          ],
-          'theme-trade': [
-            { id: '1', text: 'Technician dispatched for emergency repair.', time: '10 mins ago', read: false, type: 'info' },
-            { id: '2', text: 'Client approved the revised quote.', time: '1 hour ago', read: false, type: 'success' },
-            { id: '3', text: 'Parts order delayed by supplier.', time: '4 hours ago', read: false, type: 'warning' }
-          ],
-          'theme-workspace': [
-            { id: '1', text: 'Conference Room A booked for 3 hours.', time: '15 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'Wi-Fi guest pass generated.', time: '30 mins ago', read: false, type: 'info' },
-            { id: '3', text: 'Maintenance needed for printer in Zone B.', time: '2 hours ago', read: false, type: 'warning' }
-          ],
-          'theme-rental': [
-            { id: '1', text: 'Vehicle returned successfully. Inspection clear.', time: '5 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'Late return flagged for Booking #4092.', time: '1 hour ago', read: false, type: 'warning' },
-            { id: '3', text: 'New reservation for weekend package.', time: '3 hours ago', read: false, type: 'info' }
-          ],
-          'theme-service': [
-            { id: '1', text: 'Service appointment completed.', time: '10 mins ago', read: false, type: 'success' },
-            { id: '2', text: 'Client requested reschedule.', time: '1 hour ago', read: false, type: 'warning' },
-            { id: '3', text: 'Daily service report generated.', time: '1 day ago', read: true, type: 'info' }
-          ]
-        };
-
-        return notifications[theme] || notifications['theme-service'];
+        switch (getVerticalFromCategory(currentMerchant.category)) {
+          case 'Dental':
+            return [
+              { id: '1', text: 'Aditya Sen checked in at clinic waiting room.', time: '10 mins ago', read: false, type: 'success' },
+              { id: '2', text: 'New orthodontic braces scan request received from Meera Deshmukh.', time: '1 hour ago', read: false, type: 'info' },
+              { id: '3', text: 'Dr. Apollo updated orthodontic scan files for Varun Nair.', time: '1 day ago', read: true, type: 'info' }
+            ];
+          case 'Fitness':
+            return [
+              { id: '1', text: 'Karan Mehra completed Kettlebell Romanian Deadlifts set logs.', time: '15 mins ago', read: false, type: 'success' },
+              { id: '2', text: 'Sanjana Roy submitted macro constraints update request.', time: '2 hours ago', read: false, type: 'info' },
+              { id: '3', text: 'ZenFit daily class grid updated for Yoga Vinyasa.', time: '1 day ago', read: true, type: 'info' }
+            ];
+          case 'Salon':
+            return [
+              { id: '1', text: 'Vikram Singh assigned as stylist to Rohan Sharma.', time: '5 mins ago', read: false, type: 'info' },
+              { id: '2', text: 'Deepika Iyer haircut & wash invoice completed successfully.', time: '3 hours ago', read: false, type: 'success' },
+              { id: '3', text: 'Weekly aesthetic treatment products stock restocked.', time: '2 days ago', read: true, type: 'info' }
+            ];
+          case 'Dining':
+            return [
+              { id: '1', text: 'Peanut allergy warning flagged for guest Anil Vasudevan (Table 4).', time: '12 mins ago', read: false, type: 'warning' },
+              { id: '2', text: 'Pre-ordered risotto courses verified by Kitchen Head.', time: '40 mins ago', read: false, type: 'success' },
+              { id: '3', text: 'Candlelight package booking confirmed for Prakash Raj (Table 12).', time: '5 hours ago', read: true, type: 'info' }
+            ];
+          default:
+            return [];
+        }
       };
       setNotifications(getMockNotifications());
     }
@@ -222,20 +198,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (getVerticalFromCategory(category)) {
-      case 'Dental':
-        return Stethoscope;
-      case 'Fitness':
-        return Dumbbell;
-      case 'Salon':
-        return Scissors;
-      case 'Dining':
-        return Utensils;
-      default:
-        return ShieldAlert;
-    }
-  };
+  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+
+
+
   
   const allStores = currentMerchant 
     ? loginRole === 'supervisor'
@@ -263,7 +229,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ]
     : [];
 
-  const CategoryIcon = getCategoryIcon(currentMerchant.category);
+  const CategoryIcon = archetypeConfig.servicesIcon;
 
   const handleLogout = () => {
     logoutMerchant();
@@ -334,32 +300,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         type: 'booking',
         icon: BookOpen
       }))
-  ];
-
-  const getDynamicNavItems = () => {
+  ];  const getDynamicNavItems = () => {
     const isOwner = loginRole !== 'staff';
-    const config = getConfig(currentMerchant?.category);
-    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: 'Staff Access & Roster' } : null;
+    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: archetypeConfig.staffRosterLabel } : null;
 
     // HOME TAB (Dashboard & Quick Check-in)
     if (pathname === '/dashboard' || pathname === '/dashboard/checkin') {
       return [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Home' },
-        { href: '/dashboard/checkin', icon: QrCode, label: `Scan ${config.words.customer} Pass` },
+        { href: '/dashboard/checkin', icon: QrCode, label: archetypeConfig.scanLabel },
       ];
     } 
     // TRACKS TAB (Records & Patients)
     else if (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') {
       return [
-        { href: '/dashboard/bookings', icon: BookOpen, label: `${config.words.booking} Logs` },
-        { href: '/dashboard/customers', icon: User, label: config.words.directoryTitle },
+        { href: '/dashboard/bookings', icon: BookOpen, label: archetypeConfig.bookingTitle },
+        { href: '/dashboard/customers', icon: User, label: archetypeConfig.customerDirLabel },
       ];
     } 
     // WORKSPACE TAB (Management, Schedules, Settings)
     else {
       const items = [
-        { href: '/dashboard/services', icon: Package, label: 'Resource Management' },
-        { href: '/dashboard/settings', icon: Settings, label: config.words.settingsTitle },
+        { href: '/dashboard/services', icon: Package, label: archetypeConfig.managementLabel },
+        { href: '/dashboard/settings', icon: Settings, label: archetypeConfig.settingsLabel },
         { href: '/dashboard/contact', icon: Mail, label: 'Contact Us' }
       ];
       if (accessLink) items.push(accessLink);
@@ -368,8 +331,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const navItems = getDynamicNavItems();
-  const config = getConfig(currentMerchant?.category);
-  const themeClass = config.themeClass;
+  const themeClass = archetypeConfig.themeClass;
 
   return (
     <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
@@ -645,49 +607,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
         </div>
         
-        {/* Supervisor Badge & Vendor Info Dropdown - Aligned to right */}
-        <div className="flex-1 hidden md:flex items-center justify-end gap-4 pl-4 relative" ref={vendorInfoRef}>
-          {loginRole === 'supervisor' && (
-            <span className="px-2 py-1 rounded-md bg-black/10 dark:bg-black/40 text-slate-800 dark:text-white text-[9px] font-black uppercase tracking-wider select-none border border-black/10 dark:border-black/50 whitespace-nowrap">
-              SUPERVISOR SECURE MODE
-            </span>
-          )}
-          
-          <button 
-            onClick={() => setVendorInfoOpen(!vendorInfoOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-brand/40 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors shadow-sm cursor-pointer"
-          >
-            <Building className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 capitalize">
-              {currentMerchant.username || 'Merchant'}
-            </span>
-            <ChevronDown className={`h-3 w-3 text-slate-500 transition-transform ${vendorInfoOpen ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {vendorInfoOpen && (
-            <div className="absolute right-0 top-full mt-3 w-64 bg-bg-secondary rounded-xl shadow-2xl border border-border-brand z-50 p-4 animate-fade-in text-left">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border-brand">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                  <span className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Console Secured</span>
-                </div>
-                <p className="text-[10px] text-text-secondary flex justify-between">
-                  <span>Vendor ID:</span> 
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{currentMerchant.vendorId || 'N/A'}</span>
-                </p>
-                <p className="text-[10px] text-text-secondary flex justify-between">
-                  <span>Merchant key:</span> 
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 capitalize">{currentMerchant.username}</span>
-                </p>
-                <div className="text-[10px] text-text-secondary flex justify-between items-center pt-1">
-                  <span className="whitespace-nowrap mr-2">BNX Mail:</span> 
-                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200 truncate bg-black/5 dark:bg-white/5 p-1 rounded px-1.5" title={getBnxMailId()}>
-                    {getBnxMailId()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Right side is now empty per user request */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-4 pl-4 relative">
         </div>
       </div>
 
