@@ -100,17 +100,19 @@ export default function SettingsPage() {
         </div>
 
         <div className="relative z-10 flex gap-3">
-          <button 
-            onClick={() => {
-              if(confirm('Are you sure you want to run the onboarding wizard again?')) {
-                useVendorStore.getState().resetOnboarding(currentMerchant.id);
-                window.location.reload();
-              }
-            }}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
-          >
-            Reconfigure Dashboard
-          </button>
+          {currentMerchant.username.startsWith('O') && (
+            <button 
+              onClick={() => {
+                if(confirm('Are you sure you want to run the onboarding wizard again?')) {
+                  useVendorStore.getState().resetOnboarding(currentMerchant.id);
+                  window.location.reload();
+                }
+              }}
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
+            >
+              Reconfigure Dashboard
+            </button>
+          )}
           <button 
             onClick={handleSave}
             className="px-5 py-2.5 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
