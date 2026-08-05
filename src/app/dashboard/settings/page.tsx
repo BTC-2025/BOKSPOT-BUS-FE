@@ -1,6 +1,7 @@
 'use client';
 
 import { useVendorStore } from '../../../lib/store';
+import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { 
   Building2, Mail, Phone, Globe, MapPin, Save, Info, User,
   CheckCircle2, Clock, Camera, Settings, ShieldAlert,
@@ -10,6 +11,8 @@ import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
   const { currentMerchant, loginRole, supervisorId } = useVendorStore();
+  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const isService = currentMerchant?.archetype === 'Service';
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -51,9 +54,8 @@ export default function SettingsPage() {
     );
   }
 
-  const isTurf = currentMerchant?.archetype === 'ResourceBooking';
-  const isHotel = currentMerchant?.archetype === 'Accommodation';
-  const isService = currentMerchant.archetype === 'Service';
+  
+  
   const isHospital = currentMerchant.archetype === 'Healthcare';
 
   return (
@@ -67,7 +69,7 @@ export default function SettingsPage() {
         
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">
-            {isTurf ? 'Facility Settings' : isService ? 'Business Settings' : 'Clinic Settings'}
+            {archetypeConfig?.hasOutdoorConditions ? 'Facility Settings' : isService ? 'Business Settings' : 'Clinic Settings'}
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-500">
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100"><Building2 size={14} className="text-blue-600" /> Business Profile</span>
@@ -206,10 +208,10 @@ export default function SettingsPage() {
 
               {/* Dynamic Archetype Specific Settings */}
               <div className="pt-6 border-t border-slate-100">
-                <h3 className="text-sm font-black text-slate-900 mb-4">{isTurf ? 'Pitch Configuration' : isHospital ? 'Emergency Protocols' : isService ? 'Service Regions' : 'Preferences'}</h3>
+                <h3 className="text-sm font-black text-slate-900 mb-4">{archetypeConfig?.hasOutdoorConditions ? 'Pitch Configuration' : isHospital ? 'Emergency Protocols' : isService ? 'Service Regions' : 'Preferences'}</h3>
                 
                 <div className="space-y-4">
-                  {isTurf && (
+                  {archetypeConfig?.hasOutdoorConditions && (
                     <>
                       <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
                         <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#22c55e]" />
@@ -234,7 +236,7 @@ export default function SettingsPage() {
                     </>
                   )}
                   
-                  {isHotel && (
+                  {false && (
                     <div className="space-y-4">
                       <div>
                         <label className="text-xs font-bold text-slate-700 block mb-1">Standard Check-in Time</label>
@@ -251,7 +253,7 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  {(!isTurf && !isHospital && !isService && !isHotel) && (
+                  {(!archetypeConfig?.hasOutdoorConditions && !isHospital && !isService && !false) && (
                      <label className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
                      <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#8b6508]" />
                      <span className="text-sm font-bold text-slate-700">Enable Walk-in Bookings</span>

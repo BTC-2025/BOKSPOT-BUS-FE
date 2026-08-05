@@ -1,20 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useVendorStore, StaffMember, StaffPermissions } from '../../../lib/store'; 
+import { useVendorStore, StaffMember, StaffPermissions } from '../../../lib/store';
 import { getArchetypeConfig } from '@/lib/businessDictionary';
-import { 
-  Users, UserPlus, Search, Star, Phone, Mail, Clock, 
+import {
+  Users, UserPlus, Search, Star, Phone, Mail, Clock,
   CheckCircle2, X, Plus, Trash2, Shield, Lock
 } from 'lucide-react';
 
 export default function StaffPage() {
   const { currentMerchant, staffAccounts, addStaffMember, deleteStaffMember, updateStaffPermissions, loginRole } = useVendorStore();
-  
+
   const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
-        const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   // Filter for current merchant only
   const merchantStaff = staffAccounts.filter(s => s.merchantId === currentMerchant?.id);
 
@@ -24,7 +24,7 @@ export default function StaffPage() {
   const [newRole, setNewRole] = useState('');
   const [newIsDoctor, setNewIsDoctor] = useState(false);
   const [newPassword, setNewPassword] = useState('pass123'); // Default dummy password for sub-id
-  
+
   const [permissions, setPermissions] = useState<StaffPermissions>({
     canManageVitals: false,
     canAddPrescription: false,
@@ -48,7 +48,7 @@ export default function StaffPage() {
 
     addStaffMember(newMember);
     setShowAddModal(false);
-    
+
     // Reset form
     setSubIdEmail('');
     setNewName('');
@@ -62,7 +62,7 @@ export default function StaffPage() {
     });
   };
 
-  const filteredStaff = merchantStaff.filter(s => 
+  const filteredStaff = merchantStaff.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.roleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -93,7 +93,7 @@ export default function StaffPage() {
           </h1>
           <p className="text-xs text-text-secondary">Grant access to existing Sub-IDs and configure Role-Based Access for your portal.</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#8b6508] to-[#d4af37] hover:brightness-110 text-white px-4 py-2.5 text-xs font-bold transition-all shadow-md cursor-pointer"
         >
@@ -105,7 +105,7 @@ export default function StaffPage() {
       {/* Search and Filters */}
       <div className="rounded-xl border border-border-brand bg-bg-secondary p-4">
         <div className="relative">
-          <input 
+          <input
             type="text"
             placeholder="Search by name, role or sub-id email..."
             value={searchTerm}
@@ -139,7 +139,7 @@ export default function StaffPage() {
                       </div>
                       <div>
                         <div className="font-bold text-text-primary flex items-center gap-2">
-                          {staff.name} 
+                          {staff.name}
                           {staff.isDoctor && <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] px-1.5 py-0.5 rounded uppercase">{archetypeConfig.staffTitle || 'Staff'}</span>}
                         </div>
                         <div className="text-[10px] text-text-secondary font-medium">{staff.roleTitle}</div>
@@ -178,7 +178,7 @@ export default function StaffPage() {
 
                   {/* Actions */}
                   <td className="py-4 px-5 text-right">
-                    <button 
+                    <button
                       onClick={() => deleteStaffMember(staff.id)}
                       className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
                       title="Revoke Access & Delete"
@@ -208,7 +208,7 @@ export default function StaffPage() {
               <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary flex items-center gap-2">
                 <Shield size={16} className="text-[#d4af37]" /> Grant Staff Access
               </h3>
-              <button 
+              <button
                 onClick={() => setShowAddModal(false)}
                 className="text-text-secondary hover:text-text-primary p-1 rounded-lg hover:bg-white/5 cursor-pointer"
               >
@@ -221,8 +221,8 @@ export default function StaffPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold text-text-secondary">Full Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="e.g. Priya"
@@ -232,8 +232,8 @@ export default function StaffPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold text-text-secondary">Role Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
                     placeholder="e.g. Senior Nurse"
@@ -244,8 +244,8 @@ export default function StaffPage() {
               </div>
 
               <div className="flex items-center gap-2 bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   id="isDoctor"
                   checked={newIsDoctor}
                   onChange={(e) => setNewIsDoctor(e.target.checked)}
@@ -258,8 +258,8 @@ export default function StaffPage() {
               <div className="space-y-1 p-3 rounded-xl border border-[#0a3161]/30 bg-[#0a3161]/5">
                 <label className="text-[10px] uppercase font-bold text-text-secondary">Existing Sub-ID Email (BNX Mail)</label>
                 <div className="flex items-center mt-1">
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     value={subIdEmail}
                     onChange={(e) => setSubIdEmail(e.target.value)}
                     placeholder="e.g. nurse/hospital@bnxmail.com"
@@ -275,22 +275,22 @@ export default function StaffPage() {
               {/* Permissions Configuration */}
               <div className="space-y-2 pt-2 border-t border-white/5">
                 <label className="text-[10px] uppercase font-bold text-text-secondary">Role-Based Feature Access</label>
-                
+
                 <div className="space-y-2">
                   {/* Toggle: Vitals */}
                   <label className="flex items-center justify-between p-3 rounded-lg border border-border-brand bg-bg-tertiary/20 hover:bg-bg-tertiary/40 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
                       <div className="text-blue-400 bg-blue-400/10 p-1.5 rounded-md"><CheckCircle2 size={14} /></div>
                       <div>
-                        <div className="text-xs font-bold text-text-primary">Manage Patient Vitals & Triage</div>
-                        <div className="text-[9px] text-text-secondary">Can update BP, Temp, Pulse and view queue. (Ideal for Nurses)</div>
+                        <div className="text-xs font-bold text-text-primary">{archetypeConfig.feature1Label || 'Manage Core Operations'}</div>
+                        <div className="text-[9px] text-text-secondary">{archetypeConfig.feature1Desc || 'Can view and update daily business operations and schedules.'}</div>
                       </div>
                     </div>
                     <div className={`w-8 h-4 rounded-full transition-colors relative ${permissions.canManageVitals ? 'bg-[#0a3161]' : 'bg-slate-700'}`}>
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${permissions.canManageVitals ? 'left-4.5' : 'left-0.5'}`} />
                     </div>
                     {/* Hidden actual checkbox to control state */}
-                    <input type="checkbox" className="hidden" checked={permissions.canManageVitals} onChange={(e) => setPermissions({...permissions, canManageVitals: e.target.checked})} />
+                    <input type="checkbox" className="hidden" checked={permissions.canManageVitals} onChange={(e) => setPermissions({ ...permissions, canManageVitals: e.target.checked })} />
                   </label>
 
                   {/* Toggle: Prescriptions */}
@@ -298,14 +298,14 @@ export default function StaffPage() {
                     <div className="flex items-center gap-3">
                       <div className="text-purple-400 bg-purple-400/10 p-1.5 rounded-md"><Plus size={14} /></div>
                       <div>
-                        <div className="text-xs font-bold text-text-primary">Write Prescriptions & EMR</div>
-                        <div className="text-[9px] text-text-secondary">{isTurf ? 'Can manage schedules and turf settings.' : isService ? 'Can view and assign technical tasks.' : isHotel ? 'Can manage reservations and rates.' : 'Can add medicines, view medical reports. (Ideal for Sub-Doctors)'}</div>
+                        <div className="text-xs font-bold text-text-primary">{archetypeConfig.feature2Label || 'Advanced Reports & Billing'}</div>
+                        <div className="text-[9px] text-text-secondary">{archetypeConfig.feature2Desc || 'Can view sensitive financial reports and manage billing operations.'}</div>
                       </div>
                     </div>
                     <div className={`w-8 h-4 rounded-full transition-colors relative ${permissions.canAddPrescription ? 'bg-[#0a3161]' : 'bg-slate-700'}`}>
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${permissions.canAddPrescription ? 'left-4.5' : 'left-0.5'}`} />
                     </div>
-                    <input type="checkbox" className="hidden" checked={permissions.canAddPrescription} onChange={(e) => setPermissions({...permissions, canAddPrescription: e.target.checked})} />
+                    <input type="checkbox" className="hidden" checked={permissions.canAddPrescription} onChange={(e) => setPermissions({ ...permissions, canAddPrescription: e.target.checked })} />
                   </label>
 
                   {/* Toggle: Billing */}
@@ -320,9 +320,9 @@ export default function StaffPage() {
                     <div className={`w-8 h-4 rounded-full transition-colors relative ${permissions.canManageBilling ? 'bg-[#0a3161]' : 'bg-slate-700'}`}>
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${permissions.canManageBilling ? 'left-4.5' : 'left-0.5'}`} />
                     </div>
-                    <input type="checkbox" className="hidden" checked={permissions.canManageBilling} onChange={(e) => setPermissions({...permissions, canManageBilling: e.target.checked})} />
+                    <input type="checkbox" className="hidden" checked={permissions.canManageBilling} onChange={(e) => setPermissions({ ...permissions, canManageBilling: e.target.checked })} />
                   </label>
-                  
+
                   {/* Toggle: Appointments */}
                   <label className="flex items-center justify-between p-3 rounded-lg border border-border-brand bg-bg-tertiary/20 hover:bg-bg-tertiary/40 transition-colors cursor-pointer group">
                     <div className="flex items-center gap-3">
@@ -335,20 +335,20 @@ export default function StaffPage() {
                     <div className={`w-8 h-4 rounded-full transition-colors relative ${permissions.canManageAppointments ? 'bg-[#0a3161]' : 'bg-slate-700'}`}>
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${permissions.canManageAppointments ? 'left-4.5' : 'left-0.5'}`} />
                     </div>
-                    <input type="checkbox" className="hidden" checked={permissions.canManageAppointments} onChange={(e) => setPermissions({...permissions, canManageAppointments: e.target.checked})} />
+                    <input type="checkbox" className="hidden" checked={permissions.canManageAppointments} onChange={(e) => setPermissions({ ...permissions, canManageAppointments: e.target.checked })} />
                   </label>
                 </div>
               </div>
 
               <div className="flex gap-3 justify-end pt-3 border-t border-white/5">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-text-secondary cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8b6508] to-[#d4af37] text-white font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all shadow-md cursor-pointer"
                 >

@@ -291,7 +291,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .filter(b => b.merchantName.toLowerCase() === currentMerchant?.merchantName.toLowerCase() && (
         b.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         b.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
+        (b.customerEmail || "").toLowerCase().includes(searchQuery.toLowerCase())
       ))
       .map(b => ({
         label: `${b.customerName} (${b.ref})`,
@@ -406,7 +406,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Spotlight Search Toggle Button */}
           <button
             onClick={() => setSpotlightOpen(true)}
-            className="rounded-xl p-2 border border-white/25 hover:border-white/40 bg-black/25 hover:bg-white/15 text-white transition-colors cursor-pointer flex items-center gap-1.5 pr-3 shadow-md"
+            className="rounded-xl p-2 border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer flex items-center gap-1.5 pr-3 shadow-md"
             title="Search Console (⌘K)"
           >
             <Search className="h-3.5 w-3.5 text-white" />
@@ -417,7 +417,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="relative" ref={popoverRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative rounded-xl p-2 border border-white/25 hover:border-white/40 bg-black/25 hover:bg-white/15 text-white transition-colors cursor-pointer shadow-md"
+              className="relative rounded-xl p-2 border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shadow-md"
             >
               <Bell className="h-3.5 w-3.5" />
               {unreadCount > 0 && (
@@ -500,7 +500,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="relative border-l border-white/10 pl-4 animate-fade-in" ref={profileRef}>
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 rounded-full border border-white/25 hover:border-white/40 bg-black/25 hover:bg-white/15 px-3.5 py-1.5 text-xs font-bold text-white hover:text-white transition-all cursor-pointer select-none shadow-md"
+              className="flex items-center gap-2 rounded-full border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 px-3.5 py-1.5 text-xs font-bold text-white hover:text-white transition-all cursor-pointer select-none shadow-md"
               aria-label="Toggle profile menu"
               title="Partner Profile Settings"
             >

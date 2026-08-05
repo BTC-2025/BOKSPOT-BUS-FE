@@ -37,7 +37,7 @@ export default function CustomersPage() {
         customersMap.set(key, {
           id: `cust-${key}`,
           name: b.customerName,
-          email: b.customerEmail,
+          email: b.customerEmail || "",
           phone: b.customerPhone,
           totalBookings: 0,
           totalSpend: 0,

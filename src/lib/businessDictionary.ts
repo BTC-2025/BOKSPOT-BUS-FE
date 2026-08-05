@@ -1,4 +1,4 @@
-import { Ambulance, Zap, Medal, 
+import { 
   Stethoscope, 
   Dumbbell, 
   Briefcase, 
@@ -17,38 +17,18 @@ import { Ambulance, Zap, Medal,
 } from 'lucide-react';
 
 export type ArchetypeConfig = {
-  bookingHeaderTitle?: string;
-  bookingHeaderDesc?: string;
-  bookingRefLabel?: string;
-  bookingAssignedLabel?: string;
-  hasOutdoorConditions?: boolean;
+  staffIcon?: any;
 
-  metric4Title?: string;
-  metric4Icon?: any;
-  trendTitle?: string;
-  chartLabel?: string;
-  liveQueueTitle?: string;
-  emptyStateIcon?: any;
-  staffNamePlaceholder?: string;
-  staffRolePlaceholder?: string;
-  staffEmailPlaceholder?: string;
-  serviceNamePlaceholder?: string;
-  serviceFeePlaceholder?: string;
-  serviceDurationPlaceholder?: string;
-  customerDesc?: string;
-  customerSearchPlaceholder?: string;
-  customerTierLabel?: string;
-  customerMetricsLabel?: string;
-  themeGradient?: string;
-  themeColor?: string;
-  themeBg?: string;
+  feature1Label?: string;
+  feature1Desc?: string;
+  feature2Label?: string;
+  feature2Desc?: string;
 
   bookingTitle: string;
   bookingIcon: LucideIcon;
   servicesTitle: string;
   servicesIcon: LucideIcon;
   staffTitle: string;
-  staffIcon: LucideIcon;
   
   kpiTotalBookings: string;
   kpiNewBookings: string;
@@ -82,53 +62,49 @@ export type ArchetypeConfig = {
   editServiceLabel: string;
   assignStaffLabel: string;
   deployServiceLabel: string;
+  bookingHeaderTitle?: string;
+  bookingHeaderDesc?: string;
+  customerSearchPlaceholder?: string;
+  bookingRefLabel?: string;
+  bookingAssignedLabel?: string;
+  emptyStateIcon?: any;
+  customerDesc?: string;
+  customerTierLabel?: string;
+  customerMetricsLabel?: string;
+  gradientClass?: string;
+  dashboardTitle?: string;
+  metric1Title?: string;
+  metric2Title?: string;
+  metric3Title?: string;
+  metric4Title?: string;
+  trendTitle?: string;
+  chartLabel?: string;
+  liveQueueTitle?: string;
+  hasOutdoorConditions?: boolean;
+  staffRolePlaceholder?: string;
+  serviceDurationPlaceholder?: string;
+  staffNamePlaceholder?: string;
+  staffEmailPlaceholder?: string;
+  serviceNamePlaceholder?: string;
+  serviceFeePlaceholder?: string;
+  staffPermissionDesc?: string;
+  staffPrefix?: string;
 };
 
 export const businessDictionary: Record<string, ArchetypeConfig> = {
   Healthcare: {
-    bookingHeaderTitle: 'Medical Records',
-    bookingHeaderDesc: 'Access complete patient histories, track consultation statuses, input vitals, and issue digital prescriptions from the master clinical log.',
-    bookingRefLabel: 'Patient & File',
-    bookingAssignedLabel: 'Attending Doctor',
-    hasOutdoorConditions: false,
-    metric4Title: 'ER Admissions',
-    metric4Icon: Ambulance,
-    trendTitle: 'Patient Influx Trend',
-    chartLabel: 'Patients',
-    liveQueueTitle: 'Live Appointments Queue',
-    emptyStateIcon: Stethoscope,
-    staffNamePlaceholder: 'e.g. Dr. Sanjay Kumar',
-    staffRolePlaceholder: 'Cardiology',
-    staffEmailPlaceholder: 'dr.sanjay@hospital.com',
-    serviceNamePlaceholder: 'General Consultation',
-    serviceFeePlaceholder: '500',
-    serviceDurationPlaceholder: '30',
-    customerDesc: 'Access patient histories, visit logs, and feedback.',
-    customerSearchPlaceholder: 'Search by patient name or ID...',
-    customerTierLabel: 'Priority',
-    customerMetricsLabel: 'Visits',
-    themeGradient: 'from-[#0ea5e9] via-[#0ea5e9]/90 to-transparent',
-    themeColor: 'text-[#0ea5e9]',
-    themeBg: 'bg-[#0ea5e9]',
-    occupancyTitle: 'Bed Occupancy',
-    kpiTodayTitle: 'Outpatients Today',
-    staffPrefix: 'Dr. ',
-    customerRecordLabel: 'Medical Records',
-    customerFileLabel: 'Patient & File',
-    customerAttendingLabel: 'Attending Doctor',
-    customerUnassignedLabel: 'Dr. Unassigned',
-    quickAction1: 'New Outpatient',
-    quickAction2: 'Upload Lab Results',
-    quickAction3: 'Check ICU Vitals',
-    quickAction4: 'Trigger Code Blue',
-    statusTitle: 'Department Status',
-    statusList: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics'],
+
+    staffIcon: 'Stethoscope',
+    feature1Label: 'Manage Patient Vitals & Triage',
+    feature1Desc: 'Can update BP, Temp, Pulse and view queue. (Ideal for Nurses)',
+    feature2Label: 'Write Prescriptions & EMR',
+    feature2Desc: 'Can add medicines, view medical reports. (Ideal for Sub-Doctors)',
+
     bookingTitle: 'Medical Records',
     bookingIcon: Activity,
     servicesTitle: 'Treatments',
     servicesIcon: Stethoscope,
     staffTitle: 'Medical Staff',
-    staffIcon: Users,
     kpiTotalBookings: 'Total Patients',
     kpiNewBookings: 'New Appointments',
     quickActionNew: '+ New Patient',
@@ -160,49 +136,11 @@ export const businessDictionary: Record<string, ArchetypeConfig> = {
     deployServiceLabel: 'Deploy Shift Schedule',
   },
   ResourceBooking: {
-    bookingHeaderTitle: 'Match Logs & Bookings',
-    bookingHeaderDesc: 'View all past and upcoming match bookings, manage team details, equipment rentals, and billing status.',
-    bookingRefLabel: 'Team & Booking Ref',
-    bookingAssignedLabel: 'Referee/Manager',
-    hasOutdoorConditions: true,
-    metric4Title: 'Tournaments Active',
-    metric4Icon: Medal,
-    trendTitle: 'Footfall Trend',
-    chartLabel: 'Matches',
-    liveQueueTitle: 'Live Pitch Allocation',
-    emptyStateIcon: MonitorPlay,
-    staffNamePlaceholder: 'e.g. Ramesh Kumar',
-    staffRolePlaceholder: 'Referee',
-    staffEmailPlaceholder: 'referee@arena5.com',
-    serviceNamePlaceholder: '5-A-Side Pitch',
-    serviceFeePlaceholder: '1500',
-    serviceDurationPlaceholder: '60',
-    customerDesc: 'Manage teams, frequent players, and their match feedback.',
-    customerSearchPlaceholder: 'Search by player name or team email...',
-    customerTierLabel: 'Membership',
-    customerMetricsLabel: 'Matches',
-    themeGradient: 'from-[#064e3b] via-[#064e3b]/90 to-transparent',
-    themeColor: 'text-[#22c55e]',
-    themeBg: 'bg-[#22c55e]',
-    occupancyTitle: 'Pitch Occupancy',
-    kpiTodayTitle: 'Matches Today',
-    staffPrefix: '',
-    customerRecordLabel: 'Booking History',
-    customerFileLabel: 'Player & Stats',
-    customerAttendingLabel: 'Assigned Ref',
-    customerUnassignedLabel: 'Unassigned',
-    quickAction1: 'Book Walk-in Match',
-    quickAction2: 'Update Scorecards',
-    quickAction3: 'League Management',
-    quickAction4: 'Report Ground Issue',
-    statusTitle: 'Pitch Status',
-    statusList: ['5-A-Side Pitch A', '5-A-Side Pitch B', '7-A-Side Premium', 'Indoor Arena'],
     bookingTitle: 'Match Logs',
     bookingIcon: Calendar,
     servicesTitle: 'Facilities',
     servicesIcon: MonitorPlay,
     staffTitle: 'Ground Staff',
-    staffIcon: Users,
     kpiTotalBookings: 'Total Matches',
     kpiNewBookings: 'Upcoming Games',
     quickActionNew: '+ New Booking',
@@ -234,49 +172,18 @@ export const businessDictionary: Record<string, ArchetypeConfig> = {
     deployServiceLabel: 'Deploy Pitch Slot',
   },
   Service: {
-    bookingHeaderTitle: 'Work Orders',
-    bookingHeaderDesc: 'Track work orders, view client histories, input job metrics, and issue digital invoices.',
-    bookingRefLabel: 'Client & Job Ref',
-    bookingAssignedLabel: 'Assigned Technician',
-    hasOutdoorConditions: false,
-    metric4Title: 'Emergency Callouts',
-    metric4Icon: Zap,
-    trendTitle: 'Service Request Trend',
-    chartLabel: 'Jobs',
-    liveQueueTitle: 'Live Field Agents',
-    emptyStateIcon: Wrench,
-    staffNamePlaceholder: 'e.g. Ramesh Kumar',
-    staffRolePlaceholder: 'Electrician',
-    staffEmailPlaceholder: 'tech@spark.com',
-    serviceNamePlaceholder: 'Electrical Repair',
-    serviceFeePlaceholder: '800',
-    serviceDurationPlaceholder: '120',
-    customerDesc: 'Track lifetime values, contact directories, and visit history of your customer base.',
-    customerSearchPlaceholder: 'Search by client name or email...',
-    customerTierLabel: 'Tier / Status',
-    customerMetricsLabel: 'Sessions',
-    themeGradient: 'from-slate-900 via-slate-900/80 to-transparent',
-    themeColor: 'text-slate-900',
-    themeBg: 'bg-slate-900',
-    occupancyTitle: 'Technician Utilization',
-    kpiTodayTitle: 'Jobs Today',
-    staffPrefix: '',
-    customerRecordLabel: 'Service History',
-    customerFileLabel: 'Client & Site',
-    customerAttendingLabel: 'Assigned Tech',
-    customerUnassignedLabel: 'Unassigned',
-    quickAction1: 'Log Walk-in Request',
-    quickAction2: 'Upload Site Photos',
-    quickAction3: 'Contract Management',
-    quickAction4: 'Report Safety Hazard',
-    statusTitle: 'Team Status',
-    statusList: ['North Zone Team', 'South Zone Team', 'Emergency Team', 'Maintenance Crew'],
+
+    staffIcon: 'User',
+    feature1Label: 'Manage Core Operations',
+    feature1Desc: 'Can view and update daily business operations and schedules.',
+    feature2Label: 'Advanced Reports & Billing',
+    feature2Desc: 'Can view sensitive financial reports and manage billing operations.',
+
     bookingTitle: 'Work Orders',
     bookingIcon: Clock,
     servicesTitle: 'Services',
     servicesIcon: Wrench,
     staffTitle: 'Technicians',
-    staffIcon: Users,
     kpiTotalBookings: 'Total Work Orders',
     kpiNewBookings: 'New Requests',
     quickActionNew: '+ New Work Order',
@@ -308,49 +215,18 @@ export const businessDictionary: Record<string, ArchetypeConfig> = {
     deployServiceLabel: 'Deploy Service Slot',
   },
   Accommodation: {
-    bookingHeaderTitle: 'Reservations',
-    bookingHeaderDesc: 'Manage hotel reservations, track guest status, input room checklists, and issue service add-ons.',
-    bookingRefLabel: 'Guest & Booking Ref',
-    bookingAssignedLabel: 'Assigned Staff',
-    hasOutdoorConditions: false,
-    metric4Title: 'VIP Guests',
-    metric4Icon: Bed,
-    trendTitle: 'Booking Trend',
-    chartLabel: 'Reservations',
-    liveQueueTitle: 'Live Front Desk Queue',
-    emptyStateIcon: Bed,
-    staffNamePlaceholder: 'e.g. Ramesh Kumar',
-    staffRolePlaceholder: 'Front Desk',
-    staffEmailPlaceholder: 'reception@grandhotel.com',
-    serviceNamePlaceholder: 'Deluxe AC Room',
-    serviceFeePlaceholder: '2500',
-    serviceDurationPlaceholder: '24',
-    customerDesc: 'Track lifetime values, contact directories, and visit history of your customer base.',
-    customerSearchPlaceholder: 'Search by client name or email...',
-    customerTierLabel: 'Tier / Status',
-    customerMetricsLabel: 'Sessions',
-    themeGradient: 'from-slate-900 via-slate-900/80 to-transparent',
-    themeColor: 'text-slate-900',
-    themeBg: 'bg-slate-900',
-    occupancyTitle: 'Room Occupancy',
-    kpiTodayTitle: 'Check-ins Today',
-    staffPrefix: '',
-    customerRecordLabel: 'Stay History',
-    customerFileLabel: 'Guest Profile',
-    customerAttendingLabel: 'Assigned Staff',
-    customerUnassignedLabel: 'Unassigned',
-    quickAction1: 'New Walk-in Checkin',
-    quickAction2: 'Upload Guest IDs',
-    quickAction3: 'Manage Groups',
-    quickAction4: 'Report Room Damage',
-    statusTitle: 'Room Status',
-    statusList: ['Standard Rooms', 'Deluxe Rooms', 'Suites', 'Villas'],
+
+    staffIcon: 'User',
+    feature1Label: 'Manage Core Operations',
+    feature1Desc: 'Can view and update daily business operations and schedules.',
+    feature2Label: 'Advanced Reports & Billing',
+    feature2Desc: 'Can view sensitive financial reports and manage billing operations.',
+
     bookingTitle: 'Reservations',
     bookingIcon: Calendar,
     servicesTitle: 'Room Types',
     servicesIcon: Bed,
     staffTitle: 'Hotel Staff',
-    staffIcon: Users,
     kpiTotalBookings: 'Total Reservations',
     kpiNewBookings: 'Check-ins Today',
     quickActionNew: '+ New Reservation',
@@ -382,49 +258,18 @@ export const businessDictionary: Record<string, ArchetypeConfig> = {
     deployServiceLabel: 'Add Room',
   },
   Beauty: {
-    bookingHeaderTitle: 'Appointments',
-    bookingHeaderDesc: 'View all past and upcoming client appointments, manage stylist schedules, and process payments.',
-    bookingRefLabel: 'Client & Booking Ref',
-    bookingAssignedLabel: 'Assigned Stylist',
-    hasOutdoorConditions: false,
-    metric4Title: 'Premium Services',
-    metric4Icon: Scissors,
-    trendTitle: 'Booking Trend',
-    chartLabel: 'Clients',
-    liveQueueTitle: 'Live Walk-in Queue',
-    emptyStateIcon: Scissors,
-    staffNamePlaceholder: 'e.g. Ramesh Kumar',
-    staffRolePlaceholder: 'Senior Stylist',
-    staffEmailPlaceholder: 'stylist@salon.com',
-    serviceNamePlaceholder: 'Haircut & Styling',
-    serviceFeePlaceholder: '800',
-    serviceDurationPlaceholder: '45',
-    customerDesc: 'Track lifetime values, contact directories, and visit history of your customer base.',
-    customerSearchPlaceholder: 'Search by client name or email...',
-    customerTierLabel: 'Tier / Status',
-    customerMetricsLabel: 'Sessions',
-    themeGradient: 'from-slate-900 via-slate-900/80 to-transparent',
-    themeColor: 'text-slate-900',
-    themeBg: 'bg-slate-900',
-    occupancyTitle: 'Stylist Utilization',
-    kpiTodayTitle: 'Appointments Today',
-    staffPrefix: '',
-    customerRecordLabel: 'Service History',
-    customerFileLabel: 'Client & Notes',
-    customerAttendingLabel: 'Assigned Stylist',
-    customerUnassignedLabel: 'No Stylist',
-    quickAction1: 'Book Walk-in Client',
-    quickAction2: 'Upload Style Ref',
-    quickAction3: 'Inventory Check',
-    quickAction4: 'Report Equip Issue',
-    statusTitle: 'Section Status',
-    statusList: ['Hair Styling', 'Spa & Massage', 'Facials', 'Nail Care'],
+
+    staffIcon: 'User',
+    feature1Label: 'Manage Core Operations',
+    feature1Desc: 'Can view and update daily business operations and schedules.',
+    feature2Label: 'Advanced Reports & Billing',
+    feature2Desc: 'Can view sensitive financial reports and manage billing operations.',
+
     bookingTitle: 'Appointments',
     bookingIcon: Calendar,
     servicesTitle: 'Services',
     servicesIcon: Scissors,
     staffTitle: 'Stylists',
-    staffIcon: Users,
     kpiTotalBookings: 'Total Appointments',
     kpiNewBookings: 'New Bookings',
     quickActionNew: '+ New Appointment',

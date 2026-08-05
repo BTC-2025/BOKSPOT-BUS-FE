@@ -58,6 +58,7 @@ export default function BookingsPage() {
 
   const selectedBooking = bookings.find((b) => b.id === selectedBookingId);
   const selectedStaff = staffAccounts.find(s => s.id === selectedBooking?.assignedDoctorId || s.name === selectedBooking?.refereeAssigned);
+  const EmptyIcon = archetypeConfig.emptyStateIcon || User;
 
   const handleOpenDrawer = (booking: PersistedBooking) => {
     setSelectedBookingId(booking.id);
@@ -142,7 +143,7 @@ export default function BookingsPage() {
                 <div className="col-span-1 md:col-span-2">
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-                      {(archetypeConfig.emptyStateIcon || Users).render ? <archetypeConfig.emptyStateIcon size={10} className='text-slate-500' /> : <Users size={10} className='text-slate-500' />}
+                      <EmptyIcon size={10} className='text-slate-500' />
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-900">
@@ -224,7 +225,7 @@ export default function BookingsPage() {
               </div>
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 shrink-0 text-right">
                 <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-1">{archetypeConfig.assignedStaffLabel}</p>
-                <p className="text-sm font-bold text-slate-900">{archetypeConfig.hasHealthVitals ? 'Dr. ' : ''} {selectedStaff?.name || 'Unassigned'}</p>
+                <p className="text-sm font-bold text-slate-900">{archetypeConfig.staffPrefix || ''}{selectedStaff?.name || 'Unassigned'}</p>
               </div>
             </div>
 

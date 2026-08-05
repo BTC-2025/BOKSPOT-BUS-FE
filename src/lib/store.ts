@@ -41,13 +41,16 @@ export interface PersistedBooking {
   amount: number;
   status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'CHECKED_IN';
   customerName: string;
-  customerEmail: string;
+  customerEmail?: string;
   customerPhone: string;
   notes?: string;
   otp?: string;
   
   // Doctor/Medical specific fields
   assignedDoctorId?: string;
+  assignedDoctorName?: string;
+  paymentStatus?: string;
+  isWalkIn?: boolean;
   vitals?: {
     bp: string;
     temp: string;
@@ -149,7 +152,7 @@ export interface MerchantUser {
   supervisorPhone?: string;
   supervisorEmail?: string;
   supervisorAddress?: string;
-  archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining';
+  archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining' | 'Accommodation' | 'SportsFacility' | 'Fitness' | 'EventSpace' | 'Rental' | 'CareServices';
 }
 
 export interface StaffPermissions {
@@ -243,7 +246,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Sunstone Resort is a premier provider of Resort Booking services.',
     vendorId: '2026050101',
     email: 'h102@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Accommodation'
   },
   {
     id: 'mer-102',
@@ -254,7 +257,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Riverfront Villa is a premier provider of Homestay / Villa services.',
     vendorId: '2026050102',
     email: 'h103@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Accommodation'
   },
   {
     id: 'mer-103',
@@ -265,7 +268,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Backpackers Hostel is a premier provider of Hostel Booking services.',
     vendorId: '2026050103',
     email: 'h104@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Accommodation'
   },
   {
     id: 'mer-104',
@@ -276,7 +279,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Pine Trails Camp is a premier provider of Camping Booking services.',
     vendorId: '2026050104',
     email: 'h105@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Accommodation'
   },
   {
     id: 'mer-105',
@@ -287,7 +290,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Arena 5 Turf is a premier provider of Football Turf services.',
     vendorId: '2026050105',
     email: 't102@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-106',
@@ -298,7 +301,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Pitch Perfect Grounds is a premier provider of Cricket Ground services.',
     vendorId: '2026050106',
     email: 't103@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Service'
   },
   {
     id: 'mer-107',
@@ -309,7 +312,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Smash Academy is a premier provider of Badminton Court services.',
     vendorId: '2026050107',
     email: 't104@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-108',
@@ -320,7 +323,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Grand Slam Club is a premier provider of Tennis Court services.',
     vendorId: '2026050108',
     email: 't105@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-109',
@@ -331,7 +334,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Hoop Kings Arena is a premier provider of Basketball Court services.',
     vendorId: '2026050109',
     email: 't106@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-110',
@@ -342,7 +345,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Blue Wave Pool is a premier provider of Swimming Pool Slots services.',
     vendorId: '2026050110',
     email: 't107@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-111',
@@ -353,7 +356,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Cyber Core Cafe is a premier provider of Gaming Arena Booking services.',
     vendorId: '2026050111',
     email: 'g101@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-112',
@@ -364,7 +367,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'JumpZone Park is a premier provider of Indoor Play Arena services.',
     vendorId: '2026050112',
     email: 'g102@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'SportsFacility'
   },
   {
     id: 'mer-113',
@@ -386,7 +389,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Style Studio is a premier provider of Salon / Spa Appointment services.',
     vendorId: '2026050114',
     email: 's303@bnxmail.com',
-    archetype: 'Beauty'
+    archetype: 'Service'
   },
   {
     id: 'mer-115',
@@ -397,7 +400,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'ZenFit Clinic is a premier provider of Gym / Yoga Slot Booking services.',
     vendorId: '2026050115',
     email: 'f202@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Fitness'
   },
   {
     id: 'mer-116',
@@ -463,7 +466,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'HubSpace is a premier provider of Co-working Space services.',
     vendorId: '2026050121',
     email: 'w301@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-122',
@@ -474,7 +477,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Boardroom Plus is a premier provider of Meeting Room services.',
     vendorId: '2026050122',
     email: 'w302@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-123',
@@ -485,7 +488,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'AudioWave Cast is a premier provider of Podcast Studio services.',
     vendorId: '2026050123',
     email: 'w303@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-124',
@@ -496,7 +499,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Summit Conference is a premier provider of Conference Hall services.',
     vendorId: '2026050124',
     email: 'w304@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-125',
@@ -507,7 +510,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'EduPro Sessions is a premier provider of Training Sessions services.',
     vendorId: '2026050125',
     email: 'w305@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Fitness'
   },
   {
     id: 'mer-126',
@@ -518,7 +521,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Shutter Studio is a premier provider of Studio Booking services.',
     vendorId: '2026050126',
     email: 'w306@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-127',
@@ -529,7 +532,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Elite Planners is a premier provider of Event Organizer Booking services.',
     vendorId: '2026050127',
     email: 'o801@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-128',
@@ -540,7 +543,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'City Wheels is a premier provider of Cycle Rental services.',
     vendorId: '2026050128',
     email: 'v401@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Rental'
   },
   {
     id: 'mer-129',
@@ -551,7 +554,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Rev Rider is a premier provider of Sports Bike Rental services.',
     vendorId: '2026050129',
     email: 'v402@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Rental'
   },
   {
     id: 'mer-130',
@@ -562,7 +565,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Lens Crafters is a premier provider of Camera Rental services.',
     vendorId: '2026050130',
     email: 'm501@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Rental'
   },
   {
     id: 'mer-131',
@@ -573,7 +576,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Bass Drop Audio is a premier provider of Sound System Rental services.',
     vendorId: '2026050131',
     email: 'm502@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Rental'
   },
   {
     id: 'mer-132',
@@ -584,7 +587,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Party Supply Co is a premier provider of Event Equipment Rental services.',
     vendorId: '2026050132',
     email: 'm503@bnxmail.com',
-    archetype: 'ResourceBooking'
+    archetype: 'Rental'
   },
   {
     id: 'mer-133',
@@ -595,7 +598,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Paws & Bubbles is a premier provider of Pet Grooming Appointment services.',
     vendorId: '2026050133',
     email: 'p601@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'EventSpace'
   },
   {
     id: 'mer-134',
@@ -606,7 +609,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'SafeHands Nannies is a premier provider of Babysitting Service services.',
     vendorId: '2026050134',
     email: 'b701@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'CareServices'
   },
   {
     id: 'mer-135',
@@ -617,7 +620,7 @@ export const PRESET_MERCHANTS: MerchantUser[] = [
     aboutText: 'Compassion Care is a premier provider of Elder Care Service services.',
     vendorId: '2026050135',
     email: 'b702@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'CareServices'
   },
 ];
 
@@ -5012,6 +5015,24 @@ export const useVendorStore = create<VendorStoreState>()(
       bookings: INITIAL_BOOKINGS,
       services: INITIAL_SERVICES,
       staffAccounts: [
+        {
+          id: 'chef@restaurant.com',
+          merchantId: 'mer-113',
+          name: 'Gordon Ramsay',
+          roleTitle: 'Head Chef',
+          isDoctor: false,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: false, canAddPrescription: false, canManageBilling: true, canManageAppointments: true }
+        },
+        {
+          id: 'host@restaurant.com',
+          merchantId: 'mer-113',
+          name: 'Monica Geller',
+          roleTitle: 'Maitre D',
+          isDoctor: false,
+          passwordHash: 'pass123',
+          permissions: { canManageVitals: false, canAddPrescription: false, canManageBilling: true, canManageAppointments: true }
+        },
         {
           id: 's303_senior@salon.com',
           merchantId: 'mer-114',

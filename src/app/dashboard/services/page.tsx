@@ -45,6 +45,7 @@ export default function WorkspacePage() {
   }
 
   const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const EmptyIcon = archetypeConfig.emptyStateIcon || Users;
       
   const merchantStaff = staffAccounts.filter(s => s.merchantId === currentMerchant.id);
   const merchantSchedules = services.filter(s => s.merchant.toLowerCase() === currentMerchant.merchantName.toLowerCase());
@@ -143,7 +144,7 @@ export default function WorkspacePage() {
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setShowAddStaffModal(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase tracking-widest transition-colors shadow-md"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0a3161] hover:bg-[#07254a] text-white shadow-[#0a3161]/20 font-bold text-xs uppercase tracking-widest transition-colors shadow-md"
           >
             <UserPlus size={16} /> {archetypeConfig.staffOnboardTitle || 'Add Staff'}
           </button>
@@ -200,7 +201,7 @@ export default function WorkspacePage() {
           ))}
           {merchantStaff.length === 0 && (
             <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-              {(archetypeConfig.emptyStateIcon || Users).render ? <archetypeConfig.emptyStateIcon className='mx-auto h-12 w-12 text-slate-300 mb-4' /> : <Users className='mx-auto h-12 w-12 text-slate-300 mb-4' />}
+              <EmptyIcon className='mx-auto h-12 w-12 text-slate-300 mb-4' />
               <h3 className="text-lg font-bold text-slate-900 mb-2">{archetypeConfig.staffEmptyTitle || 'No Staff Found'}</h3>
               <p className="text-sm text-slate-500 max-w-sm mx-auto">
                 {archetypeConfig.staffEmptyDesc || 'Onboard your staff here.'}
@@ -228,13 +229,13 @@ export default function WorkspacePage() {
                     {staff ? (
                       <img src={getDummyImage(merchantStaff.findIndex(d => d.id === staff.id))} className="h-full w-full object-cover" />
                     ) : (
-                      (archetypeConfig.emptyStateIcon || Users).render ? <archetypeConfig.emptyStateIcon size={24} className='text-slate-400' /> : <Users size={24} className='text-slate-400' />
+                      <EmptyIcon size={24} className='text-slate-400' />
                     )}
                   </div>
                   <div>
                     <h3 className="text-xl font-black text-slate-900">{sch.name}</h3>
                     <p className="text-sm font-semibold text-slate-500 mt-1 flex items-center gap-2">
-                      <UserPlus size={14} className="text-blue-600" /> {archetypeConfig.hasHealthVitals ? 'Dr. ' : ''} {sch.doctorName || 'Unassigned'}
+                      <UserPlus size={14} className="text-blue-600" /> {archetypeConfig.staffPrefix || ''}{sch.doctorName || 'Unassigned'}
                     </p>
                   </div>
                 </div>
@@ -322,7 +323,7 @@ export default function WorkspacePage() {
                 <p className="text-[10px] font-bold text-blue-600/70 mt-3 flex items-center gap-1.5"><AlertCircle size={12} /> Used by the staff to access their dashboard.</p>
               </div>
 
-              <button type="submit" className="w-full mt-2 bg-slate-900 hover:bg-black text-white font-black py-4 rounded-2xl uppercase tracking-widest text-sm transition-colors shadow-xl shadow-slate-900/20">
+              <button type="submit" className="w-full mt-2 bg-[#0a3161] hover:bg-[#07254a] text-white-[#0a3161]/20">
                 {archetypeConfig.staffOnboardTitle ? archetypeConfig.staffOnboardTitle.replace('Onboard ', 'Create ') + ' ID' : 'Create Staff ID'}
               </button>
             </form>
