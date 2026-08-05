@@ -139,6 +139,9 @@ export interface CatalogService {
 }
 
 export interface MerchantUser {
+  isCustomized?: boolean;
+  activeModules?: string[];
+  customDictionary?: Record<string, string>;
   id: string;
   username: string;
   merchantName: string;
@@ -181,6 +184,7 @@ interface VendorStoreState {
   bookings: PersistedBooking[];
   services: CatalogService[];
   staffAccounts: StaffMember[];
+  customMerchants: Record<string, Partial<MerchantUser>>;
   
   // Theme actions
   setTheme: (theme: 'system' | 'light' | 'dark') => void;
@@ -223,9 +227,52 @@ interface VendorStoreState {
   addStaffMember: (staff: StaffMember) => void;
   updateStaffPermissions: (staffId: string, permissions: StaffPermissions) => void;
   deleteStaffMember: (staffId: string) => void;
+
+  completeOnboarding: (merchantId: string, setupData: { activeModules: string[], customDictionary: Record<string, string>, merchantName?: string, archetype?: string }) => void;
+  updateMerchantModules: (merchantId: string, activeModules: string[], customDictionary?: Record<string, string>) => void;
+  resetOnboarding: (merchantId: string) => void;
+
 }
 
 export const PRESET_MERCHANTS: MerchantUser[] = [
+
+  {
+    id: 'mer-901',
+    username: 'O501',
+    isCustomized: false,
+    merchantName: 'Alpha Logistics',
+    category: 'Logistics',
+    logoLetter: 'A',
+    aboutText: 'Generic business example for other categories.',
+    vendorId: '2026090100',
+    email: 'o501@bnxmail.com',
+    archetype: 'Service'
+  },
+  {
+    id: 'mer-902',
+    username: 'O502',
+    isCustomized: false,
+    merchantName: 'Beta Security',
+    category: 'Security Services',
+    logoLetter: 'B',
+    aboutText: 'Generic business example for other categories.',
+    vendorId: '2026090200',
+    email: 'o502@bnxmail.com',
+    archetype: 'Service'
+  },
+  {
+    id: 'mer-903',
+    username: 'O503',
+    isCustomized: false,
+    merchantName: 'Gamma Education',
+    category: 'Tutoring',
+    logoLetter: 'G',
+    aboutText: 'Generic business example for other categories.',
+    vendorId: '2026090300',
+    email: 'o503@bnxmail.com',
+    archetype: 'Service'
+  },
+
   {
     id: 'mer-100',
     username: 'H101',
@@ -5007,6 +5054,37 @@ export const VENDOR_ACCOUNTS = [
 export const useVendorStore = create<VendorStoreState>()(
   persist(
     (set, get) => ({
+      
+  customMerchants: {},
+  completeOnboarding: (merchantId, setupData) => set((state) => {
+    const customData: any = { isCustomized: true, activeModules: setupData.activeModules, customDictionary: setupData.customDictionary };
+    if (setupData.merchantName) customData.merchantName = setupData.merchantName;
+    if (setupData.archetype) customData.archetype = setupData.archetype;
+    return {
+      customMerchants: { ...state.customMerchants, [merchantId]: customData },
+      currentMerchant: state.currentMerchant?.id === merchantId 
+        ? { ...state.currentMerchant, ...customData }
+        : state.currentMerchant
+    };
+  }),
+  updateMerchantModules: (merchantId, activeModules, customDictionary) => set((state) => {
+    const customData = { activeModules, ...(customDictionary ? { customDictionary } : {}) };
+    return {
+      customMerchants: { ...state.customMerchants, [merchantId]: { ...(state.customMerchants[merchantId] || {}), ...customData } },
+      currentMerchant: state.currentMerchant?.id === merchantId 
+        ? { ...state.currentMerchant, ...customData }
+        : state.currentMerchant
+    };
+  }),
+  resetOnboarding: (merchantId) => set((state) => {
+    return {
+      customMerchants: { ...state.customMerchants, [merchantId]: { ...(state.customMerchants[merchantId] || {}), isCustomized: false } },
+      currentMerchant: state.currentMerchant?.id === merchantId 
+        ? { ...state.currentMerchant, isCustomized: false }
+        : state.currentMerchant
+    };
+  }),
+
       currentMerchant: null,
       loginRole: null,
       supervisorId: null,
@@ -5230,7 +5308,8 @@ export const useVendorStore = create<VendorStoreState>()(
           if (!found) {
             found = PRESET_MERCHANTS[0];
           }
-          set({ currentMerchant: found, loginRole: 'vendor', supervisorId: null });
+          const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
+          set({ currentMerchant: finalMerchant, loginRole: 'vendor', supervisorId: null });
           
           // Seed services for this merchant if not present
           const hasServices = get().services.some(s => s.merchant === found.merchantName);
@@ -5263,7 +5342,8 @@ export const useVendorStore = create<VendorStoreState>()(
           };
         }
         if (found) {
-          set({ currentMerchant: found });
+          const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
+          set({ currentMerchant: finalMerchant });
           
           // Seed services for this merchant if not present
           const hasServices = get().services.some(s => s.merchant === found.merchantName);
@@ -5460,6 +5540,6 @@ export const useVendorStore = create<VendorStoreState>()(
         }));
       }
     }),
-    { name: 'vendor-portal-storage-v8' }
+    { name: 'vendor-portal-storage-v9' }
   )
 );

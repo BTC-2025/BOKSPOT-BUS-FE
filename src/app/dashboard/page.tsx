@@ -13,7 +13,12 @@ import LiveResourceMap from '../components/LiveResourceMap';
 
 export default function DashboardPage() {
   const { currentMerchant, staffAccounts, bookings, loginRole, supervisorId, currentStaff, checkInBooking, completeBooking } = useVendorStore();
-  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
+  const activeModules = currentMerchant?.activeModules || ['bookings', 'staff', 'customers', 'map'];
+  const showMap = !currentMerchant?.isCustomized || activeModules.includes('map');
+  const showStaff = !currentMerchant?.isCustomized || activeModules.includes('staff');
+  const showBookings = !currentMerchant?.isCustomized || activeModules.includes('bookings');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -244,7 +249,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Interactive Resource Map */}
-            <LiveResourceMap />
+            {showMap && <LiveResourceMap />}
 
             {/* Live Queue */}
             <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">

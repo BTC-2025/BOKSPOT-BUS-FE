@@ -44,7 +44,8 @@ export default function WorkspacePage() {
     );
   }
 
-  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
   const EmptyIcon = archetypeConfig.emptyStateIcon || Users;
       
   const merchantStaff = staffAccounts.filter(s => s.merchantId === currentMerchant.id);

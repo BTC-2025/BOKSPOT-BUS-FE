@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
-  const { currentMerchant, loginRole, supervisorId } = useVendorStore();
+  const { currentMerchant, loginRole, supervisorId, updateMerchantModules } = useVendorStore();
   const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
   const isService = currentMerchant?.archetype === 'Service';
   const [mounted, setMounted] = useState(false);
@@ -36,6 +36,27 @@ export default function SettingsPage() {
   const [address, setAddress] = useState('42 Anna Nagar, Chennai');
   const [about, setAbout] = useState(currentMerchant?.aboutText || '');
   const [isSaved, setIsSaved] = useState(false);
+
+  const [activeModules, setActiveModules] = useState<string[]>(currentMerchant?.activeModules || ['bookings', 'staff', 'customers', 'map']);
+  const [customDictionary, setCustomDictionary] = useState<Record<string, string>>(currentMerchant?.customDictionary || {});
+  
+  const handleToggleModule = (module: string) => {
+    setActiveModules((prev) =>
+      prev.includes(module) ? prev.filter((m) => m !== module) : [...prev, module]
+    );
+  };
+
+  const handleDictChange = (key: string, value: string) => {
+    setCustomDictionary((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveModules = () => {
+    if (currentMerchant) {
+      updateMerchantModules(currentMerchant.id, activeModules, customDictionary);
+      alert('Module settings saved successfully!');
+    }
+  };
+
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +100,17 @@ export default function SettingsPage() {
         </div>
 
         <div className="relative z-10 flex gap-3">
+          <button 
+            onClick={() => {
+              if(confirm('Are you sure you want to run the onboarding wizard again?')) {
+                useVendorStore.getState().resetOnboarding(currentMerchant.id);
+                window.location.reload();
+              }
+            }}
+            className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
+          >
+            Reconfigure Dashboard
+          </button>
           <button 
             onClick={handleSave}
             className="px-5 py-2.5 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"

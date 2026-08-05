@@ -11,7 +11,8 @@ import {
 export default function StaffPage() {
   const { currentMerchant, staffAccounts, addStaffMember, deleteStaffMember, updateStaffPermissions, loginRole } = useVendorStore();
 
-  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 

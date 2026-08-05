@@ -16,7 +16,8 @@ export default function BookingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   
-  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
         
 
   // Prescription Form (Healthcare)

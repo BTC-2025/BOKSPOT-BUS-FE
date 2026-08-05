@@ -14,6 +14,7 @@ import { UtilityDrawer } from '../../components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
 import { useVendorStore, PRESET_MERCHANTS } from '../../lib/store'; 
 import { getArchetypeConfig } from '@/lib/businessDictionary';
+import OnboardingWizard from './components/OnboardingWizard';
 import { getVerticalFromCategory } from '../../lib/categoryUtils';
 
 const staticNavItems = [
@@ -198,7 +199,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
+  const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
 
 
 
@@ -330,11 +332,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
-  const navItems = getDynamicNavItems();
+  let navItems = getDynamicNavItems();
+  // Filter navItems based on activeModules if customized
+  if (currentMerchant?.isCustomized) {
+    const active = currentMerchant.activeModules || [];
+    navItems = navItems.filter(item => {
+      if (item.label === archetypeConfig.bookingTitle && !active.includes('bookings')) return false;
+      if (item.label === archetypeConfig.staffTitle && !active.includes('staff')) return false;
+      if (item.label === archetypeConfig.customerDirLabel && !active.includes('customers')) return false;
+      if (item.label === archetypeConfig.managementLabel && !active.includes('map')) return false;
+      return true;
+    });
+  }
   const themeClass = archetypeConfig.themeClass;
 
   return (
-    <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
+    <>
+      {currentMerchant?.isCustomized === false && <OnboardingWizard />}
+      <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
       {/* Top Header (100% width across the top) */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
         {/* Left Column: Logo */}
@@ -770,5 +785,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       )}
     </div>
+    </>
   );
 }
