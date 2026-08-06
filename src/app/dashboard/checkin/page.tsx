@@ -268,7 +268,7 @@ export default function CheckinPage() {
 
       {/* Simulated Scanner View Modal */}
       {isScanning && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-500/ backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[color:var(--bg-tertiary)] border border-[color:var(--border)] rounded-3xl w-full max-w-md p-6 space-y-4 shadow-2xl relative animate-scale-up text-[color:var(--text-primary)]">
             <button
               onClick={() => setIsScanning(false)}
@@ -285,7 +285,7 @@ export default function CheckinPage() {
             </div>
 
             {/* Simulated Live Lens Viewport */}
-            <div className="relative aspect-video rounded-2xl bg-black border border-white/10 overflow-hidden flex flex-col items-center justify-center p-4 shadow-inner">
+            <div className="relative aspect-video rounded-2xl bg-slate-100 border border-white/10 overflow-hidden flex flex-col items-center justify-center p-4 shadow-inner">
               <style>{`
                 @keyframes scan {
                   0% { top: 0%; }

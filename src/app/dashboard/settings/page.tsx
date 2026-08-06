@@ -108,7 +108,7 @@ export default function SettingsPage() {
                   window.location.reload();
                 }
               }}
-              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-lg font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-900 shadow-lg font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2"
             >
               Reconfigure Dashboard
             </button>
@@ -139,7 +139,7 @@ export default function SettingsPage() {
               <span className="opacity-70">Merchant key:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 ml-1 capitalize">{currentMerchant.username}</span>
             </p>
             <p className="text-xs text-text-secondary">
-              <span className="opacity-70">BNX Mail:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 bg-black/5 dark:bg-white/5 p-0.5 rounded px-1.5 ml-1">{getBnxMailId()}</span>
+              <span className="opacity-70">BNX Mail:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-500/ dark:bg-white/5 p-0.5 rounded px-1.5 ml-1">{getBnxMailId()}</span>
             </p>
           </div>
         </div>

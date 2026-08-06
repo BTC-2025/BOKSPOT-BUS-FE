@@ -556,7 +556,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
 
                 <div className="border-t border-border-brand py-1">
-                  <button className="w-full flex items-center gap-4 px-6 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left cursor-pointer">
+                  <button className="w-full flex items-center gap-4 px-6 py-2 hover:bg-slate-500/ dark:hover:bg-white/5 transition-colors text-left cursor-pointer">
                     <User className="h-5 w-5 text-slate-500 shrink-0" />
                     <span className="text-[13px] font-semibold text-slate-700 dark:text-slate-200">Add another account</span>
                   </button>
@@ -658,7 +658,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Apple Spotlight Search Overlay Modal */}
       {spotlightOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex justify-center items-start pt-[10vh]">
+        <div className="fixed inset-0 z-50 bg-slate-500/ backdrop-blur-sm flex justify-center items-start pt-[10vh]">
           {/* Backdrop Click Dismiss */}
           <div className="fixed inset-0 -z-10" onClick={() => setSpotlightOpen(false)} />
           

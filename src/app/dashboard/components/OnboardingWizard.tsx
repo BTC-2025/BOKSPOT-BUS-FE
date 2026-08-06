@@ -91,7 +91,7 @@ export default function OnboardingWizard() {
               <button 
                 onClick={() => setStep(2)}
                 disabled={!merchantName}
-                className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl"
+                className="bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl"
               >
                 Continue <ArrowRight className="h-4 w-4" />
               </button>
@@ -127,7 +127,7 @@ export default function OnboardingWizard() {
 
             <div className="mt-8 flex justify-between">
               <button onClick={() => setStep(1)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition-all">Back</button>
-              <button onClick={() => setStep(3)} className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl">
+              <button onClick={() => setStep(3)} className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl">
                 Continue <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -209,7 +209,7 @@ export default function OnboardingWizard() {
               <button onClick={() => setStep(2)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-bold transition-all">Back</button>
               <button 
                 onClick={() => setStep(4)}
-                className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl"
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-xl"
               >
                 Continue Setup <ArrowRight className="h-4 w-4" />
               </button>

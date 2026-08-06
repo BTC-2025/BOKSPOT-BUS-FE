@@ -294,7 +294,7 @@ export default function WorkspacePage() {
 
       {/* MODALS */}
       {showAddStaffModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-500/ backdrop-blur-md p-4">
           <div className="w-full max-w-lg rounded-[2rem] border border-slate-200 bg-white shadow-2xl p-8 animate-scale-up">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-slate-900">{archetypeConfig.staffOnboardTitle || 'Onboard Staff'}</h3>
@@ -333,7 +333,7 @@ export default function WorkspacePage() {
       )}
 
       {showScheduleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-500/ backdrop-blur-md p-4">
           <div className="w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white shadow-2xl p-8 animate-scale-up">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-slate-900">{editingScheduleId ? (archetypeConfig.editServiceLabel || 'Edit Service') : (archetypeConfig.createServiceLabel || 'Create Service')}</h3>

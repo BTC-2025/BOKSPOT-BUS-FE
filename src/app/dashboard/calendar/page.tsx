@@ -320,7 +320,7 @@ export default function CalendarPage() {
               placeholder="Search customer name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/50 border border-white/5 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#8b6508]/40"
+              className="w-full bg-slate-500/ border border-white/5 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#8b6508]/40"
             />
           </div>
 
@@ -328,7 +328,7 @@ export default function CalendarPage() {
           <select
             value={serviceFilter}
             onChange={(e) => setServiceFilter(e.target.value)}
-            className="bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
+            className="bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
           >
             <option value="ALL">All Services</option>
             {Array.from(new Set(merchantBookings.map(b => b.serviceName)))
@@ -343,7 +343,7 @@ export default function CalendarPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
+            className="bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
           >
             <option value="ALL">All Statuses</option>
             <option value="CONFIRMED">Confirmed</option>
@@ -413,7 +413,7 @@ export default function CalendarPage() {
                             }}
                             className={`w-full h-full rounded-lg p-1.5 text-left border text-[9px] leading-tight truncate font-bold flex flex-col justify-between ${
                               isBlocked
-                                ? 'bg-slate-900/60 text-slate-500 border-slate-800/60'
+                                ? 'bg-slate-500/ text-slate-500 border-slate-800/60'
                                 : statusColors[slotBooking.status] || 'bg-white/5 border-white/10 text-white'
                             } cursor-pointer`}
                           >
@@ -506,7 +506,7 @@ export default function CalendarPage() {
                         <select
                           value={rescheduleDate}
                           onChange={(e) => setRescheduleDate(e.target.value)}
-                          className="bg-slate-900/50 border border-white/5 rounded-xl px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-[#8b6508]/40"
+                          className="bg-slate-500/ border border-white/5 rounded-xl px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-[#8b6508]/40"
                         >
                           <option value="">Choose Date</option>
                           {dates.map((d, idx) => (
@@ -517,7 +517,7 @@ export default function CalendarPage() {
                         <select
                           value={rescheduleTime}
                           onChange={(e) => setRescheduleTime(e.target.value)}
-                          className="bg-slate-900/50 border border-white/5 rounded-xl px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-[#8b6508]/40"
+                          className="bg-slate-500/ border border-white/5 rounded-xl px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-[#8b6508]/40"
                         >
                           <option value="">Choose Time</option>
                           {hours.map((h) => (
@@ -671,7 +671,7 @@ export default function CalendarPage() {
                         placeholder="Rajesh Kumar"
                         value={walkinName}
                         onChange={(e) => setWalkinName(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40"
+                        className="w-full bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40"
                       />
                     </div>
 
@@ -682,7 +682,7 @@ export default function CalendarPage() {
                         placeholder="+91 98765 43210"
                         value={walkinPhone}
                         onChange={(e) => setWalkinPhone(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40"
+                        className="w-full bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40"
                       />
                     </div>
 
@@ -696,7 +696,7 @@ export default function CalendarPage() {
                           const selectedSvc = merchantServices.find(s => s.id === sId);
                           if (selectedSvc) setWalkinPrice(selectedSvc.price);
                         }}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
+                        className="w-full bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
                       >
                         <option value="">-- Choose Service --</option>
                         {merchantServices.map((s) => (
@@ -712,7 +712,7 @@ export default function CalendarPage() {
                         placeholder="500"
                         value={walkinPrice}
                         onChange={(e) => setWalkinPrice(Number(e.target.value))}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
+                        className="w-full bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8b6508]/40"
                       />
                     </div>
 
@@ -723,7 +723,7 @@ export default function CalendarPage() {
                         value={walkinNotes}
                         onChange={(e) => setWalkinNotes(e.target.value)}
                         rows={2}
-                        className="w-full bg-slate-900/50 border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40 resize-none"
+                        className="w-full bg-slate-500/ border border-white/5 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#8b6508]/40 resize-none"
                       />
                     </div>
                   </div>

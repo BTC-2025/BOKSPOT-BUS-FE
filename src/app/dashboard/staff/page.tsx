@@ -203,7 +203,7 @@ export default function StaffPage() {
 
       {/* Add Staff Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-500/ backdrop-blur-xs px-4">
           <div className="w-full max-w-lg bg-bg-secondary border border-border-brand rounded-2xl p-6 shadow-2xl space-y-4 animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
               <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary flex items-center gap-2">

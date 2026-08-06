@@ -237,7 +237,7 @@ export default function DashboardPage() {
                           />
                         </div>
                         {/* Tooltip */}
-                        <div className="absolute -top-10 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                        <div className="absolute -top-10 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                           {val} {archetypeConfig.chartLabel || 'Count'}
                         </div>
                       </div>

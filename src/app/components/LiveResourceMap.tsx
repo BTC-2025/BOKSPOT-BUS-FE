@@ -215,21 +215,21 @@ export default function LiveResourceMap() {
         {/* Mock Technician Pins */}
         <div className="absolute top-[20%] left-[30%] group">
           <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Tech 1: Arrived
           </div>
         </div>
 
         <div className="absolute top-[60%] left-[70%] group">
           <div className="w-4 h-4 bg-amber-500 rounded-full border-2 border-white shadow-lg" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Tech 2: En Route (12 mins)
           </div>
         </div>
 
         <div className="absolute top-[40%] left-[50%] group">
           <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Tech 3: Idle
           </div>
         </div>

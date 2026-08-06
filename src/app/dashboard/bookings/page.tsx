@@ -182,7 +182,7 @@ export default function BookingsPage() {
       {/* THE ULTIMATE DRAWER (MEDICAL or TURF) */}
       {selectedBooking && (
         <>
-          <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSelectedBookingId(null)} />
+          <div className="fixed inset-0 z-40 bg-slate-500/ backdrop-blur-sm" onClick={() => setSelectedBookingId(null)} />
           <div className="fixed inset-y-0 right-0 z-50 w-full md:w-[700px] lg:w-[800px] bg-slate-50 border-l border-slate-200 shadow-2xl flex flex-col transform transition-transform animate-slide-in">
             
             {/* Drawer Header */}
