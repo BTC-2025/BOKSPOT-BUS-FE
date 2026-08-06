@@ -9,9 +9,11 @@ import {
   CloudSun, Wind, Thermometer, AlertTriangle, Calendar, Settings, Plus
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import LiveResourceMap from '../components/LiveResourceMap';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { currentMerchant, staffAccounts, bookings, loginRole, supervisorId, currentStaff, checkInBooking, completeBooking } = useVendorStore();
   const baseConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
   const archetypeConfig = { ...baseConfig, ...(currentMerchant?.customDictionary || {}) };
@@ -349,21 +351,21 @@ export default function DashboardPage() {
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 transition-all group border border-blue-100 hover:border-blue-600">
+                <button onClick={() => router.push('/dashboard/staff')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 transition-all group border border-blue-100 hover:border-blue-600">
                   <Users size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">'Quick Action 1'</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{archetypeConfig.action1Title || 'Manage Team'}</span>
                 </button>
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 transition-all group border border-emerald-100 hover:border-emerald-600">
+                <button onClick={() => router.push('/dashboard/bookings')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 transition-all group border border-emerald-100 hover:border-emerald-600">
                   <FileText size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">'Quick Action 2'</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{archetypeConfig.action2Title || 'All Records'}</span>
                 </button>
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-[#8b6508]/10 hover:bg-[#8b6508] hover:text-white text-[#8b6508] transition-all group border border-[#8b6508]/20 hover:border-[#8b6508]">
+                <button onClick={() => router.push('/dashboard/services')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-[#8b6508]/10 hover:bg-[#8b6508] hover:text-white text-[#8b6508] transition-all group border border-[#8b6508]/20 hover:border-[#8b6508]">
                   <Activity size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">'Quick Action 3'</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{archetypeConfig.action3Title || 'Services'}</span>
                 </button>
-                <button className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-red-50 hover:bg-red-600 hover:text-white text-red-600 transition-all group border border-red-100 hover:border-red-600">
+                <button onClick={() => router.push('/dashboard/settings')} className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-red-50 hover:bg-red-600 hover:text-white text-red-600 transition-all group border border-red-100 hover:border-red-600">
                   <ShieldAlert size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">'Quick Action 4'</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">{archetypeConfig.action4Title || 'Alerts'}</span>
                 </button>
               </div>
             </div>
