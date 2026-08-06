@@ -207,12 +207,32 @@ export default function LiveResourceMap() {
         {isCare ? <Baby size={18} className="text-rose-500" /> : <Wrench size={18} className="text-slate-700" />}
         {isCare ? 'Active Care Sessions' : 'Field Technician Map'}
       </h2>
-      <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center">
-        <div className="w-16 h-16 bg-slate-200 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <Map className="text-slate-400" />
+      <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden relative h-[250px]">
+        {/* Mock City Map Background */}
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cartographer.png')] mix-blend-multiply bg-blue-100" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        
+        {/* Mock Technician Pins */}
+        <div className="absolute top-[20%] left-[30%] group">
+          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Tech 1: Arrived
+          </div>
         </div>
-        <h3 className="font-black text-slate-900">Map Not Active</h3>
-        <p className="text-xs text-slate-500 mt-2">GPS tracking is currently disabled for your active {isCare ? 'sessions' : 'jobs'}.</p>
+
+        <div className="absolute top-[60%] left-[70%] group">
+          <div className="w-4 h-4 bg-amber-500 rounded-full border-2 border-white shadow-lg" />
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Tech 2: En Route (12 mins)
+          </div>
+        </div>
+
+        <div className="absolute top-[40%] left-[50%] group">
+          <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Tech 3: Idle
+          </div>
+        </div>
       </div>
     </div>
   );
