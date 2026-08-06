@@ -6,7 +6,7 @@ import {
   Users, User, Activity, ShieldAlert, CheckCircle2, ChevronRight, Phone, HeartPulse,
   Bed, Stethoscope, Syringe, Ambulance, FileText, IndianRupee, Clock,
   ArrowUpRight, ArrowDownRight, TrendingUp, Goal, Medal, MonitorPlay, Zap,
-  CloudSun, Wind, Thermometer, AlertTriangle
+  CloudSun, Wind, Thermometer, AlertTriangle, Calendar, Settings, Plus
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import LiveResourceMap from '../components/LiveResourceMap';
@@ -128,28 +128,28 @@ export default function DashboardPage() {
               <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> 4.2%</span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              {archetypeConfig.metric1Title || 'Metric 1'}
+              {archetypeConfig.metric1Title || 'Total Bookings'}
             </p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900">{occupancy}%</h3>
             </div>
-            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden">
-              <div className="bg-amber-500 h-full rounded-full" style={{ width: `${occupancy}%` }} />
-            </div>
+            <p className="text-xs font-semibold text-slate-500 mt-4 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> {archetypeConfig.activeStaffLabel || 'Live Capacity'}
+            </p>
           </div>
 
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Users size={80} />
+              <Calendar size={80} />
             </div>
             <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
-                <Users size={18} className="text-blue-600" />
+              <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100">
+                <Calendar size={18} className="text-emerald-600" />
               </div>
               <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> 12.5%</span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              {archetypeConfig.metric2Title || 'Metric 2'}
+              {archetypeConfig.metric2Title || 'Active Customers'}
             </p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900">{merchantBookings.length + 42}</h3>
@@ -170,13 +170,13 @@ export default function DashboardPage() {
               <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md"><ArrowUpRight size={12} /> High</span>
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-              {archetypeConfig.metric3Title || 'Metric 3'}
+              {archetypeConfig.metric3Title || 'Performance Index'}
             </p>
             <div className="flex items-baseline gap-2">
               <h3 className="text-3xl font-black text-slate-900">{metric3}</h3>
             </div>
             <p className="text-xs font-semibold text-slate-500 mt-4 flex items-center gap-1">
-              <Zap size={14} className="text-slate-400" /> {metric4} {archetypeConfig.metric4Title || 'Metric 4'}
+              <Zap size={14} className="text-slate-400" /> {metric4} {archetypeConfig.metric4Title || 'Weekly Growth'}
             </p>
           </div>
 
