@@ -88,6 +88,15 @@ export interface PersistedBooking {
   refereeAssigned?: string;
 }
 
+export interface SupportTicket {
+  id: string;
+  merchantId: string;
+  merchantName: string;
+  subject: string;
+  message: string;
+  status: 'open' | 'pending' | 'resolved';
+  createdAt: string;
+}
 export interface CatalogService {
   id: string;
   name: string;
@@ -232,6 +241,12 @@ interface VendorStoreState {
   updateMerchantModules: (merchantId: string, activeModules: string[], customDictionary?: Record<string, string>) => void;
   resetOnboarding: (merchantId: string) => void;
 
+  // Support Tickets
+  supportTickets: SupportTicket[];
+  fetchSupportTickets: () => Promise<void>;
+  addSupportTicket: (ticket: Omit<SupportTicket, 'id' | 'timestamp' | 'status' | 'createdAt'>) => void;
+  resolveSupportTicket: (ticketId: string) => void;
+  updateSupportTicketStatus: (ticketId: string, status: 'open' | 'pending' | 'resolved') => void;
 }
 
 export const PRESET_MERCHANTS: MerchantUser[] = [
@@ -5056,6 +5071,7 @@ export const useVendorStore = create<VendorStoreState>()(
     (set, get) => ({
       
   customMerchants: {},
+  supportTickets: [],
   completeOnboarding: (merchantId, setupData) => set((state) => {
     const customData: any = { isCustomized: true, activeModules: setupData.activeModules, customDictionary: setupData.customDictionary };
     if (setupData.merchantName) customData.merchantName = setupData.merchantName;
@@ -5538,6 +5554,90 @@ export const useVendorStore = create<VendorStoreState>()(
         set((state) => ({
           staffAccounts: state.staffAccounts.filter((s) => s.id !== staffId)
         }));
+      },
+
+      fetchSupportTickets: async () => {
+        try {
+          const res = await fetch('http://localhost:9000/api/v1/tickets');
+          if (res.ok) {
+            const body = await res.json();
+            const ticketsData = body.data || [];
+            // Map the API data structure to the BUS-FE structure
+            const mapped = ticketsData.map((t: any) => ({
+              id: t.id,
+              merchantId: t.merchantId,
+              merchantName: t.merchantName,
+              subject: t.subject,
+              message: t.message,
+              status: t.status.toLowerCase(), // OPEN -> open
+              createdAt: t.createdAt
+            }));
+            set({ supportTickets: mapped });
+          }
+        } catch (e) {
+          console.error('Failed to fetch tickets from backend', e);
+        }
+      },
+
+      addSupportTicket: async (ticket) => {
+        try {
+          const res = await fetch('http://localhost:9000/api/v1/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...ticket, targetType: 'ADMIN' })
+          });
+          if (res.ok) {
+            const body = await res.json();
+            const newTicket = body.data;
+            const mappedTicket = {
+              id: newTicket.id,
+              merchantId: newTicket.merchantId,
+              merchantName: newTicket.merchantName,
+              subject: newTicket.subject,
+              message: newTicket.message,
+              status: newTicket.status.toLowerCase(),
+              createdAt: newTicket.createdAt
+            };
+            set((state) => ({
+              supportTickets: [mappedTicket, ...state.supportTickets]
+            }));
+          }
+        } catch (e) {
+          console.error('Failed to create ticket in backend', e);
+        }
+      },
+
+      resolveSupportTicket: (ticketId) => {
+        set((state) => ({
+          supportTickets: state.supportTickets.map((t) =>
+            t.id === ticketId ? { ...t, status: 'resolved' } : t
+          )
+        }));
+      },
+
+      updateSupportTicketStatus: async (ticketId, status) => {
+        try {
+          const res = await fetch(`http://localhost:9000/api/v1/tickets/${ticketId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: status.toUpperCase() })
+          });
+          if (res.ok) {
+            set((state) => ({
+              supportTickets: state.supportTickets.map((t) =>
+                t.id === ticketId ? { ...t, status } : t
+              )
+            }));
+          }
+        } catch (e) {
+          console.error('Failed to update ticket status', e);
+          // Fallback local update
+          set((state) => ({
+            supportTickets: state.supportTickets.map((t) =>
+              t.id === ticketId ? { ...t, status } : t
+            )
+          }));
+        }
       }
     }),
     { name: 'vendor-portal-storage-v9' }

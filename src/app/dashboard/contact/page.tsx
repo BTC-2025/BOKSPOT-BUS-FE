@@ -2,17 +2,26 @@
 
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { useVendorStore } from '../../../lib/store';
 
 export default function ContactPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
+  const { currentMerchant, addSupportTicket } = useVendorStore();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subject.trim() || !message.trim()) return;
+    if (!subject.trim() || !message.trim() || !currentMerchant) return;
     
     // Simulate support ticket creation
+    addSupportTicket({
+      merchantId: currentMerchant.id,
+      merchantName: currentMerchant.merchantName,
+      subject,
+      message,
+    });
+    
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);

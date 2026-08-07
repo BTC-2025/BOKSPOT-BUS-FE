@@ -13,6 +13,7 @@ export default function AdminGatePage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -50,6 +51,14 @@ export default function AdminGatePage() {
 
     if (!username.trim() || !password) {
       setError('Please enter both username and password.');
+      return;
+    }
+
+    if (username.trim() === 'Admin' && password === 'Admin123') {
+      setSuccess('Super Admin access granted. Redirecting...');
+      setTimeout(() => {
+        window.location.href = '/admin';
+      }, 1000);
       return;
     }
 
@@ -108,11 +117,13 @@ export default function AdminGatePage() {
                 <span className="text-[#ff6325] font-black">SPOT</span>
               </span>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] bg-[#8b6508]/15 border border-[#8b6508]/30 text-[#fceea7] shadow-sm select-none">
-              MERCHANT CONSOLE
+            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-sm select-none ${isAdminMode ? 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400' : 'bg-[#8b6508]/15 border border-[#8b6508]/30 text-[#fceea7]'}`}>
+              {isAdminMode ? 'SUPER ADMIN CONSOLE' : 'MERCHANT CONSOLE'}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2">Sign in to manage bookings, services, and schedules.</p>
+          <p className="text-xs text-slate-400 mt-2">
+            {isAdminMode ? 'Sign in to access platform-wide settings and support tickets.' : 'Sign in to manage bookings, services, and schedules.'}
+          </p>
         </div>
  
         {/* Login Card */}
@@ -187,10 +198,20 @@ export default function AdminGatePage() {
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#8b6508] to-[#d4af37] text-white hover:brightness-105 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#8b6508]/10 mt-6 flex items-center justify-center gap-1.5 cursor-pointer"
+              className={`w-full text-white hover:brightness-105 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all mt-6 flex items-center justify-center gap-1.5 cursor-pointer ${isAdminMode ? 'bg-indigo-500 shadow-indigo-500/20' : 'bg-gradient-to-r from-[#8b6508] to-[#d4af37] shadow-[#8b6508]/10'}`}
             >
               Sign In <ArrowRight size={13} />
             </button>
+            
+            <div className="mt-4 pt-4 border-t border-border-brand/50 text-center">
+              <p className="text-[10px] text-text-secondary font-semibold">
+                {isAdminMode ? (
+                  <>Are you a merchant? <button type="button" onClick={() => setIsAdminMode(false)} className="text-indigo-400 font-bold hover:underline">Merchant Login</button></>
+                ) : (
+                  <>Platform Administrator? <button type="button" onClick={() => { setIsAdminMode(true); setUsername(''); setPassword(''); }} className="text-[#8b6508] font-bold hover:underline">Admin Login</button></>
+                )}
+              </p>
+            </div>
           </form>
  
 
