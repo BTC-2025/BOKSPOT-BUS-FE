@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Calendar, BookOpen, Settings, QrCode, 
   Package, Menu, X, Bell, LogOut, Stethoscope, Dumbbell, Bed, 
   Scissors, Utensils, ShieldAlert, Check, Trash2, Info,
   ChevronDown, Building, Film, Sparkles, LogOut as LogOutIcon, Laptop, User,
-  Sun, Moon, Users, Mail, Search, UserCog
+  Sun, Moon, Users, Mail, Search, UserCog, MapPin, Clock, ShieldCheck, MessageSquare, Calculator, Ticket, CheckCircle
 } from 'lucide-react';
 import { UtilityDrawer } from '../../components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
@@ -35,10 +35,15 @@ interface NotificationItem {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { currentMerchant, logoutMerchant, switchStore, loginRole, theme, setTheme, supervisorId, bookings, services } = useVendorStore();
   const [utilityDrawerOpen, setUtilityDrawerOpen] = useState(false);
   const [activeUtilityTab, setActiveUtilityTab] = useState<'calendar' | 'calc' | 'tasks' | 'contacts' | null>(null);
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const [city, setCity] = useState('Chennai');
+  const [status, setStatus] = useState<'idle' | 'detecting'>('idle');
+  const locationRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
 
@@ -123,6 +128,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       if (vendorInfoRef.current && !vendorInfoRef.current.contains(event.target as Node)) {
         setVendorInfoOpen(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setLocationDropdownOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -323,9 +331,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // WORKSPACE TAB (Management, Schedules, Settings)
     else {
       const items = [
-        { href: '/dashboard/services', icon: Package, label: archetypeConfig.managementLabel },
-        { href: '/dashboard/settings', icon: Settings, label: archetypeConfig.settingsLabel },
-        { href: '/dashboard/contact', icon: Mail, label: 'Contact Us' }
+        { href: '/dashboard/services', icon: Package, label: 'My Services' }
       ];
       if (accessLink) items.push(accessLink);
       return items;
@@ -340,7 +346,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (item.label === archetypeConfig.bookingTitle && !active.includes('bookings')) return false;
       if (item.label === archetypeConfig.staffTitle && !active.includes('staff')) return false;
       if (item.label === archetypeConfig.customerDirLabel && !active.includes('customers')) return false;
-      if (item.label === archetypeConfig.managementLabel && !active.includes('map')) return false;
+      if (item.label === 'My Services' && !active.includes('map')) return false;
       return true;
     });
   }
@@ -352,11 +358,53 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
       {/* Top Header (100% width across the top) */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
-        {/* Left Column: Logo */}
-        <div className="flex-1 flex items-center gap-4">
+        {/* Left Column: Logo & Location */}
+        <div className="flex-1 flex items-center gap-6">
           <Link href="/dashboard" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
+          
+          <div className="relative hidden lg:inline-block" ref={locationRef}>
+            <button
+              onClick={() => setLocationDropdownOpen(!locationDropdownOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shadow-md text-xs font-bold tracking-wide"
+            >
+              <MapPin size={14} className={status === 'detecting' ? 'animate-bounce' : ''} />
+              <span className="!text-white">{isMounted ? city : 'Chennai'}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200" style={{ transform: locationDropdownOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            {locationDropdownOpen && (
+              <div className="absolute left-0 top-full mt-3 w-56 bg-white dark:bg-[#1a1d24] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800/80 z-50 overflow-hidden backdrop-blur-xl animate-fade-up">
+                <div className="py-2 divide-y divide-slate-100 dark:divide-slate-800">
+                  <button
+                    onClick={() => {
+                      setStatus('detecting');
+                      setTimeout(() => { setStatus('idle'); setCity('Coimbatore'); setLocationDropdownOpen(false); }, 1500);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[#8b6508] hover:bg-[#8b6508]/10 transition-colors text-left text-xs font-bold"
+                  >
+                    <MapPin size={16} className="animate-pulse" />
+                    🎯 Detect GPS
+                  </button>
+                  <div className="py-1">
+                    {['Chennai', 'Madurai', 'Theni', 'Coimbatore', 'Bangalore', 'Mumbai', 'Delhi'].map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => {
+                          setCity(c);
+                          setLocationDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${city === c ? 'text-[#8b6508] bg-[#8b6508]/5' : 'text-slate-700 dark:text-slate-300'}`}
+                      >
+                        <span>📍 {c}</span>
+                        {city === c && <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-[#8b6508]"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Center Column: Floating Navigation Menu */}
@@ -432,7 +480,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="relative" ref={popoverRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative rounded-xl p-2 border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shadow-md"
+              className="relative flex items-center justify-center rounded-xl p-2 border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shadow-md"
             >
               <Bell className="h-3.5 w-3.5" />
               {unreadCount > 0 && (
@@ -597,8 +645,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* New Horizontal Navigation Bar */}
       <div className="bg-[#f9fafb] dark:bg-bg-secondary flex items-center px-6 py-2 shrink-0 shadow-sm border-b border-border-brand/40 relative z-40">
-        {/* Empty flex-1 to push nav to center */}
-        <div className="flex-1 hidden md:block"></div>
+        {/* Left side subscription link */}
+        <div className="flex-1 hidden md:flex items-center justify-start pl-2">
+          <Link
+            href="/dashboard/subscription"
+            className="flex items-center text-xs font-black uppercase tracking-wider text-[#8b6508] hover:text-[#6c4e06] transition-colors"
+          >
+            Subscription
+          </Link>
+        </div>
         
         <div className="flex-auto overflow-x-auto custom-scrollbar flex justify-center">
           <nav className="flex items-center gap-2 md:gap-4 mx-auto px-1 w-max">
@@ -610,8 +665,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs uppercase tracking-wide font-bold transition-all whitespace-nowrap ${
                   active 
-                    ? 'bg-[#8b6508] text-white shadow-md border border-[#8b6508]' 
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                    ? 'text-[#8b6508]' 
+                    : 'text-slate-600 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508]'
                 }`}
               >
                 <item.icon className="h-4 w-4" />
@@ -622,8 +677,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
         </div>
         
-        {/* Right side is now empty per user request */}
-        <div className="flex-1 hidden md:flex items-center justify-end gap-4 pl-4 relative">
+        {/* Right side icons and links */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-5 pl-4 pr-2 relative">
+          <Link
+            href="/dashboard/contact"
+            className="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
+            title="Help & Support"
+          >
+            <Info className="h-[18px] w-[18px]" />
+          </Link>
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
+            title="Settings"
+          >
+            <Settings className="h-[18px] w-[18px]" />
+          </Link>
         </div>
       </div>
 

@@ -88,6 +88,33 @@ export interface PersistedBooking {
   refereeAssigned?: string;
 }
 
+
+export interface CatalogListing {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  price?: number;
+  duration?: number;
+  active?: boolean;
+
+  // Extended Details
+  isTimingEnabled?: boolean;
+  timingDetails?: string;
+  isCapacityEnabled?: boolean;
+  participantCapacity?: number;
+  isAddonsEnabled?: boolean;
+  addOns?: Array<{ name: string; price: number }>;
+  isTipsEnabled?: boolean;
+  tipsAndGuidelines?: string;
+  isRestrictionsEnabled?: boolean;
+  restrictions?: string;
+  isInstructionsEnabled?: boolean;
+  specialInstructions?: string;
+  isOffersEnabled?: boolean;
+  offersAndDiscounts?: string;
+}
+
 export interface SupportTicket {
   id: string;
   merchantId: string;
@@ -107,8 +134,22 @@ export interface CatalogService {
   active: boolean;
   rating: number;
   bookingsCount: number;
+  listings?: CatalogListing[];
+  imageUrl?: string;
   description?: string;
   
+  // Extended Details
+  isTimingEnabled?: boolean;
+  timingDetails?: string;
+  participantCapacity?: number;
+  isAddonsEnabled?: boolean;
+  addOns?: Array<{ name: string; price: number }>;
+  isRulesEnabled?: boolean;
+  tipsAndGuidelines?: string;
+  restrictions?: string;
+  specialInstructions?: string;
+  isOffersEnabled?: boolean;
+  offersAndDiscounts?: string;
   // Custom industry-specific details
   specializationRequired?: string;
   difficultyLevel?: 'Beginner' | 'Intermediate' | 'Advanced';
