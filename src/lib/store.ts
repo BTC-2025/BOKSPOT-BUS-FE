@@ -5561,7 +5561,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: [service, ...state.services]
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
           const payload = {
             name: service.name,
@@ -5614,7 +5614,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.map((s) => (s.id === updated.id ? updated : s))
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           const payload = {
             name: updated.name,
             categoryId: 'b06981f6-b12b-4905-be30-d74da4b6906b',
@@ -5658,7 +5658,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.filter((s) => s.id !== serviceId)
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           await fetch(`${baseUrl}/services/${serviceId}`, {
             method: 'DELETE'
           });
@@ -5693,7 +5693,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       fetchSupportTickets: async () => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           const res = await fetch(`${baseUrl}/tickets`);
           if (res.ok) {
             const body = await res.json();
@@ -5717,7 +5717,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       addSupportTicket: async (ticket) => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           const res = await fetch(`${baseUrl}/tickets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5754,7 +5754,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       updateSupportTicketStatus: async (ticketId, status) => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           const res = await fetch(`${baseUrl}/tickets/${ticketId}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
