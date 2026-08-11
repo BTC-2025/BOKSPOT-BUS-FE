@@ -5563,12 +5563,17 @@ export const useVendorStore = create<VendorStoreState>()(
         try {
           const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
+          let dynamicCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default: general-service
+          const nameLower = service.name.toLowerCase();
+          if (nameLower.includes('room') || nameLower.includes('hotel') || nameLower.includes('stay')) {
+            dynamicCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Hotels
+          }
           const payload = {
             name: service.name,
-            categoryId: 'b06981f6-b12b-4905-be30-d74da4b6906b', // Default seeded Category ID
+            categoryId: dynamicCategoryId,
             description: service.description || '',
             shortDescription: service.description?.substring(0, 250) || '',
-            serviceType: 'APPOINTMENT',
+            serviceType: 'RENTAL',
             durationMinutes: Number(service.duration) || 60,
             basePrice: Number(service.price) || 0,
             maxCapacity: Number(service.maxCapacity) || 1,
