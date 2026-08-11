@@ -5597,6 +5597,11 @@ export const useVendorStore = create<VendorStoreState>()(
           });
           if (!res.ok) {
             console.error('Backend rejected addService:', await res.text());
+          } else {
+            const data = await res.json();
+            set((state) => ({
+              services: state.services.map((s) => s.id === service.id ? { ...s, id: data.data.id } : s)
+            }));
           }
         } catch (e) {
           console.error('Failed to sync addService to backend', e);
