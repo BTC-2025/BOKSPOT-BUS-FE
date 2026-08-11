@@ -5555,22 +5555,111 @@ export const useVendorStore = create<VendorStoreState>()(
       },
 
       // Services actions
-      addService: (service) => {
+      addService: async (service) => {
+        // Optimistic update
         set((state) => ({
           services: [service, ...state.services]
         }));
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          // Convert local CatalogService structure to CreateServiceDto
+          const payload = {
+            name: service.name,
+            categoryId: 'b06981f6-b12b-4905-be30-d74da4b6906b', // Default seeded Category ID
+            description: service.description || '',
+            shortDescription: service.description?.substring(0, 250) || '',
+            serviceType: 'APPOINTMENT',
+            durationMinutes: Number(service.duration) || 60,
+            basePrice: Number(service.price) || 0,
+            maxCapacity: Number(service.maxCapacity) || 1,
+            images: [service.imageUrl || ''],
+            // Map dynamic fields
+            isTimingEnabled: Boolean(service.isTimingEnabled),
+            timingDetails: String(service.timingDetails || ''),
+            isCapacityEnabled: Boolean(service.isCapacityEnabled),
+            participantCapacity: Number(service.participantCapacity) || 0,
+            isAddonsEnabled: Boolean(service.isAddonsEnabled),
+            addOns: service.addOns || [],
+            isTipsEnabled: Boolean(service.isTipsEnabled),
+            tipsAndGuidelines: String(service.tipsAndGuidelines || ''),
+            isRestrictionsEnabled: Boolean(service.isRestrictionsEnabled),
+            restrictions: String(service.restrictions || ''),
+            isOffersEnabled: Boolean(service.isOffersEnabled),
+            offersAndDiscounts: String(service.offersAndDiscounts || ''),
+            isInstructionsEnabled: Boolean(service.isInstructionsEnabled),
+            specialInstructions: String(service.specialInstructions || '')
+          };
+          
+          const res = await fetch(`${baseUrl}/services/2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e`, { // Default seeded Merchant ID
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            console.error('Backend rejected addService:', await res.text());
+          }
+        } catch (e) {
+          console.error('Failed to sync addService to backend', e);
+        }
       },
       
-      updateService: (updated) => {
+      updateService: async (updated) => {
+        // Optimistic update
         set((state) => ({
           services: state.services.map((s) => (s.id === updated.id ? updated : s))
         }));
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const payload = {
+            name: updated.name,
+            categoryId: 'b06981f6-b12b-4905-be30-d74da4b6906b',
+            description: updated.description || '',
+            shortDescription: updated.description?.substring(0, 250) || '',
+            durationMinutes: Number(updated.duration) || 60,
+            basePrice: Number(updated.price) || 0,
+            maxCapacity: Number(updated.maxCapacity) || 1,
+            images: [updated.imageUrl || ''],
+            isTimingEnabled: Boolean(updated.isTimingEnabled),
+            timingDetails: String(updated.timingDetails || ''),
+            isCapacityEnabled: Boolean(updated.isCapacityEnabled),
+            participantCapacity: Number(updated.participantCapacity) || 0,
+            isAddonsEnabled: Boolean(updated.isAddonsEnabled),
+            addOns: updated.addOns || [],
+            isTipsEnabled: Boolean(updated.isTipsEnabled),
+            tipsAndGuidelines: String(updated.tipsAndGuidelines || ''),
+            isRestrictionsEnabled: Boolean(updated.isRestrictionsEnabled),
+            restrictions: String(updated.restrictions || ''),
+            isOffersEnabled: Boolean(updated.isOffersEnabled),
+            offersAndDiscounts: String(updated.offersAndDiscounts || ''),
+            isInstructionsEnabled: Boolean(updated.isInstructionsEnabled),
+            specialInstructions: String(updated.specialInstructions || '')
+          };
+          
+          const res = await fetch(`${baseUrl}/services/${updated.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            console.error('Backend rejected updateService:', await res.text());
+          }
+        } catch (e) {
+          console.error('Failed to sync updateService to backend', e);
+        }
       },
       
-      deleteService: (serviceId) => {
+      deleteService: async (serviceId) => {
         set((state) => ({
           services: state.services.filter((s) => s.id !== serviceId)
         }));
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          await fetch(`${baseUrl}/services/${serviceId}`, {
+            method: 'DELETE'
+          });
+        } catch (e) {
+          console.error('Failed to sync deleteService to backend', e);
+        }
       },
 
       // Staff actions
@@ -5599,7 +5688,8 @@ export const useVendorStore = create<VendorStoreState>()(
 
       fetchSupportTickets: async () => {
         try {
-          const res = await fetch('http://localhost:9000/api/v1/tickets');
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const res = await fetch(`${baseUrl}/tickets`);
           if (res.ok) {
             const body = await res.json();
             const ticketsData = body.data || [];
@@ -5622,7 +5712,8 @@ export const useVendorStore = create<VendorStoreState>()(
 
       addSupportTicket: async (ticket) => {
         try {
-          const res = await fetch('http://localhost:9000/api/v1/tickets', {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const res = await fetch(`${baseUrl}/tickets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...ticket, targetType: 'ADMIN' })
@@ -5658,7 +5749,8 @@ export const useVendorStore = create<VendorStoreState>()(
 
       updateSupportTicketStatus: async (ticketId, status) => {
         try {
-          const res = await fetch(`http://localhost:9000/api/v1/tickets/${ticketId}/status`, {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const res = await fetch(`${baseUrl}/tickets/${ticketId}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: status.toUpperCase() })

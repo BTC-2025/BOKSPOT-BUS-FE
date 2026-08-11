@@ -649,8 +649,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 hidden md:flex items-center justify-start pl-2">
           <Link
             href="/dashboard/subscription"
-            className="flex items-center text-xs font-black uppercase tracking-wider text-[#8b6508] hover:text-[#6c4e06] transition-colors"
+            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#8b6508] hover:text-[#6c4e06] transition-colors"
           >
+            <CheckCircle className="h-[14px] w-[14px]" />
             Subscription
           </Link>
         </div>
@@ -681,17 +682,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex-1 hidden md:flex items-center justify-end gap-5 pl-4 pr-2 relative">
           <Link
             href="/dashboard/contact"
-            className="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
-            title="Help & Support"
+            className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
+            title="Support"
           >
-            <Info className="h-[18px] w-[18px]" />
+            <Info className="h-[15px] w-[15px]" />
+            Support
           </Link>
           <Link
             href="/dashboard/settings"
-            className="flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
+            className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
             title="Settings"
           >
-            <Settings className="h-[18px] w-[18px]" />
+            <Settings className="h-[15px] w-[15px]" />
+            Settings
           </Link>
         </div>
       </div>
