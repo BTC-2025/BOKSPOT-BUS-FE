@@ -3,7 +3,7 @@
 import { useVendorStore, CatalogListing } from '../../../../../../lib/store';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, ToggleLeft, ToggleRight, Save } from 'lucide-react';
+import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, ToggleLeft, ToggleRight, Save, Bed } from 'lucide-react';
 
 const ToggleHeader = ({ title, enabled, onToggle, desc, icon: Icon }: any) => (
   <div className="flex items-start justify-between pb-4 mb-6">
@@ -61,6 +61,9 @@ export default function ListingEditorPage() {
   const [isRestrictionsEnabled, setIsRestrictionsEnabled] = useState(false);
   const [isInstructionsEnabled, setIsInstructionsEnabled] = useState(false);
   const [isOffersEnabled, setIsOffersEnabled] = useState(false);
+  
+  // Config-Driven Metadata State
+  const [metadata, setMetadata] = useState<Record<string, any>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -90,6 +93,7 @@ export default function ListingEditorPage() {
           setIsRestrictionsEnabled(list.isRestrictionsEnabled || false);
           setIsInstructionsEnabled(list.isInstructionsEnabled || false);
           setIsOffersEnabled(list.isOffersEnabled || false);
+          setMetadata(list.metadata || {});
         }
       }
     }
@@ -143,7 +147,8 @@ export default function ListingEditorPage() {
       specialInstructions: isInstructionsEnabled ? (detInstructions.trim() || undefined) : undefined,
       
       isOffersEnabled,
-      offersAndDiscounts: isOffersEnabled ? (detOffers.trim() || undefined) : undefined
+      offersAndDiscounts: isOffersEnabled ? (detOffers.trim() || undefined) : undefined,
+      metadata
     };
 
     let updatedListings = category.listings || [];
@@ -283,6 +288,73 @@ export default function ListingEditorPage() {
               </div>
             </div>
           </div>
+
+          <div className="h-px bg-slate-100 w-full my-8"></div>
+
+          {/* DYNAMIC CONFIG DRIVEN UI BLOCK */}
+          {currentMerchant.archetype === 'Accommodation' && (
+            <div>
+              <h4 className="text-xl font-black text-slate-900 mb-6 border-b border-slate-100 pb-4 flex items-center gap-2">
+                <Bed size={24} className="text-[#8b6508]" />
+                Hotel Specific Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#8b6508]/5 p-6 rounded-2xl border border-[#8b6508]/20">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Bed Size</label>
+                  <select
+                    value={metadata.bedSize || ''}
+                    onChange={(e) => setMetadata({...metadata, bedSize: e.target.value})}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium bg-white"
+                  >
+                    <option value="">Select Bed Size</option>
+                    <option value="Single">Single</option>
+                    <option value="Double">Double</option>
+                    <option value="Queen">Queen</option>
+                    <option value="King">King</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Max Guests</label>
+                  <input
+                    type="number"
+                    value={metadata.maxGuests || ''}
+                    onChange={(e) => setMetadata({...metadata, maxGuests: parseInt(e.target.value)})}
+                    placeholder="e.g. 2"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium bg-white"
+                  />
+                </div>
+                <div className="md:col-span-2 flex flex-wrap items-center gap-6 pt-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!metadata.hasAC}
+                      onChange={(e) => setMetadata({...metadata, hasAC: e.target.checked})}
+                      className="w-5 h-5 rounded text-[#8b6508] focus:ring-[#8b6508]"
+                    />
+                    <span className="font-bold text-slate-700">Air Conditioning</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!metadata.hasWiFi}
+                      onChange={(e) => setMetadata({...metadata, hasWiFi: e.target.checked})}
+                      className="w-5 h-5 rounded text-[#8b6508] focus:ring-[#8b6508]"
+                    />
+                    <span className="font-bold text-slate-700">Free WiFi</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={!!metadata.hasBreakfast}
+                      onChange={(e) => setMetadata({...metadata, hasBreakfast: e.target.checked})}
+                      className="w-5 h-5 rounded text-[#8b6508] focus:ring-[#8b6508]"
+                    />
+                    <span className="font-bold text-slate-700">Breakfast Included</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="h-px bg-slate-100 w-full my-8"></div>
 

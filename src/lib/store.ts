@@ -113,6 +113,7 @@ export interface CatalogListing {
   specialInstructions?: string;
   isOffersEnabled?: boolean;
   offersAndDiscounts?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface SupportTicket {
@@ -5147,8 +5148,8 @@ export const useVendorStore = create<VendorStoreState>()(
       supervisorId: null,
       currentStaff: null,
       theme: 'system',
-      bookings: INITIAL_BOOKINGS,
-      services: INITIAL_SERVICES,
+      bookings: [],
+      services: [],
       staffAccounts: [
         {
           id: 'chef@restaurant.com',
@@ -5341,12 +5342,7 @@ export const useVendorStore = create<VendorStoreState>()(
           const found = PRESET_MERCHANTS.find((m) => m.id === subAcc.merchantId);
           if (found) {
             set({ currentMerchant: found, loginRole: 'supervisor', supervisorId: subAcc.subId });
-            // Seed services for this merchant if not present
-            const hasServices = get().services.some(s => s.merchant === found.merchantName);
-            if (!hasServices) {
-              const newServices = getMockServicesForAdminMerchant(found);
-              set({ services: [...get().services, ...newServices] });
-            }
+            // No mock seeding - user gets a blank slate
             return true;
           }
         }
@@ -5368,12 +5364,7 @@ export const useVendorStore = create<VendorStoreState>()(
           const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
           set({ currentMerchant: finalMerchant, loginRole: 'vendor', supervisorId: null });
           
-          // Seed services for this merchant if not present
-          const hasServices = get().services.some(s => s.merchant === found.merchantName);
-          if (!hasServices) {
-            const newServices = getMockServicesForAdminMerchant(found);
-            set({ services: [...get().services, ...newServices] });
-          }
+          // No mock seeding - user gets a blank slate when starting fresh
           return true;
         }
 
@@ -5402,12 +5393,7 @@ export const useVendorStore = create<VendorStoreState>()(
           const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
           set({ currentMerchant: finalMerchant });
           
-          // Seed services for this merchant if not present
-          const hasServices = get().services.some(s => s.merchant === found.merchantName);
-          if (!hasServices) {
-            const newServices = getMockServicesForAdminMerchant(found);
-            set({ services: [...get().services, ...newServices] });
-          }
+          // No mock seeding - user gets a blank slate when starting fresh
         }
       },
       
@@ -5561,7 +5547,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: [service, ...state.services]
         }));
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
           let dynamicCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default: general-service
           const nameLower = service.name.toLowerCase();
@@ -5569,6 +5555,7 @@ export const useVendorStore = create<VendorStoreState>()(
             dynamicCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Hotels
           }
           const payload = {
+            id: service.id,
             name: service.name,
             categoryId: dynamicCategoryId,
             description: service.description || '',
@@ -5578,6 +5565,10 @@ export const useVendorStore = create<VendorStoreState>()(
             basePrice: Number(service.price) || 0,
             maxCapacity: Number(service.maxCapacity) || 1,
             images: [service.imageUrl || ''],
+            metadata: { 
+              merchantName: get().currentMerchant?.merchantName || service.merchant,
+              listings: service.listings 
+            },
             // Map dynamic fields
             isTimingEnabled: Boolean(service.isTimingEnabled),
             timingDetails: String(service.timingDetails || ''),
@@ -5619,7 +5610,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.map((s) => (s.id === updated.id ? updated : s))
         }));
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
           
@@ -5637,7 +5628,11 @@ export const useVendorStore = create<VendorStoreState>()(
             durationMinutes: Number(source.duration) || 60,
             basePrice: Number(source.price) || 0,
             maxCapacity: Number(source.maxCapacity) || 1,
-            images: [source.imageUrl || ''],
+            images: [source.imageUrl || updated.imageUrl || ''],
+            metadata: { 
+              merchantName: get().currentMerchant?.merchantName || updated.merchant,
+              listings: updated.listings 
+            },
             isTimingEnabled: Boolean(source.isTimingEnabled),
             timingDetails: String(source.timingDetails || ''),
             isCapacityEnabled: Boolean(source.isCapacityEnabled),
@@ -5672,7 +5667,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.filter((s) => s.id !== serviceId)
         }));
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           await fetch(`${baseUrl}/services/${serviceId}`, {
             method: 'DELETE'
           });
@@ -5707,7 +5702,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       fetchSupportTickets: async () => {
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets`);
           if (res.ok) {
             const body = await res.json();
@@ -5731,7 +5726,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       addSupportTicket: async (ticket) => {
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5768,7 +5763,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       updateSupportTicketStatus: async (ticketId, status) => {
         try {
-          const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets/${ticketId}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },

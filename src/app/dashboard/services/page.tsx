@@ -39,7 +39,7 @@ export default function WorkspacePage() {
     if (!serviceName.trim()) return;
 
     const newService: CatalogService = {
-      id: editingServiceId || `srv-${Date.now()}`,
+      id: editingServiceId || crypto.randomUUID(),
       name: serviceName.trim(),
       merchant: currentMerchant.merchantName,
       price: 0,
