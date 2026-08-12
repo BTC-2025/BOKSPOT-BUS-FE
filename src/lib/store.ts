@@ -5620,29 +5620,38 @@ export const useVendorStore = create<VendorStoreState>()(
         }));
         try {
           const baseUrl = 'https://bokspot-be.onrender.com/api/v1';
+          // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
+          const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
+          
+          let dynamicCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default: general-service
+          const nameLower = updated.name.toLowerCase();
+          if (nameLower.includes('room') || nameLower.includes('hotel') || nameLower.includes('stay')) {
+            dynamicCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Hotels
+          }
+          
           const payload = {
             name: updated.name,
-            categoryId: 'b06981f6-b12b-4905-be30-d74da4b6906b',
+            categoryId: dynamicCategoryId,
             description: updated.description || '',
             shortDescription: updated.description?.substring(0, 250) || '',
-            durationMinutes: Number(updated.duration) || 60,
-            basePrice: Number(updated.price) || 0,
-            maxCapacity: Number(updated.maxCapacity) || 1,
-            images: [updated.imageUrl || ''],
-            isTimingEnabled: Boolean(updated.isTimingEnabled),
-            timingDetails: String(updated.timingDetails || ''),
-            isCapacityEnabled: Boolean(updated.isCapacityEnabled),
-            participantCapacity: Number(updated.participantCapacity) || 0,
-            isAddonsEnabled: Boolean(updated.isAddonsEnabled),
-            addOns: updated.addOns || [],
-            isTipsEnabled: Boolean(updated.isTipsEnabled),
-            tipsAndGuidelines: String(updated.tipsAndGuidelines || ''),
-            isRestrictionsEnabled: Boolean(updated.isRestrictionsEnabled),
-            restrictions: String(updated.restrictions || ''),
-            isOffersEnabled: Boolean(updated.isOffersEnabled),
-            offersAndDiscounts: String(updated.offersAndDiscounts || ''),
-            isInstructionsEnabled: Boolean(updated.isInstructionsEnabled),
-            specialInstructions: String(updated.specialInstructions || '')
+            durationMinutes: Number(source.duration) || 60,
+            basePrice: Number(source.price) || 0,
+            maxCapacity: Number(source.maxCapacity) || 1,
+            images: [source.imageUrl || ''],
+            isTimingEnabled: Boolean(source.isTimingEnabled),
+            timingDetails: String(source.timingDetails || ''),
+            isCapacityEnabled: Boolean(source.isCapacityEnabled),
+            participantCapacity: Number(source.participantCapacity) || 0,
+            isAddonsEnabled: Boolean(source.isAddonsEnabled),
+            addOns: source.addOns || [],
+            isTipsEnabled: Boolean(source.isTipsEnabled),
+            tipsAndGuidelines: String(source.tipsAndGuidelines || ''),
+            isRestrictionsEnabled: Boolean(source.isRestrictionsEnabled),
+            restrictions: String(source.restrictions || ''),
+            isOffersEnabled: Boolean(source.isOffersEnabled),
+            offersAndDiscounts: String(source.offersAndDiscounts || ''),
+            isInstructionsEnabled: Boolean(source.isInstructionsEnabled),
+            specialInstructions: String(source.specialInstructions || '')
           };
           
           const res = await fetch(`${baseUrl}/services/${updated.id}`, {
