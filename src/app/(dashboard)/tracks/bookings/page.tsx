@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore, PersistedBooking } from '../../../lib/store'; 
+import { useVendorStore, PersistedBooking } from '@/lib/store'; 
 import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { 
   Search, Clock, CheckCircle2, ChevronRight, X, Phone, 

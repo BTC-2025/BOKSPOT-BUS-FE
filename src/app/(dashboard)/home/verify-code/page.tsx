@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore } from '../../../lib/store';
+import { useVendorStore } from '@/lib/store';
 import { QrCode, CheckCircle2, XCircle, Search, Clock, ArrowRight, ShieldCheck, User, Camera, ScanLine, X, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 

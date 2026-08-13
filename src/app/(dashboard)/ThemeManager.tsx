@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useVendorStore } from '../../lib/store';
+import { useVendorStore } from '@/lib/store';
 
 export function ThemeManager() {
   const { theme } = useVendorStore();

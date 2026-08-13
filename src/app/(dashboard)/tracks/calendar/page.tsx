@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore, PersistedBooking } from '../../../lib/store';
+import { useVendorStore, PersistedBooking } from '@/lib/store';
 import { 
   ChevronLeft, ChevronRight, Calendar, User, Clock, CheckCircle2, 
   ShieldAlert, IndianRupee, Lock, Unlock, PlusCircle, Search, Trash2, XCircle,
@@ -638,7 +638,7 @@ export default function CalendarPage() {
                       )}
 
                       <a
-                        href="/dashboard/bookings"
+                        href="/workspace/bookings"
                         className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 py-2 text-xs font-bold text-slate-300 transition-all text-center cursor-pointer"
                       >
                         Open Complete Client File

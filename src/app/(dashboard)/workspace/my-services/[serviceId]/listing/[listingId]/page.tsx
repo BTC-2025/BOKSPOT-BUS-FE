@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore, CatalogListing } from '../../../../../../lib/store';
+import { useVendorStore, CatalogListing } from '@/lib/store';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, ToggleLeft, ToggleRight, Save, Bed } from 'lucide-react';
@@ -164,7 +164,7 @@ export default function ListingEditorPage() {
     };
 
     updateService(updatedCategory);
-    router.push(`/dashboard/services/${serviceId}`);
+    router.push(`/workspace/my-services/${serviceId}`);
   };
 
   return (
@@ -173,7 +173,7 @@ export default function ListingEditorPage() {
       {/* Header section (No buttons here) */}
       <div className="py-6">
         <button 
-          onClick={() => router.push(`/dashboard/services/${serviceId}`)}
+          onClick={() => router.push(`/workspace/my-services/${serviceId}`)}
           className="flex items-center gap-2 text-slate-500 hover:text-[#8b6508] font-bold text-sm mb-4 transition-colors"
         >
           <ArrowLeft size={16} /> Back to {category.name} Listings
@@ -602,7 +602,7 @@ export default function ListingEditorPage() {
         {/* Footer with Buttons inside the single card */}
         <div className="bg-slate-50 p-6 md:p-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-end gap-4">
           <button 
-            onClick={() => router.push(`/dashboard/services/${serviceId}`)}
+            onClick={() => router.push(`/workspace/my-services/${serviceId}`)}
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-slate-600 font-bold hover:bg-slate-200 transition-colors"
           >
             Cancel

@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore, CatalogListing } from '../../../../lib/store';
+import { useVendorStore, CatalogListing } from '@/lib/store';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Plus, ArrowLeft, Image as ImageIcon, Trash2 } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function ServiceListingsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Category Not Found</h2>
-        <button onClick={() => router.push('/dashboard/services')} className="px-6 py-2 bg-slate-900 text-white rounded-xl">Go Back</button>
+        <button onClick={() => router.push('/workspace/my-services')} className="px-6 py-2 bg-slate-900 text-white rounded-xl">Go Back</button>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function ServiceListingsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <button 
-            onClick={() => router.push('/dashboard/services')}
+            onClick={() => router.push('/workspace/my-services')}
             className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold text-sm mb-4 transition-colors"
           >
             <ArrowLeft size={16} /> Back to Categories
@@ -71,7 +71,7 @@ export default function ServiceListingsPage() {
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => router.push(`/dashboard/services/${serviceId}/listing/new`)}
+            onClick={() => router.push(`/workspace/my-services/${serviceId}/listing/new`)}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-bold text-xs uppercase tracking-widest transition-colors"
           >
             <Plus size={16} /> My Listing
@@ -85,7 +85,7 @@ export default function ServiceListingsPage() {
           {listings.map(list => (
             <div 
               key={list.id} 
-              onClick={() => router.push(`/dashboard/services/${serviceId}/listing/${list.id}`)}
+              onClick={() => router.push(`/workspace/my-services/${serviceId}/listing/${list.id}`)}
               className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden flex flex-col cursor-pointer group"
             >
               <div className="h-40 w-full bg-slate-100 relative">

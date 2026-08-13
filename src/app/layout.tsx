@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ThemeManager } from './dashboard/ThemeManager';
+import { ThemeManager } from './(dashboard)/ThemeManager';
 import './globals.css';
 
 export const metadata: Metadata = {

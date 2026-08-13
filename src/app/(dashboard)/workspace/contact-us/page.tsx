@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, CheckCircle2 } from 'lucide-react';
-import { useVendorStore } from '../../../lib/store';
+import { useVendorStore } from '@/lib/store';
 
 export default function ContactPage() {
   const [subject, setSubject] = useState('');

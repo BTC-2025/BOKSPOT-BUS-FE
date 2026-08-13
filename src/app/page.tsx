@@ -32,7 +32,7 @@ export default function AdminGatePage() {
 
   useEffect(() => {
     if (mounted && hasHydrated && currentMerchant) {
-      window.location.href = '/dashboard';
+      window.location.href = '/home/dashboard-home';
     }
   }, [currentMerchant, mounted, hasHydrated]);
 
@@ -66,7 +66,7 @@ export default function AdminGatePage() {
     if (successLogin) {
       setSuccess('Sign in successful. Redirecting to console...');
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/home/dashboard-home';
       }, 1000);
     } else {
       setError('Invalid username or passcode.');
@@ -83,7 +83,7 @@ export default function AdminGatePage() {
     if (successLogin) {
       setSuccess(`Authenticated as ${user}! Redirecting...`);
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = '/home/dashboard-home';
       }, 800);
     } else {
       setError('Quick login configuration error.');

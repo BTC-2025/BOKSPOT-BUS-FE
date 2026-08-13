@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore } from '../../../lib/store';
+import { useVendorStore } from '@/lib/store';
 import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { 
   Building2, Mail, Phone, Globe, MapPin, Save, Info, User,

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useVendorStore } from '../../../lib/store';
-import { getArchetypeConfig } from '../../../lib/businessDictionary';
+import { useVendorStore } from '@/lib/store';
+import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { 
   Users, Search, Mail, Phone, Calendar, ArrowUpRight, 
   DollarSign, BookOpen, Star, RefreshCw

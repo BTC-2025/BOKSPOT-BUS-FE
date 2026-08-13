@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useVendorStore, StaffMember, StaffPermissions } from '../../../lib/store';
+import { useVendorStore, StaffMember, StaffPermissions } from '@/lib/store';
 import { getArchetypeConfig } from '@/lib/businessDictionary';
 import {
   Users, UserPlus, Search, Star, Phone, Mail, Clock,

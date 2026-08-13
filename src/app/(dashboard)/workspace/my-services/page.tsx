@@ -1,6 +1,6 @@
 'use client';
 
-import { useVendorStore, CatalogService } from '../../../lib/store'; 
+import { useVendorStore, CatalogService } from '@/lib/store';
 import { getArchetypeConfig } from '@/lib/businessDictionary';
 import { Plus, Trash2, Edit, X, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -81,7 +81,7 @@ export default function WorkspacePage() {
   };
 
   const openCategoryPage = (srv: CatalogService) => {
-    router.push(`/dashboard/services/${srv.id}`);
+    router.push(`/workspace/my-services/${srv.id}`);
   };
 
   const getFallbackImage = (name: string) => {

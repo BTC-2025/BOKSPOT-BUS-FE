@@ -10,19 +10,19 @@ import {
   ChevronDown, Building, Film, Sparkles, LogOut as LogOutIcon, Laptop, User,
   Sun, Moon, Users, Mail, Search, UserCog, MapPin, Clock, ShieldCheck, MessageSquare, Calculator, Ticket, CheckCircle
 } from 'lucide-react';
-import { UtilityDrawer } from '../../components/UtilityDrawer';
+import { UtilityDrawer } from '@/components/UtilityDrawer';
 import { useState, useEffect, useRef } from 'react';
-import { useVendorStore, PRESET_MERCHANTS } from '../../lib/store'; 
+import { useVendorStore, PRESET_MERCHANTS } from '@/lib/store'; 
 import { getArchetypeConfig } from '@/lib/businessDictionary';
 import OnboardingWizard from './components/OnboardingWizard';
-import { getVerticalFromCategory } from '../../lib/categoryUtils';
+import { getVerticalFromCategory } from '@/lib/categoryUtils';
 
 const staticNavItems = [
-  { href: '/dashboard/checkin', icon: QrCode, label: 'Verify Code' },
-  { href: '/dashboard/staff', icon: Users, label: 'Staff Management' },
-  { href: '/dashboard/customers', icon: User, label: 'Customer Directory' },
-  { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
-  { href: '/dashboard/contact', icon: Mail, label: 'Contact Us' },
+  { href: '/home/verify-code', icon: QrCode, label: 'Verify Code' },
+  { href: '/workspace/hotel-staff-roster', icon: Users, label: 'Staff Management' },
+  { href: '/tracks/customer-directory', icon: User, label: 'Customer Directory' },
+  { href: '/workspace/settings', icon: Settings, label: 'Settings' },
+  { href: '/workspace/contact-us', icon: Mail, label: 'Contact Us' },
 ];
 
 interface NotificationItem {
@@ -278,12 +278,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const searchPages = [
-    { label: 'Dashboard Home', href: '/dashboard', description: 'Main overview & logs', type: 'page', icon: LayoutDashboard },
-    { label: 'Verify Code', href: '/dashboard/checkin', description: 'Check-in ticket codes', type: 'page', icon: QrCode },
-    { label: 'Staff Management', href: '/dashboard/staff', description: 'Manage employee assignments', type: 'page', icon: Users },
-    { label: 'Customer Directory', href: '/dashboard/customers', description: 'Diner database', type: 'page', icon: User },
-    { label: 'Business Settings', href: '/dashboard/settings', description: 'Working hours & profile details', type: 'page', icon: Settings },
-    { label: 'Contact Us', href: '/dashboard/contact', description: 'Support helpdesk & tickets', type: 'page', icon: Mail },
+    { label: 'Dashboard Home', href: '/home/dashboard-home', description: 'Main overview & logs', type: 'page', icon: LayoutDashboard },
+    { label: 'Verify Code', href: '/home/verify-code', description: 'Check-in ticket codes', type: 'page', icon: QrCode },
+    { label: 'Staff Management', href: '/workspace/hotel-staff-roster', description: 'Manage employee assignments', type: 'page', icon: Users },
+    { label: 'Customer Directory', href: '/tracks/customer-directory', description: 'Diner database', type: 'page', icon: User },
+    { label: 'Business Settings', href: '/workspace/settings', description: 'Working hours & profile details', type: 'page', icon: Settings },
+    { label: 'Contact Us', href: '/workspace/contact-us', description: 'Support helpdesk & tickets', type: 'page', icon: Mail },
   ];
 
   const searchResults = searchQuery.trim() === '' ? [] : [
@@ -292,7 +292,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .filter(s => s.merchant.toLowerCase() === currentMerchant?.merchantName.toLowerCase() && s.name.toLowerCase().includes(searchQuery.toLowerCase()))
       .map(s => ({
         label: s.name,
-        href: '/dashboard/services',
+        href: '/workspace/my-services',
         description: `Listing · ₹${s.price} · ${s.duration} mins`,
         type: 'service',
         icon: Package
@@ -305,33 +305,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       ))
       .map(b => ({
         label: `${b.customerName} (${b.ref})`,
-        href: '/dashboard/bookings',
+        href: '/tracks/bookings',
         description: `Booking · ${b.serviceName} · ${b.date} ${b.time}`,
         type: 'booking',
         icon: BookOpen
       }))
   ];  const getDynamicNavItems = () => {
     const isOwner = loginRole !== 'staff';
-    const accessLink = isOwner ? { href: '/dashboard/staff', icon: Users, label: archetypeConfig.staffRosterLabel } : null;
+    const accessLink = isOwner ? { href: '/workspace/hotel-staff-roster', icon: Users, label: archetypeConfig.staffRosterLabel } : null;
 
     // HOME TAB (Dashboard & Quick Check-in)
-    if (pathname === '/dashboard' || pathname === '/dashboard/checkin') {
+    if (pathname === '/home/dashboard-home' || pathname === '/home/verify-code') {
       return [
-        { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard Home' },
-        { href: '/dashboard/checkin', icon: QrCode, label: archetypeConfig.scanLabel },
+        { href: '/home/dashboard-home', icon: LayoutDashboard, label: 'Dashboard Home' },
+        { href: '/home/verify-code', icon: QrCode, label: archetypeConfig.scanLabel },
       ];
     } 
     // TRACKS TAB (Records & Patients)
-    else if (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') {
+    else if (pathname.startsWith('/tracks/bookings') || pathname === '/tracks/customer-directory') {
       return [
-        { href: '/dashboard/bookings', icon: BookOpen, label: archetypeConfig.bookingTitle },
-        { href: '/dashboard/customers', icon: User, label: archetypeConfig.customerDirLabel },
+        { href: '/tracks/bookings', icon: BookOpen, label: archetypeConfig.bookingTitle },
+        { href: '/tracks/customer-directory', icon: User, label: archetypeConfig.customerDirLabel },
       ];
     } 
     // WORKSPACE TAB (Management, Schedules, Settings)
     else {
       const items = [
-        { href: '/dashboard/services', icon: Package, label: 'My Services' }
+        { href: '/workspace/my-services', icon: Package, label: 'My Services' }
       ];
       if (accessLink) items.push(accessLink);
       return items;
@@ -360,7 +360,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
         {/* Left Column: Logo & Location */}
         <div className="flex-1 flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
+          <Link href="/home/dashboard-home" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
           
@@ -411,14 +411,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="hidden lg:flex flex-none justify-center">
           <nav className="custom-nav-capsule shadow-lg relative">
             <Link
-              href="/dashboard"
+              href="/home/dashboard-home"
               className={`w-20 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                (pathname === '/dashboard' || pathname === '/dashboard/checkin')
+                (pathname === '/home/dashboard-home' || pathname === '/home/verify-code')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {(pathname === '/dashboard' || pathname === '/dashboard/checkin') && (
+              {(pathname === '/home/dashboard-home' || pathname === '/home/verify-code') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -428,14 +428,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Home
             </Link>
             <Link
-              href="/dashboard/services"
+              href="/workspace/my-services"
               className={`w-28 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                (!['/dashboard', '/dashboard/checkin'].includes(pathname) && !pathname.startsWith('/dashboard/bookings') && pathname !== '/dashboard/customers')
+                (!['/home/dashboard-home', '/home/verify-code'].includes(pathname) && !pathname.startsWith('/tracks/bookings') && pathname !== '/tracks/customer-directory')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {(!['/dashboard', '/dashboard/checkin'].includes(pathname) && !pathname.startsWith('/dashboard/bookings') && pathname !== '/dashboard/customers') && (
+              {(!['/home/dashboard-home', '/home/verify-code'].includes(pathname) && !pathname.startsWith('/tracks/bookings') && pathname !== '/tracks/customer-directory') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -445,14 +445,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Workspace
             </Link>
             <Link
-              href="/dashboard/bookings"
+              href="/tracks/bookings"
               className={`w-24 text-center py-1 text-[13px] font-extrabold tracking-wide hover:scale-[1.02] active:scale-[0.98] relative z-10 custom-nav-link ${
-                (pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers')
+                (pathname.startsWith('/tracks/bookings') || pathname === '/tracks/customer-directory')
                   ? 'custom-nav-link-active'
                   : 'custom-nav-link-inactive'
               }`}
             >
-              {(pathname.startsWith('/dashboard/bookings') || pathname === '/dashboard/customers') && (
+              {(pathname.startsWith('/tracks/bookings') || pathname === '/tracks/customer-directory') && (
                 <motion.div
                   layoutId="activeNavIndicatorAdmin"
                   className="absolute inset-0 rounded-full bg-[#8b6508]/20 border border-[#8b6508]/45 shadow-[0_0_12px_rgba(255,215,0,0.15)] backdrop-blur-md -z-10 custom-nav-active-bg"
@@ -594,7 +594,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </span>
                   
                   <Link 
-                    href="/dashboard/settings" 
+                    href="/workspace/settings" 
                     onClick={() => setProfileOpen(false)}
                     className="mt-3 px-4 py-1.5 flex items-center justify-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   >
@@ -648,7 +648,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Left side subscription link */}
         <div className="flex-1 hidden md:flex items-center justify-start pl-2">
           <Link
-            href="/dashboard/subscription"
+            href="/workspace/subscription"
             className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#8b6508] hover:text-[#6c4e06] transition-colors"
           >
             <CheckCircle className="h-[14px] w-[14px]" />
@@ -681,7 +681,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Right side icons and links */}
         <div className="flex-1 hidden md:flex items-center justify-end gap-5 pl-4 pr-2 relative">
           <Link
-            href="/dashboard/contact"
+            href="/workspace/contact-us"
             className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
             title="Support"
           >
@@ -689,7 +689,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             Support
           </Link>
           <Link
-            href="/dashboard/settings"
+            href="/workspace/settings"
             className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
             title="Settings"
           >
