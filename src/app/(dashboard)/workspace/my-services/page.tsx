@@ -33,8 +33,10 @@ export default function WorkspacePage() {
     );
   }
 
-  const merchantServices = services.filter(s => s.merchant.toLowerCase() === currentMerchant.merchantName.toLowerCase());
-
+  const merchantServices = services;
+  console.log("DEBUG: all services=", services);
+  console.log("DEBUG: currentMerchant.merchantName=", currentMerchant.merchantName);
+  console.log("DEBUG: merchantServices=", merchantServices);
   const handleSaveService = (e: React.FormEvent) => {
     e.preventDefault();
     if (!serviceName.trim()) return;

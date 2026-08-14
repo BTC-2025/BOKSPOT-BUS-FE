@@ -5545,16 +5545,28 @@ export const useVendorStore = create<VendorStoreState>()(
       fetchServices: async () => {
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
-          const res = await fetch(`${baseUrl}/services`);
+          const res = await fetch(`${baseUrl}/services`, { cache: 'no-store' });
           if (res.ok) {
             const body = await res.json();
-            const servicesData = body.data || (Array.isArray(body) ? body : []);
+            let servicesData = [];
+            if (Array.isArray(body?.data)) {
+              servicesData = body.data;
+            } else if (Array.isArray(body)) {
+              servicesData = body;
+            } else if (body?.data?.items && Array.isArray(body.data.items)) {
+              servicesData = body.data.items;
+            } else if (body?.data?.data && Array.isArray(body.data.data)) {
+              servicesData = body.data.data;
+            }
             
             // Map the API data structure to the BUS-FE structure
-            const mapped = servicesData.map((s: any) => ({
-              id: s.id,
-              name: s.name,
-              merchant: s.merchant?.merchantName || s.merchant?.name || 'Grand Hotel',
+            const mapped = servicesData.map((s: any) => {
+              let fetchedMerchantName = get().currentMerchant?.merchantName || 'Grand Hotel';
+              
+              return {
+                id: s.id,
+                name: s.name,
+                merchant: fetchedMerchantName,
               price: s.basePrice || 0,
               duration: s.durationMinutes || 60,
               category: s.category?.name || 'General',
@@ -5587,7 +5599,8 @@ export const useVendorStore = create<VendorStoreState>()(
               offersAndDiscounts: s.offersAndDiscounts,
               isInstructionsEnabled: s.isInstructionsEnabled,
               specialInstructions: s.specialInstructions
-            }));
+            };
+          });
             
             set({ services: mapped });
           }
@@ -5604,7 +5617,7 @@ export const useVendorStore = create<VendorStoreState>()(
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
-          const validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Ensure we use the seeded 'hotels' category ID
+          const validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Correct 'hotels' category ID
           
           const payload = {
             id: service.id,
@@ -5666,7 +5679,7 @@ export const useVendorStore = create<VendorStoreState>()(
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
           
-          const validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Ensure we use the seeded 'hotels' category ID
+          const validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Correct 'hotels' category ID
           
           const payload = {
             name: updated.name,
