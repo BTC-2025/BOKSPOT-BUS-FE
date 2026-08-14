@@ -5544,7 +5544,7 @@ export const useVendorStore = create<VendorStoreState>()(
       // Services actions
       fetchServices: async () => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           const res = await fetch(`${baseUrl}/services`, { cache: 'no-store' });
           if (res.ok) {
             const body = await res.json();
@@ -5615,7 +5615,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: [service, ...state.services]
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
           const validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Correct 'hotels' category ID
           
@@ -5675,7 +5675,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.map((s) => (s.id === updated.id ? updated : s))
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
           
@@ -5728,7 +5728,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.filter((s) => s.id !== serviceId)
         }));
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           await fetch(`${baseUrl}/services/${serviceId}`, {
             method: 'DELETE'
           });
@@ -5763,7 +5763,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       fetchSupportTickets: async () => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           const res = await fetch(`${baseUrl}/tickets`);
           if (res.ok) {
             const body = await res.json();
@@ -5787,7 +5787,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       addSupportTicket: async (ticket) => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           const res = await fetch(`${baseUrl}/tickets`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5824,7 +5824,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       updateSupportTicketStatus: async (ticketId, status) => {
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
           const res = await fetch(`${baseUrl}/tickets/${ticketId}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
