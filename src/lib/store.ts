@@ -5549,15 +5549,12 @@ export const useVendorStore = create<VendorStoreState>()(
         try {
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
-          let dynamicCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default: general-service
-          const nameLower = service.name.toLowerCase();
-          if (nameLower.includes('room') || nameLower.includes('hotel') || nameLower.includes('stay')) {
-            dynamicCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Hotels
-          }
+          const validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Ensure we use the seeded 'hotels' category ID
+          
           const payload = {
             id: service.id,
             name: service.name,
-            categoryId: dynamicCategoryId,
+            categoryId: validCategoryId,
             description: service.description || '',
             shortDescription: service.description?.substring(0, 250) || '',
             serviceType: 'RENTAL',
@@ -5614,15 +5611,11 @@ export const useVendorStore = create<VendorStoreState>()(
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
           
-          let dynamicCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default: general-service
-          const nameLower = updated.name.toLowerCase();
-          if (nameLower.includes('room') || nameLower.includes('hotel') || nameLower.includes('stay')) {
-            dynamicCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Hotels
-          }
+          const validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Ensure we use the seeded 'hotels' category ID
           
           const payload = {
             name: updated.name,
-            categoryId: dynamicCategoryId,
+            categoryId: validCategoryId,
             description: updated.description || '',
             shortDescription: updated.description?.substring(0, 250) || '',
             durationMinutes: Number(source.duration) || 60,
