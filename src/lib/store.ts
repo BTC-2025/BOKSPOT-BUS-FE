@@ -234,6 +234,7 @@ interface VendorStoreState {
   theme: 'system' | 'light' | 'dark';
   bookings: PersistedBooking[];
   services: CatalogService[];
+  fetchServices: () => Promise<void>;
   staffAccounts: StaffMember[];
   customMerchants: Record<string, Partial<MerchantUser>>;
   
@@ -5541,6 +5542,60 @@ export const useVendorStore = create<VendorStoreState>()(
       },
 
       // Services actions
+      fetchServices: async () => {
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+          const res = await fetch(`${baseUrl}/services`);
+          if (res.ok) {
+            const body = await res.json();
+            const servicesData = body.data || (Array.isArray(body) ? body : []);
+            
+            // Map the API data structure to the BUS-FE structure
+            const mapped = servicesData.map((s: any) => ({
+              id: s.id,
+              name: s.name,
+              merchant: s.merchant?.merchantName || s.merchant?.name || 'Grand Hotel',
+              price: s.basePrice || 0,
+              duration: s.durationMinutes || 60,
+              category: s.category?.name || 'General',
+              active: s.isActive ?? true,
+              rating: s.rating || 0,
+              bookingsCount: s.reviewCount || 0,
+              imageUrl: s.images?.[0] || s.metadata?.images?.[0] || '',
+              description: s.description || '',
+              listings: s.metadata?.listings || [
+                {
+                  id: s.id,
+                  name: s.name,
+                  price: s.basePrice || 0,
+                  duration: s.durationMinutes || 60,
+                  imageUrl: s.images?.[0] || s.metadata?.images?.[0] || '',
+                  active: s.isActive ?? true
+                }
+              ],
+              isTimingEnabled: s.isTimingEnabled,
+              timingDetails: s.timingDetails,
+              isCapacityEnabled: s.isCapacityEnabled,
+              participantCapacity: s.participantCapacity,
+              isAddonsEnabled: s.isAddonsEnabled,
+              addOns: s.addOns || [],
+              isTipsEnabled: s.isTipsEnabled,
+              tipsAndGuidelines: s.tipsAndGuidelines,
+              isRestrictionsEnabled: s.isRestrictionsEnabled,
+              restrictions: s.restrictions,
+              isOffersEnabled: s.isOffersEnabled,
+              offersAndDiscounts: s.offersAndDiscounts,
+              isInstructionsEnabled: s.isInstructionsEnabled,
+              specialInstructions: s.specialInstructions
+            }));
+            
+            set({ services: mapped });
+          }
+        } catch (e) {
+          console.error('Failed to fetch services from backend', e);
+        }
+      },
+      
       addService: async (service) => {
         // Optimistic update
         set((state) => ({

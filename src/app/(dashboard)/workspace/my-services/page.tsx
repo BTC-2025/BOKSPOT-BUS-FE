@@ -8,11 +8,12 @@ import { useRouter } from 'next/navigation';
 
 export default function WorkspacePage() {
   const router = useRouter();
-  const { currentMerchant, services, addService, updateService, deleteService } = useVendorStore();
+  const { currentMerchant, services, fetchServices, addService, updateService, deleteService } = useVendorStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    fetchServices(); // Always pull fresh data from backend on load
   }, []);
 
   // Modals state
