@@ -5619,7 +5619,18 @@ export const useVendorStore = create<VendorStoreState>()(
           const isProd = process.env.NODE_ENV === 'production';
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? 'https://bokspot-be.onrender.com/api/v1' : '/api/v1');
           // Convert local CatalogService structure to CreateServiceDto
-          const validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Correct 'hotels' category ID
+          // Fetch the correct category ID from the backend to handle DB differences (Local vs Prod)
+          let validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Fallback
+          try {
+            const catRes = await fetch(`${baseUrl}/services/categories`);
+            if (catRes.ok) {
+              const catBody = await catRes.json();
+              const hotelsCat = catBody.data?.find((c: any) => c.slug === 'hotels');
+              if (hotelsCat) validCategoryId = hotelsCat.id;
+            }
+          } catch (err) {
+            console.warn('Could not fetch categories, using fallback ID');
+          }
           
           const payload = {
             id: service.id,
@@ -5682,7 +5693,17 @@ export const useVendorStore = create<VendorStoreState>()(
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
           
-          const validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Correct 'hotels' category ID
+          let validCategoryId = '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Fallback
+          try {
+            const catRes = await fetch(`${baseUrl}/services/categories`);
+            if (catRes.ok) {
+              const catBody = await catRes.json();
+              const hotelsCat = catBody.data?.find((c: any) => c.slug === 'hotels');
+              if (hotelsCat) validCategoryId = hotelsCat.id;
+            }
+          } catch (err) {
+            console.warn('Could not fetch categories, using fallback ID');
+          }
           
           const payload = {
             name: updated.name,
