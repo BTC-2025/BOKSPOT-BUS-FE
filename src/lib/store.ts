@@ -5561,8 +5561,15 @@ export const useVendorStore = create<VendorStoreState>()(
             }
             
             // Map the API data structure to the BUS-FE structure
-            const mapped = servicesData.map((s: any) => {
-              let fetchedMerchantName = get().currentMerchant?.merchantName || 'Grand Hotel';
+            const currentMerchantName = get().currentMerchant?.merchantName;
+            
+            // Filter services so each business only sees its own services
+            const filteredData = currentMerchantName 
+              ? servicesData.filter((s: any) => s.metadata?.merchantName === currentMerchantName)
+              : servicesData;
+
+            const mapped = filteredData.map((s: any) => {
+              let fetchedMerchantName = s.metadata?.merchantName || currentMerchantName || 'Grand Hotel';
               
               return {
                 id: s.id,
@@ -5625,8 +5632,16 @@ export const useVendorStore = create<VendorStoreState>()(
             const catRes = await fetch(`${baseUrl}/services/categories`);
             if (catRes.ok) {
               const catBody = await catRes.json();
-              const hotelsCat = catBody.data?.find((c: any) => c.slug === 'hotels');
-              if (hotelsCat) validCategoryId = hotelsCat.id;
+              const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
+              let matchedCat = catBody.data?.find((c: any) => 
+                c.name.toLowerCase() === merchantCategory || 
+                merchantCategory.includes(c.slug) || 
+                merchantCategory.includes(c.name.toLowerCase())
+              );
+              if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
+              if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
+              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
+              if (matchedCat) validCategoryId = matchedCat.id;
             }
           } catch (err) {
             console.warn('Could not fetch categories, using fallback ID');
@@ -5698,8 +5713,16 @@ export const useVendorStore = create<VendorStoreState>()(
             const catRes = await fetch(`${baseUrl}/services/categories`);
             if (catRes.ok) {
               const catBody = await catRes.json();
-              const hotelsCat = catBody.data?.find((c: any) => c.slug === 'hotels');
-              if (hotelsCat) validCategoryId = hotelsCat.id;
+              const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
+              let matchedCat = catBody.data?.find((c: any) => 
+                c.name.toLowerCase() === merchantCategory || 
+                merchantCategory.includes(c.slug) || 
+                merchantCategory.includes(c.name.toLowerCase())
+              );
+              if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
+              if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
+              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
+              if (matchedCat) validCategoryId = matchedCat.id;
             }
           } catch (err) {
             console.warn('Could not fetch categories, using fallback ID');

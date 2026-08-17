@@ -11,6 +11,7 @@ import {
   Sun, Moon, Users, Mail, Search, UserCog, MapPin, Clock, ShieldCheck, MessageSquare, Calculator, Ticket, CheckCircle
 } from 'lucide-react';
 import { UtilityDrawer } from '@/components/UtilityDrawer';
+import { LocationSelectorModal } from '@/components/LocationSelectorModal';
 import { useState, useEffect, useRef } from 'react';
 import { useVendorStore, PRESET_MERCHANTS } from '@/lib/store'; 
 import { getArchetypeConfig } from '@/lib/businessDictionary';
@@ -41,8 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [utilityDrawerOpen, setUtilityDrawerOpen] = useState(false);
   const [activeUtilityTab, setActiveUtilityTab] = useState<'calendar' | 'calc' | 'tasks' | 'contacts' | null>(null);
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [city, setCity] = useState('Chennai');
-  const [status, setStatus] = useState<'idle' | 'detecting'>('idle');
+  const [status, setStatus] = useState<'idle' | 'detecting' | 'detected' | 'error'>('idle');
   const locationRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -364,46 +366,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
           
-          <div className="relative hidden lg:inline-block" ref={locationRef}>
+          <div className="relative hidden lg:inline-block">
             <button
-              onClick={() => setLocationDropdownOpen(!locationDropdownOpen)}
+              onClick={() => setIsLocationModalOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/25 hover:border-white/40 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shadow-md text-xs font-bold tracking-wide"
             >
               <MapPin size={14} className={status === 'detecting' ? 'animate-bounce' : ''} />
-              <span className="!text-white">{isMounted ? city : 'Chennai'}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200" style={{ transform: locationDropdownOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <span className="!text-white">{isMounted ? (city || 'Select Location') : 'Chennai'}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200" style={{ transform: isLocationModalOpen ? 'rotate(180deg)' : 'none' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
-            {locationDropdownOpen && (
-              <div className="absolute left-0 top-full mt-3 w-56 bg-white dark:bg-[#1a1d24] rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800/80 z-50 overflow-hidden backdrop-blur-xl animate-fade-up">
-                <div className="py-2 divide-y divide-slate-100 dark:divide-slate-800">
-                  <button
-                    onClick={() => {
-                      setStatus('detecting');
-                      setTimeout(() => { setStatus('idle'); setCity('Coimbatore'); setLocationDropdownOpen(false); }, 1500);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[#8b6508] hover:bg-[#8b6508]/10 transition-colors text-left text-xs font-bold"
-                  >
-                    <MapPin size={16} className="animate-pulse" />
-                    🎯 Detect GPS
-                  </button>
-                  <div className="py-1">
-                    {['Chennai', 'Madurai', 'Theni', 'Coimbatore', 'Bangalore', 'Mumbai', 'Delhi'].map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => {
-                          setCity(c);
-                          setLocationDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${city === c ? 'text-[#8b6508] bg-[#8b6508]/5' : 'text-slate-700 dark:text-slate-300'}`}
-                      >
-                        <span>📍 {c}</span>
-                        {city === c && <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-[#8b6508]"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
@@ -856,6 +827,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       )}
+      
+      <LocationSelectorModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)}
+        city={city}
+        setCity={setCity}
+        setStatus={setStatus}
+      />
     </div>
     </>
   );
