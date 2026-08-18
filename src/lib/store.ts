@@ -5551,8 +5551,18 @@ export const useVendorStore = create<VendorStoreState>()(
       fetchServices: async () => {
         try {
           const isProd = process.env.NODE_ENV === 'production';
-          const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? 'https://bokspot-be.onrender.com/api/v1' : '/api/v1');
-          const res = await fetch(`${baseUrl}/services`, { cache: 'no-store' });
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1');
+          
+          // Add 10 second timeout so the app doesn't hang if backend is down
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          
+          const res = await fetch(`${baseUrl}/services`, { 
+            cache: 'no-store',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
           if (res.ok) {
             const body = await res.json();
             let servicesData = [];
@@ -5567,12 +5577,43 @@ export const useVendorStore = create<VendorStoreState>()(
             }
             
             // Map the API data structure to the BUS-FE structure
-            const currentMerchantName = get().currentMerchant?.merchantName;
+            const currentMerchant = get().currentMerchant;
+            const currentMerchantName = currentMerchant?.merchantName;
+            const currentArchetype = currentMerchant?.archetype;
             
-            // Filter services so each business only sees its own services
-            const filteredData = currentMerchantName 
+            // Archetype → allowed category names/keywords mapping
+            const ARCHETYPE_CATEGORY_MAP: Record<string, string[]> = {
+              'Accommodation': ['hotel', 'resort', 'hostel', 'villa', 'homestay', 'room', 'accommodation', 'stay'],
+              'Healthcare': ['doctor', 'clinic', 'medical', 'health', 'dental', 'appointment'],
+              'SportsFacility': ['turf', 'cricket', 'football', 'badminton', 'tennis', 'basketball', 'swimming', 'sport', 'court', 'ground'],
+              'Dining': ['restaurant', 'dining', 'food', 'table', 'reservation'],
+              'Fitness': ['gym', 'yoga', 'fitness', 'workout', 'slot'],
+              'EventSpace': ['event', 'concert', 'theatre', 'movie', 'cinema', 'hall', 'venue'],
+              'Rental': ['rental', 'car', 'bike', 'vehicle'],
+              'CareServices': ['salon', 'spa', 'care', 'beauty', 'hair'],
+              'Service': [], // Generic — show all
+            };
+            
+            // Filter 1: by merchantName (exact match if possible)
+            const byName = currentMerchantName
               ? servicesData.filter((s: any) => s.metadata?.merchantName === currentMerchantName)
-              : servicesData;
+              : [];
+            
+            // Filter 2: if no name match, filter by archetype category keywords
+            let filteredData = byName;
+            if (filteredData.length === 0 && currentArchetype && currentArchetype !== 'Service') {
+              const keywords = ARCHETYPE_CATEGORY_MAP[currentArchetype] || [];
+              filteredData = servicesData.filter((s: any) => {
+                const catName = (s.category?.name || '').toLowerCase();
+                const svcName = (s.name || '').toLowerCase();
+                return keywords.some(kw => catName.includes(kw) || svcName.includes(kw));
+              });
+            }
+            
+            // Filter 3: fallback to all services if still empty (new merchant with no data)
+            if (filteredData.length === 0) {
+              filteredData = servicesData;
+            }
 
             const mapped = filteredData.map((s: any) => {
               let fetchedMerchantName = s.metadata?.merchantName || currentMerchantName || 'Grand Hotel';
@@ -5618,8 +5659,12 @@ export const useVendorStore = create<VendorStoreState>()(
             
             set({ services: mapped });
           }
-        } catch (e) {
-          console.error('Failed to fetch services from backend', e);
+        } catch (e: any) {
+          // Silently fail — backend may be offline or cold starting
+          // App will use local store state (services already in memory)
+          if (e?.name !== 'AbortError') {
+            console.warn('Backend offline — using local services data:', e?.message);
+          }
         }
       },
       
