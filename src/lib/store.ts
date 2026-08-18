@@ -5599,19 +5599,8 @@ export const useVendorStore = create<VendorStoreState>()(
               ? servicesData.filter((s: any) => s.metadata?.merchantName === currentMerchantName)
               : [];
             
-            // Filter 2: if no name match, filter by archetype category keywords
+            // If no services found for this merchant, return empty array instead of falling back to generic archetype services
             let filteredData = byName;
-            if (filteredData.length === 0 && currentArchetype && currentArchetype !== 'Service') {
-              const keywords = ARCHETYPE_CATEGORY_MAP[currentArchetype] || [];
-              filteredData = servicesData.filter((s: any) => {
-                const catName = (s.category?.name || '').toLowerCase();
-                const svcName = (s.name || '').toLowerCase();
-                return keywords.some(kw => catName.includes(kw) || svcName.includes(kw));
-              });
-            }
-            
-            // Filter 3: Removed. If a merchant has no services matching their archetype, they should see an empty list, not all services.
-
             const mapped = filteredData.map((s: any) => {
               let fetchedMerchantName = s.metadata?.merchantName || currentMerchantName || 'Grand Hotel';
               
@@ -5681,11 +5670,23 @@ export const useVendorStore = create<VendorStoreState>()(
             if (catRes.ok) {
               const catBody = await catRes.json();
               const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
+              const serviceNameLower = (service.name || '').toLowerCase();
+              
+              // First try to match the service name itself to a global category!
               let matchedCat = catBody.data?.find((c: any) => 
-                c.name.toLowerCase() === merchantCategory || 
-                merchantCategory.includes(c.slug) || 
-                merchantCategory.includes(c.name.toLowerCase())
+                c.name.toLowerCase().includes(serviceNameLower) || 
+                c.slug.replace(/-/g, ' ').includes(serviceNameLower)
               );
+              
+              // Fallback to merchant category if no direct match found
+              if (!matchedCat) {
+                matchedCat = catBody.data?.find((c: any) => 
+                  c.name.toLowerCase() === merchantCategory || 
+                  merchantCategory.includes(c.slug) || 
+                  merchantCategory.includes(c.name.toLowerCase())
+                );
+              }
+              
               if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
               if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
               if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
@@ -5727,12 +5728,13 @@ export const useVendorStore = create<VendorStoreState>()(
             specialInstructions: String(service.specialInstructions || ''),
             
             // Location payload
-            city: service.city,
             latitude: service.latitude,
             longitude: service.longitude
           };
           
-          const res = await fetch(`${baseUrl}/services/2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e`, { // Default seeded Merchant ID
+          // Use the default seeded Merchant ID for mock frontend backend persistence (UUID validation)
+          const activeMerchantId = '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
+          const res = await fetch(`${baseUrl}/services/${activeMerchantId}`, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -5767,11 +5769,23 @@ export const useVendorStore = create<VendorStoreState>()(
             if (catRes.ok) {
               const catBody = await catRes.json();
               const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
+              const serviceNameLower = (updated.name || '').toLowerCase();
+              
+              // First try to match the service name itself to a global category!
               let matchedCat = catBody.data?.find((c: any) => 
-                c.name.toLowerCase() === merchantCategory || 
-                merchantCategory.includes(c.slug) || 
-                merchantCategory.includes(c.name.toLowerCase())
+                c.name.toLowerCase().includes(serviceNameLower) || 
+                c.slug.replace(/-/g, ' ').includes(serviceNameLower)
               );
+              
+              // Fallback to merchant category if no direct match found
+              if (!matchedCat) {
+                matchedCat = catBody.data?.find((c: any) => 
+                  c.name.toLowerCase() === merchantCategory || 
+                  merchantCategory.includes(c.slug) || 
+                  merchantCategory.includes(c.name.toLowerCase())
+                );
+              }
+              
               if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
               if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
               if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
