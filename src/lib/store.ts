@@ -5610,10 +5610,7 @@ export const useVendorStore = create<VendorStoreState>()(
               });
             }
             
-            // Filter 3: fallback to all services if still empty (new merchant with no data)
-            if (filteredData.length === 0) {
-              filteredData = servicesData;
-            }
+            // Filter 3: Removed. If a merchant has no services matching their archetype, they should see an empty list, not all services.
 
             const mapped = filteredData.map((s: any) => {
               let fetchedMerchantName = s.metadata?.merchantName || currentMerchantName || 'Grand Hotel';
