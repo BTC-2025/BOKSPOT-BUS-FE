@@ -24,6 +24,7 @@ export default function WorkspacePage() {
   const [serviceName, setServiceName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
+  const [city, setCity] = useState('Chennai');
 
   if (!currentMerchant || !mounted) {
     return (
@@ -53,6 +54,7 @@ export default function WorkspacePage() {
       bookingsCount: 0,
       imageUrl: imageUrl.trim() || undefined,
       description: description.trim() || undefined,
+      city: city,
       listings: []
     };
 
@@ -75,6 +77,7 @@ export default function WorkspacePage() {
     setServiceName(srv.name);
     setImageUrl(srv.imageUrl || '');
     setDescription(srv.description || '');
+    setCity(srv.city || 'Chennai');
     setShowServiceModal(true);
   };
 
@@ -111,6 +114,7 @@ export default function WorkspacePage() {
               setServiceName('');
               setImageUrl('');
               setDescription('');
+              setCity('Chennai');
               setShowServiceModal(true);
             }}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold tracking-wide transition-all shadow-md active:scale-95"
@@ -220,6 +224,21 @@ export default function WorkspacePage() {
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">City / Location</label>
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium"
+                  >
+                    <option value="Chennai">Chennai</option>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi">Delhi</option>
+                  </select>
                 </div>
                 
                 <div>

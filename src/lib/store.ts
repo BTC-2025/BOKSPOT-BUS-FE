@@ -151,6 +151,12 @@ export interface CatalogService {
   specialInstructions?: string;
   isOffersEnabled?: boolean;
   offersAndDiscounts?: string;
+  
+  // Location
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+
   // Custom industry-specific details
   specializationRequired?: string;
   difficultyLevel?: 'Beginner' | 'Intermediate' | 'Advanced';
@@ -5676,7 +5682,12 @@ export const useVendorStore = create<VendorStoreState>()(
             isOffersEnabled: Boolean(service.isOffersEnabled),
             offersAndDiscounts: String(service.offersAndDiscounts || ''),
             isInstructionsEnabled: Boolean(service.isInstructionsEnabled),
-            specialInstructions: String(service.specialInstructions || '')
+            specialInstructions: String(service.specialInstructions || ''),
+            
+            // Location payload
+            city: service.city,
+            latitude: service.latitude,
+            longitude: service.longitude
           };
           
           const res = await fetch(`${baseUrl}/services/2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e`, { // Default seeded Merchant ID
