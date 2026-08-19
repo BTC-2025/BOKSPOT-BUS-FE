@@ -3,7 +3,7 @@
 import { useVendorStore, CatalogListing } from '@/lib/store';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Plus, ArrowLeft, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Plus, ArrowLeft, Image as ImageIcon, Trash2, Calendar } from 'lucide-react';
 
 export default function ServiceListingsPage() {
   const router = useRouter();
@@ -109,6 +109,20 @@ export default function ServiceListingsPage() {
                   {list.isAddonsEnabled && <span className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded">Add-ons</span>}
                   {list.isRulesEnabled && <span className="px-2 py-1 bg-orange-50 text-orange-700 text-[10px] font-bold rounded">Rules</span>}
                   {list.isOffersEnabled && <span className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded">Offers</span>}
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/workspace/my-services/${serviceId}/listing/${list.id}/slots`);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors"
+                  >
+                    <Calendar size={14} />
+                    Calendar & Slots
+                  </button>
+                  <span className="text-xs font-bold text-[#8b6508]">Edit Info &rarr;</span>
                 </div>
               </div>
             </div>

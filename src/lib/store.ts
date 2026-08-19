@@ -114,6 +114,7 @@ export interface CatalogListing {
   isOffersEnabled?: boolean;
   offersAndDiscounts?: string;
   metadata?: Record<string, any>;
+  schedule?: Array<{ dayOfWeek: string; startTime: string; endTime: string; price: number }>;
 }
 
 export interface SupportTicket {
@@ -299,440 +300,402 @@ interface VendorStoreState {
 }
 
 export const PRESET_MERCHANTS: MerchantUser[] = [
-
   {
-    id: 'mer-901',
-    username: 'O501',
-    isCustomized: false,
-    merchantName: 'Alpha Logistics',
-    category: 'Logistics',
-    logoLetter: 'A',
-    aboutText: 'Generic business example for other categories.',
-    vendorId: '2026090100',
-    email: 'o501@bnxmail.com',
-    archetype: 'Service'
-  },
-  {
-    id: 'mer-902',
-    username: 'O502',
-    isCustomized: false,
-    merchantName: 'Beta Security',
-    category: 'Security Services',
-    logoLetter: 'B',
-    aboutText: 'Generic business example for other categories.',
-    vendorId: '2026090200',
-    email: 'o502@bnxmail.com',
-    archetype: 'Service'
-  },
-  {
-    id: 'mer-903',
-    username: 'O503',
-    isCustomized: false,
-    merchantName: 'Gamma Education',
-    category: 'Tutoring',
-    logoLetter: 'G',
-    aboutText: 'Generic business example for other categories.',
-    vendorId: '2026090300',
-    email: 'o503@bnxmail.com',
-    archetype: 'Service'
-  },
-
-  {
-    id: 'mer-100',
+    id: '8fb83f4b-62aa-3a5b-3e42-074005378435',
     username: 'H101',
     merchantName: 'Grand Hotel',
     category: 'Hotel Booking',
     logoLetter: 'G',
-    aboutText: 'Grand Hotel is a premier provider of Hotel Booking services.',
-    vendorId: '2026050100',
+    aboutText: 'Welcome to Grand Hotel. We provide professional Hotel Booking services.',
+    vendorId: '20260000',
     email: 'h101@bnxmail.com',
     archetype: 'Accommodation'
   },
   {
-    id: 'mer-101',
+    id: '7d24a2aa-b792-554b-1bf8-b3f392999a3f',
     username: 'H102',
     merchantName: 'Sunstone Resort',
     category: 'Resort Booking',
     logoLetter: 'S',
-    aboutText: 'Sunstone Resort is a premier provider of Resort Booking services.',
-    vendorId: '2026050101',
+    aboutText: 'Welcome to Sunstone Resort. We provide professional Resort Booking services.',
+    vendorId: '20260001',
     email: 'h102@bnxmail.com',
     archetype: 'Accommodation'
   },
   {
-    id: 'mer-102',
+    id: '23b1896d-5bd2-3242-cd72-0d55891c85e2',
     username: 'H103',
     merchantName: 'Riverfront Villa',
     category: 'Homestay / Villa',
     logoLetter: 'R',
-    aboutText: 'Riverfront Villa is a premier provider of Homestay / Villa services.',
-    vendorId: '2026050102',
+    aboutText: 'Welcome to Riverfront Villa. We provide professional Homestay / Villa services.',
+    vendorId: '20260002',
     email: 'h103@bnxmail.com',
     archetype: 'Accommodation'
   },
   {
-    id: 'mer-103',
+    id: '51c6a3b8-2abc-9421-7644-2a2dea05dbc0',
     username: 'H104',
     merchantName: 'Backpackers Hostel',
     category: 'Hostel Booking',
     logoLetter: 'B',
-    aboutText: 'Backpackers Hostel is a premier provider of Hostel Booking services.',
-    vendorId: '2026050103',
+    aboutText: 'Welcome to Backpackers Hostel. We provide professional Hostel Booking services.',
+    vendorId: '20260003',
     email: 'h104@bnxmail.com',
     archetype: 'Accommodation'
   },
   {
-    id: 'mer-104',
+    id: 'a1f48aa6-72ae-8830-257a-5d3c190bebf8',
     username: 'H105',
     merchantName: 'Pine Trails Camp',
     category: 'Camping Booking',
     logoLetter: 'P',
-    aboutText: 'Pine Trails Camp is a premier provider of Camping Booking services.',
-    vendorId: '2026050104',
+    aboutText: 'Welcome to Pine Trails Camp. We provide professional Camping Booking services.',
+    vendorId: '20260004',
     email: 'h105@bnxmail.com',
     archetype: 'Accommodation'
   },
   {
-    id: 'mer-105',
+    id: '7c996ce5-e515-8b61-5039-83c06a21e9e5',
     username: 'T102',
     merchantName: 'Arena 5 Turf',
     category: 'Football Turf',
     logoLetter: 'A',
-    aboutText: 'Arena 5 Turf is a premier provider of Football Turf services.',
-    vendorId: '2026050105',
+    aboutText: 'Welcome to Arena 5 Turf. We provide professional Football Turf services.',
+    vendorId: '20260005',
     email: 't102@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-106',
+    id: '5a8fe3b6-9787-e911-bd92-12be14cde4e6',
     username: 'T103',
     merchantName: 'Pitch Perfect Grounds',
     category: 'Cricket Ground',
     logoLetter: 'P',
-    aboutText: 'Pitch Perfect Grounds is a premier provider of Cricket Ground services.',
-    vendorId: '2026050106',
+    aboutText: 'Welcome to Pitch Perfect Grounds. We provide professional Cricket Ground services.',
+    vendorId: '20260006',
     email: 't103@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-107',
+    id: 'de764dbc-2b2b-6079-d829-4633f41fd826',
     username: 'T104',
     merchantName: 'Smash Academy',
     category: 'Badminton Court',
     logoLetter: 'S',
-    aboutText: 'Smash Academy is a premier provider of Badminton Court services.',
-    vendorId: '2026050107',
+    aboutText: 'Welcome to Smash Academy. We provide professional Badminton Court services.',
+    vendorId: '20260007',
     email: 't104@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-108',
+    id: '1ededc46-c2c0-1e09-a0be-30c4b441bbae',
     username: 'T105',
     merchantName: 'Grand Slam Club',
     category: 'Tennis Court',
     logoLetter: 'G',
-    aboutText: 'Grand Slam Club is a premier provider of Tennis Court services.',
-    vendorId: '2026050108',
+    aboutText: 'Welcome to Grand Slam Club. We provide professional Tennis Court services.',
+    vendorId: '20260008',
     email: 't105@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-109',
+    id: 'ad72ab0e-4361-aed4-d236-117c907068e9',
     username: 'T106',
     merchantName: 'Hoop Kings Arena',
     category: 'Basketball Court',
     logoLetter: 'H',
-    aboutText: 'Hoop Kings Arena is a premier provider of Basketball Court services.',
-    vendorId: '2026050109',
+    aboutText: 'Welcome to Hoop Kings Arena. We provide professional Basketball Court services.',
+    vendorId: '20260009',
     email: 't106@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-110',
+    id: '10af45e9-939e-0b14-5bd6-c4b21fb3fe8a',
     username: 'T107',
     merchantName: 'Blue Wave Pool',
     category: 'Swimming Pool Slots',
     logoLetter: 'B',
-    aboutText: 'Blue Wave Pool is a premier provider of Swimming Pool Slots services.',
-    vendorId: '2026050110',
+    aboutText: 'Welcome to Blue Wave Pool. We provide professional Swimming Pool Slots services.',
+    vendorId: '20260010',
     email: 't107@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-111',
+    id: '5ef7ac5b-f41e-d1bd-8741-498129d65866',
     username: 'G101',
     merchantName: 'Cyber Core Cafe',
     category: 'Gaming Arena Booking',
     logoLetter: 'C',
-    aboutText: 'Cyber Core Cafe is a premier provider of Gaming Arena Booking services.',
-    vendorId: '2026050111',
+    aboutText: 'Welcome to Cyber Core Cafe. We provide professional Gaming Arena Booking services.',
+    vendorId: '20260011',
     email: 'g101@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-112',
+    id: 'bdb9deee-6122-12de-c16b-26fad5fb0028',
     username: 'G102',
     merchantName: 'JumpZone Park',
     category: 'Indoor Play Arena',
     logoLetter: 'J',
-    aboutText: 'JumpZone Park is a premier provider of Indoor Play Arena services.',
-    vendorId: '2026050112',
+    aboutText: 'Welcome to JumpZone Park. We provide professional Indoor Play Arena services.',
+    vendorId: '20260012',
     email: 'g102@bnxmail.com',
-    archetype: 'SportsFacility'
+    archetype: 'Sports'
   },
   {
-    id: 'mer-113',
+    id: 'b23bbd1f-3c8d-56dd-7143-e34153dec1fd',
     username: 'R404',
     merchantName: 'Grand Temple Restaurant',
     category: 'Restaurant Table Reservation',
     logoLetter: 'G',
-    aboutText: 'Grand Temple Restaurant is a premier provider of Restaurant Table Reservation services.',
-    vendorId: '2026050113',
+    aboutText: 'Welcome to Grand Temple Restaurant. We provide professional Restaurant Table Reservation services.',
+    vendorId: '20260013',
     email: 'r404@bnxmail.com',
     archetype: 'Dining'
   },
   {
-    id: 'mer-114',
+    id: '18bc5a90-2570-dd5a-eba7-b5c244f6147c',
     username: 'S303',
     merchantName: 'Style Studio',
     category: 'Salon / Spa Appointment',
     logoLetter: 'S',
-    aboutText: 'Style Studio is a premier provider of Salon / Spa Appointment services.',
-    vendorId: '2026050114',
+    aboutText: 'Welcome to Style Studio. We provide professional Salon / Spa Appointment services.',
+    vendorId: '20260014',
     email: 's303@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Wellness'
   },
   {
-    id: 'mer-115',
+    id: 'f2a14cc0-5f78-aff0-8665-b91d0a464e5f',
     username: 'F202',
     merchantName: 'ZenFit Clinic',
     category: 'Gym / Yoga Slot Booking',
     logoLetter: 'Z',
-    aboutText: 'ZenFit Clinic is a premier provider of Gym / Yoga Slot Booking services.',
-    vendorId: '2026050115',
+    aboutText: 'Welcome to ZenFit Clinic. We provide professional Gym / Yoga Slot Booking services.',
+    vendorId: '20260015',
     email: 'f202@bnxmail.com',
-    archetype: 'Fitness'
+    archetype: 'Wellness'
   },
   {
-    id: 'mer-116',
+    id: '6e2a5d5e-0c09-63ca-11ab-81e24d60f77a',
     username: 'D101',
     merchantName: 'Apollo Dental',
     category: 'Doctor Appointment',
     logoLetter: 'A',
-    aboutText: 'Apollo Dental is a premier provider of Doctor Appointment services.',
-    vendorId: '2026050116',
+    aboutText: 'Welcome to Apollo Dental. We provide professional Doctor Appointment services.',
+    vendorId: '20260016',
     email: 'd101@bnxmail.com',
-    archetype: 'Healthcare'
+    archetype: 'Wellness'
   },
   {
-    id: 'mer-117',
+    id: '2ecab9d2-4489-adcb-10ca-5493f964b34d',
     username: 'E201',
     merchantName: 'Spark Electricians',
     category: 'Electrician Booking',
     logoLetter: 'S',
-    aboutText: 'Spark Electricians is a premier provider of Electrician Booking services.',
-    vendorId: '2026050117',
+    aboutText: 'Welcome to Spark Electricians. We provide professional Electrician Booking services.',
+    vendorId: '20260017',
     email: 'e201@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Trade'
   },
   {
-    id: 'mer-118',
+    id: '72fb2c1f-ff1b-ba37-1045-1e0fb08b633a',
     username: 'E202',
     merchantName: 'FlowTech Plumbers',
     category: 'Plumber Booking',
     logoLetter: 'F',
-    aboutText: 'FlowTech Plumbers is a premier provider of Plumber Booking services.',
-    vendorId: '2026050118',
+    aboutText: 'Welcome to FlowTech Plumbers. We provide professional Plumber Booking services.',
+    vendorId: '20260018',
     email: 'e202@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Trade'
   },
   {
-    id: 'mer-119',
+    id: 'a71f9807-d3ed-e020-bd3c-b51a386ad4de',
     username: 'E203',
     merchantName: 'Shine Home Cleaners',
     category: 'Cleaning Service',
     logoLetter: 'S',
-    aboutText: 'Shine Home Cleaners is a premier provider of Cleaning Service services.',
-    vendorId: '2026050119',
+    aboutText: 'Welcome to Shine Home Cleaners. We provide professional Cleaning Service services.',
+    vendorId: '20260019',
     email: 'e203@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Trade'
   },
   {
-    id: 'mer-120',
+    id: 'aa4fcbce-2fa1-863b-f814-92f6ad48a3ad',
     username: 'E204',
     merchantName: 'FixIt Tech Repairs',
     category: 'Technician Service',
     logoLetter: 'F',
-    aboutText: 'FixIt Tech Repairs is a premier provider of Technician Service services.',
-    vendorId: '2026050120',
+    aboutText: 'Welcome to FixIt Tech Repairs. We provide professional Technician Service services.',
+    vendorId: '20260020',
     email: 'e204@bnxmail.com',
-    archetype: 'Service'
+    archetype: 'Trade'
   },
   {
-    id: 'mer-121',
+    id: '2add955b-f1c9-4fac-1a52-e6dd19887ed4',
     username: 'W301',
     merchantName: 'HubSpace',
     category: 'Co-working Space',
     logoLetter: 'H',
-    aboutText: 'HubSpace is a premier provider of Co-working Space services.',
-    vendorId: '2026050121',
+    aboutText: 'Welcome to HubSpace. We provide professional Co-working Space services.',
+    vendorId: '20260021',
     email: 'w301@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-122',
+    id: '082299ad-a075-b9ab-1ff9-f34412da2720',
     username: 'W302',
     merchantName: 'Boardroom Plus',
     category: 'Meeting Room',
     logoLetter: 'B',
-    aboutText: 'Boardroom Plus is a premier provider of Meeting Room services.',
-    vendorId: '2026050122',
+    aboutText: 'Welcome to Boardroom Plus. We provide professional Meeting Room services.',
+    vendorId: '20260022',
     email: 'w302@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-123',
+    id: '57f6b4ae-1c14-cba8-72b2-51a96c88cb20',
     username: 'W303',
     merchantName: 'AudioWave Cast',
     category: 'Podcast Studio',
     logoLetter: 'A',
-    aboutText: 'AudioWave Cast is a premier provider of Podcast Studio services.',
-    vendorId: '2026050123',
+    aboutText: 'Welcome to AudioWave Cast. We provide professional Podcast Studio services.',
+    vendorId: '20260023',
     email: 'w303@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-124',
+    id: 'da471c80-e77f-f2a6-955b-fa486a1838a4',
     username: 'W304',
     merchantName: 'Summit Conference',
     category: 'Conference Hall',
     logoLetter: 'S',
-    aboutText: 'Summit Conference is a premier provider of Conference Hall services.',
-    vendorId: '2026050124',
+    aboutText: 'Welcome to Summit Conference. We provide professional Conference Hall services.',
+    vendorId: '20260024',
     email: 'w304@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-125',
+    id: '198bd77a-f881-cbf5-86f4-97104d9cd3c6',
     username: 'W305',
     merchantName: 'EduPro Sessions',
     category: 'Training Sessions',
     logoLetter: 'E',
-    aboutText: 'EduPro Sessions is a premier provider of Training Sessions services.',
-    vendorId: '2026050125',
+    aboutText: 'Welcome to EduPro Sessions. We provide professional Training Sessions services.',
+    vendorId: '20260025',
     email: 'w305@bnxmail.com',
-    archetype: 'Fitness'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-126',
+    id: 'b5223c3a-18dd-2e6d-d7e6-d9f9af88120e',
     username: 'W306',
     merchantName: 'Shutter Studio',
     category: 'Studio Booking',
     logoLetter: 'S',
-    aboutText: 'Shutter Studio is a premier provider of Studio Booking services.',
-    vendorId: '2026050126',
+    aboutText: 'Welcome to Shutter Studio. We provide professional Studio Booking services.',
+    vendorId: '20260026',
     email: 'w306@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Workspace'
   },
   {
-    id: 'mer-127',
+    id: 'c8dc997b-0599-73ae-4e5f-a55cb6cbdf85',
     username: 'O801',
     merchantName: 'Elite Planners',
     category: 'Event Organizer Booking',
     logoLetter: 'E',
-    aboutText: 'Elite Planners is a premier provider of Event Organizer Booking services.',
-    vendorId: '2026050127',
+    aboutText: 'Welcome to Elite Planners. We provide professional Event Organizer Booking services.',
+    vendorId: '20260027',
     email: 'o801@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'Events'
   },
   {
-    id: 'mer-128',
+    id: 'dcee4116-5e1b-734c-2a91-a635b00aa38a',
     username: 'V401',
     merchantName: 'City Wheels',
     category: 'Cycle Rental',
     logoLetter: 'C',
-    aboutText: 'City Wheels is a premier provider of Cycle Rental services.',
-    vendorId: '2026050128',
+    aboutText: 'Welcome to City Wheels. We provide professional Cycle Rental services.',
+    vendorId: '20260028',
     email: 'v401@bnxmail.com',
-    archetype: 'Rental'
+    archetype: 'Rentals'
   },
   {
-    id: 'mer-129',
+    id: '22acc0cf-989e-dd2a-0a3e-d6c510abae14',
     username: 'V402',
     merchantName: 'Rev Rider',
     category: 'Sports Bike Rental',
     logoLetter: 'R',
-    aboutText: 'Rev Rider is a premier provider of Sports Bike Rental services.',
-    vendorId: '2026050129',
+    aboutText: 'Welcome to Rev Rider. We provide professional Sports Bike Rental services.',
+    vendorId: '20260029',
     email: 'v402@bnxmail.com',
-    archetype: 'Rental'
+    archetype: 'Rentals'
   },
   {
-    id: 'mer-130',
+    id: '580e355e-092a-53f1-657c-643cf6178419',
     username: 'M501',
     merchantName: 'Lens Crafters',
     category: 'Camera Rental',
     logoLetter: 'L',
-    aboutText: 'Lens Crafters is a premier provider of Camera Rental services.',
-    vendorId: '2026050130',
+    aboutText: 'Welcome to Lens Crafters. We provide professional Camera Rental services.',
+    vendorId: '20260030',
     email: 'm501@bnxmail.com',
-    archetype: 'Rental'
+    archetype: 'Rentals'
   },
   {
-    id: 'mer-131',
+    id: 'a6020993-655b-a8ae-9571-5fe2d048fee4',
     username: 'M502',
     merchantName: 'Bass Drop Audio',
     category: 'Sound System Rental',
     logoLetter: 'B',
-    aboutText: 'Bass Drop Audio is a premier provider of Sound System Rental services.',
-    vendorId: '2026050131',
+    aboutText: 'Welcome to Bass Drop Audio. We provide professional Sound System Rental services.',
+    vendorId: '20260031',
     email: 'm502@bnxmail.com',
-    archetype: 'Rental'
+    archetype: 'Rentals'
   },
   {
-    id: 'mer-132',
+    id: '8ca6acea-f6bf-dfa4-28f8-3e0bb5045924',
     username: 'M503',
     merchantName: 'Party Supply Co',
     category: 'Event Equipment Rental',
     logoLetter: 'P',
-    aboutText: 'Party Supply Co is a premier provider of Event Equipment Rental services.',
-    vendorId: '2026050132',
+    aboutText: 'Welcome to Party Supply Co. We provide professional Event Equipment Rental services.',
+    vendorId: '20260032',
     email: 'm503@bnxmail.com',
-    archetype: 'Rental'
+    archetype: 'Rentals'
   },
   {
-    id: 'mer-133',
+    id: 'c26fec4d-6ff6-5b1e-fc3a-294596b2f346',
     username: 'P601',
     merchantName: 'Paws & Bubbles',
     category: 'Pet Grooming Appointment',
     logoLetter: 'P',
-    aboutText: 'Paws & Bubbles is a premier provider of Pet Grooming Appointment services.',
-    vendorId: '2026050133',
+    aboutText: 'Welcome to Paws & Bubbles. We provide professional Pet Grooming Appointment services.',
+    vendorId: '20260033',
     email: 'p601@bnxmail.com',
-    archetype: 'EventSpace'
+    archetype: 'PersonalCare'
   },
   {
-    id: 'mer-134',
+    id: 'd3f460f8-bf3c-3e72-f822-f1ce090935de',
     username: 'B701',
     merchantName: 'SafeHands Nannies',
     category: 'Babysitting Service',
     logoLetter: 'S',
-    aboutText: 'SafeHands Nannies is a premier provider of Babysitting Service services.',
-    vendorId: '2026050134',
+    aboutText: 'Welcome to SafeHands Nannies. We provide professional Babysitting Service services.',
+    vendorId: '20260034',
     email: 'b701@bnxmail.com',
-    archetype: 'CareServices'
+    archetype: 'PersonalCare'
   },
   {
-    id: 'mer-135',
+    id: '17dca546-8456-d5e1-9006-254fea58d4ea',
     username: 'B702',
     merchantName: 'Compassion Care',
     category: 'Elder Care Service',
     logoLetter: 'C',
-    aboutText: 'Compassion Care is a premier provider of Elder Care Service services.',
-    vendorId: '2026050135',
+    aboutText: 'Welcome to Compassion Care. We provide professional Elder Care Service services.',
+    vendorId: '20260035',
     email: 'b702@bnxmail.com',
-    archetype: 'CareServices'
-  },
+    archetype: 'PersonalCare'
+  }
 ];
 
 const INITIAL_SERVICES: CatalogService[] = [
@@ -5097,17 +5060,42 @@ export interface SubAccount {
 }
 
 export const SUB_ACCOUNTS: SubAccount[] = [
-  { subId: 'D101', merchantId: 'mer-1', passwordHash: 'pass101' },
-  { subId: 'H101', merchantId: 'mer-100', passwordHash: 'pass101' },
-  { subId: 'E202', merchantId: 'mer-117', passwordHash: 'pass202' },
-  { subId: 'F202', merchantId: 'mer-2', passwordHash: 'pass202' },
-  { subId: 'S303', merchantId: 'mer-3', passwordHash: 'pass303' },
-  { subId: 'R404', merchantId: 'mer-4', passwordHash: 'pass404' },
-  { subId: 'G505', merchantId: 'mer-5', passwordHash: 'pass505' },
-  { subId: 'U606', merchantId: 'mer-6', passwordHash: 'pass606' },
-  { subId: 'C707', merchantId: 'mer-7', passwordHash: 'pass707' },
-  { subId: 'W808', merchantId: 'mer-8', passwordHash: 'pass808' },
-  { subId: 'T102', merchantId: 'mer-105', passwordHash: 'pass102' }
+  { subId: 'H101', merchantId: '8fb83f4b-62aa-3a5b-3e42-074005378435', passwordHash: 'pass101' },
+  { subId: 'H102', merchantId: '7d24a2aa-b792-554b-1bf8-b3f392999a3f', passwordHash: 'pass102' },
+  { subId: 'H103', merchantId: '23b1896d-5bd2-3242-cd72-0d55891c85e2', passwordHash: 'pass103' },
+  { subId: 'H104', merchantId: '51c6a3b8-2abc-9421-7644-2a2dea05dbc0', passwordHash: 'pass104' },
+  { subId: 'H105', merchantId: 'a1f48aa6-72ae-8830-257a-5d3c190bebf8', passwordHash: 'pass105' },
+  { subId: 'T102', merchantId: '7c996ce5-e515-8b61-5039-83c06a21e9e5', passwordHash: 'pass102' },
+  { subId: 'T103', merchantId: '5a8fe3b6-9787-e911-bd92-12be14cde4e6', passwordHash: 'pass103' },
+  { subId: 'T104', merchantId: 'de764dbc-2b2b-6079-d829-4633f41fd826', passwordHash: 'pass104' },
+  { subId: 'T105', merchantId: '1ededc46-c2c0-1e09-a0be-30c4b441bbae', passwordHash: 'pass105' },
+  { subId: 'T106', merchantId: 'ad72ab0e-4361-aed4-d236-117c907068e9', passwordHash: 'pass106' },
+  { subId: 'T107', merchantId: '10af45e9-939e-0b14-5bd6-c4b21fb3fe8a', passwordHash: 'pass107' },
+  { subId: 'G101', merchantId: '5ef7ac5b-f41e-d1bd-8741-498129d65866', passwordHash: 'pass101' },
+  { subId: 'G102', merchantId: 'bdb9deee-6122-12de-c16b-26fad5fb0028', passwordHash: 'pass102' },
+  { subId: 'R404', merchantId: 'b23bbd1f-3c8d-56dd-7143-e34153dec1fd', passwordHash: 'pass404' },
+  { subId: 'S303', merchantId: '18bc5a90-2570-dd5a-eba7-b5c244f6147c', passwordHash: 'pass303' },
+  { subId: 'F202', merchantId: 'f2a14cc0-5f78-aff0-8665-b91d0a464e5f', passwordHash: 'pass202' },
+  { subId: 'D101', merchantId: '6e2a5d5e-0c09-63ca-11ab-81e24d60f77a', passwordHash: 'pass101' },
+  { subId: 'E201', merchantId: '2ecab9d2-4489-adcb-10ca-5493f964b34d', passwordHash: 'pass201' },
+  { subId: 'E202', merchantId: '72fb2c1f-ff1b-ba37-1045-1e0fb08b633a', passwordHash: 'pass202' },
+  { subId: 'E203', merchantId: 'a71f9807-d3ed-e020-bd3c-b51a386ad4de', passwordHash: 'pass203' },
+  { subId: 'E204', merchantId: 'aa4fcbce-2fa1-863b-f814-92f6ad48a3ad', passwordHash: 'pass204' },
+  { subId: 'W301', merchantId: '2add955b-f1c9-4fac-1a52-e6dd19887ed4', passwordHash: 'pass301' },
+  { subId: 'W302', merchantId: '082299ad-a075-b9ab-1ff9-f34412da2720', passwordHash: 'pass302' },
+  { subId: 'W303', merchantId: '57f6b4ae-1c14-cba8-72b2-51a96c88cb20', passwordHash: 'pass303' },
+  { subId: 'W304', merchantId: 'da471c80-e77f-f2a6-955b-fa486a1838a4', passwordHash: 'pass304' },
+  { subId: 'W305', merchantId: '198bd77a-f881-cbf5-86f4-97104d9cd3c6', passwordHash: 'pass305' },
+  { subId: 'W306', merchantId: 'b5223c3a-18dd-2e6d-d7e6-d9f9af88120e', passwordHash: 'pass306' },
+  { subId: 'O801', merchantId: 'c8dc997b-0599-73ae-4e5f-a55cb6cbdf85', passwordHash: 'pass801' },
+  { subId: 'V401', merchantId: 'dcee4116-5e1b-734c-2a91-a635b00aa38a', passwordHash: 'pass401' },
+  { subId: 'V402', merchantId: '22acc0cf-989e-dd2a-0a3e-d6c510abae14', passwordHash: 'pass402' },
+  { subId: 'M501', merchantId: '580e355e-092a-53f1-657c-643cf6178419', passwordHash: 'pass501' },
+  { subId: 'M502', merchantId: 'a6020993-655b-a8ae-9571-5fe2d048fee4', passwordHash: 'pass502' },
+  { subId: 'M503', merchantId: '8ca6acea-f6bf-dfa4-28f8-3e0bb5045924', passwordHash: 'pass503' },
+  { subId: 'P601', merchantId: 'c26fec4d-6ff6-5b1e-fc3a-294596b2f346', passwordHash: 'pass601' },
+  { subId: 'B701', merchantId: 'd3f460f8-bf3c-3e72-f822-f1ce090935de', passwordHash: 'pass701' },
+  { subId: 'B702', merchantId: '17dca546-8456-d5e1-9006-254fea58d4ea', passwordHash: 'pass702' }
 ];
 
 export const VENDOR_ACCOUNTS = [
@@ -5232,17 +5220,16 @@ export const useVendorStore = create<VendorStoreState>()(
         },
         {
           id: 'reception@grandhotel.com',
-          merchantId: 'mer-100',
+          merchantId: '11111111-1111-4111-a111-111111111111',
           name: 'Priyanka Chopra',
           roleTitle: 'Hotel Manager',
           isDoctor: true,
           passwordHash: 'pass123',
           permissions: { canManageVitals: true, canAddPrescription: true, canManageBilling: true, canManageAppointments: true }
         },
-
         {
           id: 'ref1@arena5.com',
-          merchantId: 'mer-105',
+          merchantId: '22222222-2222-4222-a222-222222222222',
           name: 'Vikram Singh',
           roleTitle: 'Senior Referee',
           isDoctor: true,
@@ -5251,7 +5238,7 @@ export const useVendorStore = create<VendorStoreState>()(
         },
         {
           id: 'manager@arena5.com',
-          merchantId: 'mer-105',
+          merchantId: '22222222-2222-4222-a222-222222222222',
           name: 'Ramesh Kumar',
           roleTitle: 'Turf Manager',
           isDoctor: true,
@@ -5287,7 +5274,7 @@ export const useVendorStore = create<VendorStoreState>()(
         },
         {
           id: 'staff1@grandhotel.com',
-          merchantId: 'mer-100',
+          merchantId: '11111111-1111-4111-a111-111111111111',
           name: 'Priya Sharma',
           roleTitle: 'Front Desk',
           isDoctor: true,
@@ -5296,7 +5283,7 @@ export const useVendorStore = create<VendorStoreState>()(
         },
         {
           id: 'staff2@grandhotel.com',
-          merchantId: 'mer-100',
+          merchantId: '11111111-1111-4111-a111-111111111111',
           name: 'Arun Housekeeping',
           roleTitle: 'Housekeeping',
           isDoctor: true,
@@ -5552,12 +5539,13 @@ export const useVendorStore = create<VendorStoreState>()(
         try {
           const isProd = process.env.NODE_ENV === 'production';
           const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1');
+          const activeMerchantId = get().currentMerchant?.id || '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
           
           // Add 10 second timeout so the app doesn't hang if backend is down
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000);
           
-          const res = await fetch(`${baseUrl}/services`, { 
+          const res = await fetch(`${baseUrl}/services?merchantId=${activeMerchantId}`, { 
             cache: 'no-store',
             signal: controller.signal
           });
@@ -5671,12 +5659,21 @@ export const useVendorStore = create<VendorStoreState>()(
               const catBody = await catRes.json();
               const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
               const serviceNameLower = (service.name || '').toLowerCase();
+              const serviceCategoryLower = (service.category || '').toLowerCase();
               
-              // First try to match the service name itself to a global category!
+              // First try to match the chosen service category precisely
               let matchedCat = catBody.data?.find((c: any) => 
-                c.name.toLowerCase().includes(serviceNameLower) || 
-                c.slug.replace(/-/g, ' ').includes(serviceNameLower)
+                c.name.toLowerCase().includes(serviceCategoryLower) || 
+                c.slug.replace(/-/g, ' ').includes(serviceCategoryLower)
               );
+
+              // Second try to match the service name itself to a global category!
+              if (!matchedCat) {
+                matchedCat = catBody.data?.find((c: any) => 
+                  c.name.toLowerCase().includes(serviceNameLower) || 
+                  c.slug.replace(/-/g, ' ').includes(serviceNameLower)
+                );
+              }
               
               // Fallback to merchant category if no direct match found
               if (!matchedCat) {
@@ -5689,8 +5686,13 @@ export const useVendorStore = create<VendorStoreState>()(
               
               if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
               if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
-              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
-              if (matchedCat) validCategoryId = matchedCat.id;
+              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'general-service');
+              
+              if (matchedCat) {
+                validCategoryId = matchedCat.id;
+              } else {
+                validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // general-service fallback
+              }
             }
           } catch (err) {
             console.warn('Could not fetch categories, using fallback ID');
@@ -5732,8 +5734,8 @@ export const useVendorStore = create<VendorStoreState>()(
             longitude: service.longitude
           };
           
-          // Use the default seeded Merchant ID for mock frontend backend persistence (UUID validation)
-          const activeMerchantId = '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
+          // Use the actual current merchant ID from state (which now correctly uses valid UUIDs)
+          const activeMerchantId = get().currentMerchant?.id || '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
           const res = await fetch(`${baseUrl}/services/${activeMerchantId}`, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5770,12 +5772,21 @@ export const useVendorStore = create<VendorStoreState>()(
               const catBody = await catRes.json();
               const merchantCategory = (get().currentMerchant?.category || '').toLowerCase();
               const serviceNameLower = (updated.name || '').toLowerCase();
+              const serviceCategoryLower = (updated.category || '').toLowerCase();
               
-              // First try to match the service name itself to a global category!
+              // First try to match the chosen service category precisely
               let matchedCat = catBody.data?.find((c: any) => 
-                c.name.toLowerCase().includes(serviceNameLower) || 
-                c.slug.replace(/-/g, ' ').includes(serviceNameLower)
+                c.name.toLowerCase().includes(serviceCategoryLower) || 
+                c.slug.replace(/-/g, ' ').includes(serviceCategoryLower)
               );
+
+              // Second try to match the service name itself to a global category!
+              if (!matchedCat) {
+                matchedCat = catBody.data?.find((c: any) => 
+                  c.name.toLowerCase().includes(serviceNameLower) || 
+                  c.slug.replace(/-/g, ' ').includes(serviceNameLower)
+                );
+              }
               
               // Fallback to merchant category if no direct match found
               if (!matchedCat) {
@@ -5788,8 +5799,13 @@ export const useVendorStore = create<VendorStoreState>()(
               
               if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
               if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
-              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
-              if (matchedCat) validCategoryId = matchedCat.id;
+              if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'general-service');
+              
+              if (matchedCat) {
+                validCategoryId = matchedCat.id;
+              } else {
+                validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // general-service fallback
+              }
             }
           } catch (err) {
             console.warn('Could not fetch categories, using fallback ID');
@@ -5802,7 +5818,7 @@ export const useVendorStore = create<VendorStoreState>()(
             shortDescription: updated.description?.substring(0, 250) || '',
             durationMinutes: Number(source.duration) || 60,
             basePrice: Number(source.price) || 0,
-            maxCapacity: Number(source.maxCapacity) || 1,
+            maxCapacity: Number((source as any).maxCapacity) || 1,
             images: [source.imageUrl || updated.imageUrl || ''],
             metadata: { 
               merchantName: get().currentMerchant?.merchantName || updated.merchant,

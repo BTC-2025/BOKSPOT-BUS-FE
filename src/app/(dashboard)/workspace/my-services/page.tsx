@@ -25,6 +25,35 @@ export default function WorkspacePage() {
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [city, setCity] = useState('Chennai');
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const GROUPED_CATEGORIES = {
+    "Accommodation & Hospitality": [
+      "Hotel Booking", "Resort Booking", "Homestay / Villa", "Hostel Booking", "Camping Booking"
+    ],
+    "Sports & Arenas": [
+      "Football Turf", "Cricket Ground", "Badminton Court", "Tennis Court", "Basketball Court", "Swimming Pool Slots", "Gaming Arena Booking", "Indoor Play Arena"
+    ],
+    "Health, Wellness & Dining": [
+      "Restaurant Table Reservation", "Salon / Spa Appointment", "Gym / Yoga Slot Booking", "Doctor Appointment"
+    ],
+    "Home & Trade Services": [
+      "Electrician Booking", "Plumber Booking", "Cleaning Service", "Technician Service"
+    ],
+    "Workspaces, Studios & Events": [
+      "Co-working Space", "Meeting Room", "Podcast Studio", "Conference Hall", "Training Sessions", "Studio Booking", "Event Organizer Booking"
+    ],
+    "Rentals & Equipment": [
+      "Cycle Rental", "Sports Bike Rental", "Camera Rental", "Sound System Rental", "Event Equipment Rental"
+    ],
+    "Personal Care Services": [
+      "Pet Grooming Appointment", "Babysitting Service", "Elder Care Service"
+    ],
+    "API Integrations (Category B)": [
+      "Flight Booking", "Train Booking", "Bus Booking", "Ferry / Boat Booking", "Shuttle / Van Booking", "Helicopter Booking (Premium)", "Cab / Taxi Booking", "Bike Rental", "Self-Drive Car Rental", "Cinema / Movie Tickets", "Theatre Shows", "Concert Tickets", "Events & Festivals", "Exhibition Entry", "Workshops / Classes", "Temple Darshan Booking", "Pooja Slot Booking", "Pilgrimage Packages"
+    ]
+  };
+
 
   if (!currentMerchant || !mounted) {
     return (
@@ -48,7 +77,7 @@ export default function WorkspacePage() {
       merchant: currentMerchant.merchantName,
       price: 0,
       duration: 30,
-      category: currentMerchant.category,
+      category: selectedCategory || currentMerchant.category,
       active: true,
       rating: 5.0,
       bookingsCount: 0,
@@ -69,6 +98,7 @@ export default function WorkspacePage() {
     setServiceName('');
     setImageUrl('');
     setDescription('');
+    setSelectedCategory('');
   };
 
   const openEditService = (e: React.MouseEvent, srv: CatalogService) => {
@@ -78,6 +108,7 @@ export default function WorkspacePage() {
     setImageUrl(srv.imageUrl || '');
     setDescription(srv.description || '');
     setCity(srv.city || 'Chennai');
+    setSelectedCategory(srv.category || currentMerchant.category);
     setShowServiceModal(true);
   };
 
@@ -115,6 +146,7 @@ export default function WorkspacePage() {
               setImageUrl('');
               setDescription('');
               setCity('Chennai');
+              setSelectedCategory(currentMerchant.category);
               setShowServiceModal(true);
             }}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold tracking-wide transition-all shadow-md active:scale-95"
@@ -224,6 +256,26 @@ export default function WorkspacePage() {
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Service Type (BokSpot Category)</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium"
+                    required
+                  >
+                    <option value="" disabled>Select a service type</option>
+                    {Object.entries(GROUPED_CATEGORIES).map(([groupName, categories]) => (
+                      <optgroup key={groupName} label={groupName} className="font-bold text-slate-800 bg-slate-50">
+                        {categories.map(cat => (
+                          <option key={cat} value={cat} className="font-normal text-slate-700 bg-white">{cat}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-slate-500 mt-1">This determines where your service appears in the User App.</p>
                 </div>
 
                 <div>
