@@ -214,6 +214,10 @@ export interface MerchantUser {
   supervisorEmail?: string;
   supervisorAddress?: string;
   archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining' | 'Accommodation' | 'SportsFacility' | 'Fitness' | 'EventSpace' | 'Rental' | 'CareServices';
+  
+  // Venue Profile (Global Business Details)
+  thingsToKnow?: string[];
+  gallery?: string[];
 }
 
 export interface StaffPermissions {
@@ -289,6 +293,7 @@ interface VendorStoreState {
 
   completeOnboarding: (merchantId: string, setupData: { activeModules: string[], customDictionary: Record<string, string>, merchantName?: string, archetype?: string }) => void;
   updateMerchantModules: (merchantId: string, activeModules: string[], customDictionary?: Record<string, string>) => void;
+  updateMerchantProfile: (merchantId: string, profileData: Partial<MerchantUser>) => void;
   resetOnboarding: (merchantId: string) => void;
 
   // Support Tickets
@@ -5120,6 +5125,7 @@ export const useVendorStore = create<VendorStoreState>()(
         : state.currentMerchant
     };
   }),
+
   updateMerchantModules: (merchantId, activeModules, customDictionary) => set((state) => {
     const customData = { activeModules, ...(customDictionary ? { customDictionary } : {}) };
     return {
@@ -5129,6 +5135,40 @@ export const useVendorStore = create<VendorStoreState>()(
         : state.currentMerchant
     };
   }),
+
+  updateMerchantProfile: async (merchantId, profileData) => {
+    // 1. Update local state immediately for optimistic UI
+    set((state) => ({
+      customMerchants: { ...state.customMerchants, [merchantId]: { ...(state.customMerchants[merchantId] || {}), ...profileData } },
+      currentMerchant: state.currentMerchant?.id === merchantId 
+        ? { ...state.currentMerchant, ...profileData }
+        : state.currentMerchant
+    }));
+
+    // 2. Sync to Backend Database
+    try {
+      const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || (isProd ? 'https://bokspot-be.onrender.com/api/v1' : '/api/v1');
+      
+      const payload: any = {};
+      if (profileData.about) payload.description = profileData.about;
+      if (profileData.amenities) payload.amenities = profileData.amenities;
+      if (profileData.gallery) payload.images = profileData.gallery;
+      
+      const res = await fetch(`${baseUrl}/merchants/${merchantId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) {
+        console.error('Failed to sync merchant profile to DB:', await res.text());
+      }
+    } catch (err) {
+      console.error('Error syncing merchant profile:', err);
+    }
+  },
+
   resetOnboarding: (merchantId) => set((state) => {
     return {
       customMerchants: { ...state.customMerchants, [merchantId]: { ...(state.customMerchants[merchantId] || {}), isCustomized: false } },
