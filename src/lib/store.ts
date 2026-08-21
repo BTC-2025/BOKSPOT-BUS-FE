@@ -213,11 +213,13 @@ export interface MerchantUser {
   supervisorPhone?: string;
   supervisorEmail?: string;
   supervisorAddress?: string;
-  archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining' | 'Accommodation' | 'SportsFacility' | 'Fitness' | 'EventSpace' | 'Rental' | 'CareServices';
+  archetype?: 'Healthcare' | 'ResourceBooking' | 'Service' | 'Dining' | 'Accommodation' | 'SportsFacility' | 'Fitness' | 'EventSpace' | 'Rental' | 'CareServices' | 'PersonalCare' | 'Sports' | 'Wellness' | 'Trade' | 'Workspace' | 'Events' | 'Rentals';
   
   // Venue Profile (Global Business Details)
   thingsToKnow?: string[];
   gallery?: string[];
+  about?: string;
+  amenities?: string[];
 }
 
 export interface StaffPermissions {
