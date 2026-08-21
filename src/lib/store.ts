@@ -5755,7 +5755,6 @@ export const useVendorStore = create<VendorStoreState>()(
               merchantName: get().currentMerchant?.merchantName || service.merchant,
               listings: service.listings 
             },
-            // Map dynamic fields
             isTimingEnabled: Boolean(service.isTimingEnabled),
             timingDetails: String(service.timingDetails || ''),
             isCapacityEnabled: Boolean(service.isCapacityEnabled),
