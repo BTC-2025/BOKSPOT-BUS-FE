@@ -5693,8 +5693,8 @@ export const useVendorStore = create<VendorStoreState>()(
           const isProd = process.env.NODE_ENV === 'production';
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
-          // Fetch the correct category ID from the backend to handle DB differences (Local vs Prod)
-          let validCategoryId = isProd ? 'b06981f6-b12b-4905-be30-d74da4b6906b' : '712cb562-7f6a-4fea-9145-00c6da59ebc3'; // Prod/Local Fallback
+          // Fetch the correct category ID from the backend
+          let validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // Default to General Service ID
           try {
             const catRes = await fetch(`${baseUrl}/services/categories`);
             if (catRes.ok) {
@@ -5728,12 +5728,11 @@ export const useVendorStore = create<VendorStoreState>()(
               
               if (!matchedCat && merchantCategory.includes('doctor')) matchedCat = catBody.data?.find((c: any) => c.slug === 'doctor');
               if (!matchedCat && merchantCategory.includes('spa')) matchedCat = catBody.data?.find((c: any) => c.slug === 'salons');
+              if (!matchedCat && merchantCategory.includes('hotel')) matchedCat = catBody.data?.find((c: any) => c.slug === 'hotels');
               if (!matchedCat) matchedCat = catBody.data?.find((c: any) => c.slug === 'general-service');
               
               if (matchedCat) {
                 validCategoryId = matchedCat.id;
-              } else {
-                validCategoryId = 'b06981f6-b12b-4905-be30-d74da4b6906b'; // general-service fallback
               }
             }
           } catch (err) {
