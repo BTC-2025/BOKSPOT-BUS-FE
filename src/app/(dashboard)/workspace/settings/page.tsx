@@ -226,6 +226,22 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+            <div className="pt-4 pb-2">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-sm font-black text-slate-900 mb-1">Advanced Venue Profile</h3>
+                  <p className="text-xs text-slate-600 font-medium">Add Gallery Photos, Amenities (Things to know), and Detailed About section.</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => window.location.href = '/workspace/about'}
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-md transition-colors whitespace-nowrap"
+                >
+                  Setup Venue Profile &rarr;
+                </button>
+              </div>
+            </div>
+
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500">About Description</label>
                 <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-[#8b6508] focus-within:ring-1 focus-within:ring-[#8b6508] transition-all">

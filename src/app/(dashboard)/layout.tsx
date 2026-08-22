@@ -20,7 +20,6 @@ import { getVerticalFromCategory } from '@/lib/categoryUtils';
 
 const staticNavItems = [
   { href: '/home/verify-code', icon: QrCode, label: 'Verify Code' },
-  { href: '/workspace/about', icon: Building, label: 'Venue Profile' },
   { href: '/workspace/hotel-staff-roster', icon: Users, label: 'Staff Management' },
   { href: '/tracks/customer-directory', icon: User, label: 'Customer Directory' },
   { href: '/workspace/settings', icon: Settings, label: 'Settings' },
@@ -285,7 +284,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: 'Verify Code', href: '/home/verify-code', description: 'Check-in ticket codes', type: 'page', icon: QrCode },
     { label: 'Staff Management', href: '/workspace/hotel-staff-roster', description: 'Manage employee assignments', type: 'page', icon: Users },
     { label: 'Customer Directory', href: '/tracks/customer-directory', description: 'Diner database', type: 'page', icon: User },
-    { label: 'Venue Profile', href: '/workspace/about', description: 'Global business details & gallery', type: 'page', icon: Building },
     { label: 'Business Settings', href: '/workspace/settings', description: 'Working hours & profile details', type: 'page', icon: Settings },
     { label: 'Contact Us', href: '/workspace/contact-us', description: 'Support helpdesk & tickets', type: 'page', icon: Mail },
   ];
@@ -335,8 +333,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // WORKSPACE TAB (Management, Schedules, Settings)
     else {
       const items = [
-        { href: '/workspace/my-services', icon: Package, label: 'My Services' },
-        { href: '/workspace/about', icon: Building, label: 'Venue Profile' }
+        { href: '/workspace/my-services', icon: Package, label: 'My Services' }
       ];
       if (accessLink) items.push(accessLink);
       return items;

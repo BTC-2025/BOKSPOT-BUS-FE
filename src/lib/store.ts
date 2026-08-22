@@ -5153,8 +5153,9 @@ export const useVendorStore = create<VendorStoreState>()(
       const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
       
       const payload: any = {};
-      if (profileData.about) payload.description = profileData.about;
-      if (profileData.amenities) payload.amenities = profileData.amenities;
+      // Handle both formats depending on what is passed by components
+      if (profileData.about || profileData.aboutText) payload.description = profileData.about || profileData.aboutText;
+      if (profileData.amenities || profileData.thingsToKnow) payload.amenities = profileData.amenities || profileData.thingsToKnow;
       if (profileData.gallery) payload.images = profileData.gallery;
       
       const res = await fetch(`${baseUrl}/merchants/${merchantId}`, {
