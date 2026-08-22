@@ -5740,8 +5740,8 @@ export const useVendorStore = create<VendorStoreState>()(
           const payload = {
             name: service.name,
             categoryId: validCategoryId,
-            description: service.description || '',
-            shortDescription: service.description?.substring(0, 250) || '',
+            description: service.description || 'No description provided for this category.',
+            shortDescription: service.description ? service.description.substring(0, 250) : 'No description provided for this category.',
             serviceType: 'RENTAL',
             durationMinutes: Number(service.duration) || 60,
             basePrice: Number(service.price) || 0,
@@ -5856,8 +5856,8 @@ export const useVendorStore = create<VendorStoreState>()(
           const payload = {
             name: updated.name,
             categoryId: validCategoryId,
-            description: updated.description || '',
-            shortDescription: updated.description?.substring(0, 250) || '',
+            description: updated.description || 'No description provided for this category.',
+            shortDescription: updated.description ? updated.description.substring(0, 250) : 'No description provided for this category.',
             durationMinutes: Number(source.duration) || 60,
             basePrice: Number(source.price) || 0,
             maxCapacity: Number((source as any).maxCapacity) || 1,
