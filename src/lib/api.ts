@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1';
+const isProd = process.env.NODE_ENV === 'production';
+const API_BASE = isProd ? 'https://bokspot-be.onrender.com/api/v1' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000/api/v1');
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
