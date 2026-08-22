@@ -5685,10 +5685,6 @@ export const useVendorStore = create<VendorStoreState>()(
       },
       
       addService: async (service) => {
-        // Optimistic update
-        set((state) => ({
-          services: [service, ...state.services]
-        }));
         try {
           const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
@@ -5782,15 +5778,20 @@ export const useVendorStore = create<VendorStoreState>()(
             body: JSON.stringify(payload)
           });
           if (!res.ok) {
-            console.error('Backend rejected addService:', await res.text());
+            const errText = await res.text();
+            console.error('Backend rejected addService:', errText);
+            alert('Failed to save to database. Error: ' + errText);
           } else {
             const data = await res.json();
+            const finalService = { ...service, id: data.data?.id || service.id };
             set((state) => ({
-              services: state.services.map((s) => s.id === service.id ? { ...s, id: data.data.id } : s)
+              services: [finalService, ...state.services]
             }));
+            alert('Success! Category/Service saved to Database.');
           }
         } catch (e) {
           console.error('Failed to sync addService to backend', e);
+          alert('Network Error. Could not connect to backend.');
         }
       },
       
