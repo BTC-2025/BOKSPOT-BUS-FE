@@ -5149,7 +5149,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
     // 2. Sync to Backend Database
     try {
-      const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+      const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
       const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
       
       const payload: any = {};
@@ -5580,7 +5580,7 @@ export const useVendorStore = create<VendorStoreState>()(
       // Services actions
       fetchServices: async () => {
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const activeMerchantId = get().currentMerchant?.id || '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
           
@@ -5687,7 +5687,7 @@ export const useVendorStore = create<VendorStoreState>()(
       
       addService: async (service) => {
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           // Convert local CatalogService structure to CreateServiceDto
           // Fetch the correct category ID from the backend to handle DB differences (Local vs Prod)
@@ -5802,7 +5802,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.map((s) => (s.id === updated.id ? updated : s))
         }));
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           // Use properties from the first listing if available, as they contain the actual configured details (price, duration, toggles)
           const source = (updated.listings && updated.listings.length > 0) ? updated.listings[0] : updated;
@@ -5900,7 +5900,7 @@ export const useVendorStore = create<VendorStoreState>()(
           services: state.services.filter((s) => s.id !== serviceId)
         }));
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           await fetch(`${baseUrl}/services/${serviceId}`, {
             method: 'DELETE'
@@ -5936,7 +5936,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       fetchSupportTickets: async () => {
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets`);
           if (res.ok) {
@@ -5961,7 +5961,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       addSupportTicket: async (ticket) => {
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets`, {
             method: 'POST',
@@ -5999,7 +5999,7 @@ export const useVendorStore = create<VendorStoreState>()(
 
       updateSupportTicketStatus: async (ticketId, status) => {
         try {
-          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app'));
+          const isProd = process.env.NODE_ENV === 'production' || (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const res = await fetch(`${baseUrl}/tickets/${ticketId}/status`, {
             method: 'PATCH',
