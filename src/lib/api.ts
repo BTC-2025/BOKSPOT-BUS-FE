@@ -15,7 +15,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   services: {
-    create: (data: any) => apiFetch('/services', { method: 'POST', body: JSON.stringify(data) }),
+    create: (merchantId: string, data: any) => apiFetch(`/services/${merchantId}`, { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: any) => apiFetch(`/services/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => apiFetch(`/services/${id}`, { method: 'DELETE' }),
     list: (params?: Record<string, string>) => {
