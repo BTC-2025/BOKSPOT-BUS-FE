@@ -5741,7 +5741,6 @@ export const useVendorStore = create<VendorStoreState>()(
           }
           
           const payload = {
-            id: service.id,
             name: service.name,
             categoryId: validCategoryId,
             description: service.description || '',
