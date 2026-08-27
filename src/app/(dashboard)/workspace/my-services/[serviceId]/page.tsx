@@ -81,14 +81,14 @@ export default function ServiceListingsPage() {
 
       {/* Listings Grid */}
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {listings.map(list => (
             <div 
               key={list.id} 
               onClick={() => router.push(`/workspace/my-services/${serviceId}/listing/${list.id}`)}
               className="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden flex flex-col cursor-pointer group"
             >
-              <div className="h-40 w-full bg-slate-100 relative">
+              <div className="h-32 w-full bg-slate-100 relative">
                 {list.imageUrl ? (
                   <img src={list.imageUrl} alt={list.name} className="h-full w-full object-cover" />
                 ) : (
@@ -100,8 +100,8 @@ export default function ServiceListingsPage() {
                   </button>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="font-extrabold text-lg text-slate-900">{list.name}</h3>
+              <div className="p-4">
+                <h3 className="font-extrabold text-base text-slate-900 leading-tight">{list.name}</h3>
                 {list.description && <p className="text-sm text-slate-500 mt-2 line-clamp-2">{list.description}</p>}
                 
                 <div className="mt-4 flex flex-wrap gap-2">

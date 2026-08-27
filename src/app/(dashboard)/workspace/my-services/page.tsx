@@ -158,7 +158,7 @@ export default function WorkspacePage() {
 
       {/* Categories Grid */}
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {merchantServices.map(srv => (
             <div 
               key={srv.id} 
@@ -167,7 +167,7 @@ export default function WorkspacePage() {
             >
               
               {/* Image Section */}
-              <div className="h-48 w-full bg-slate-100 relative">
+              <div className="h-36 w-full bg-slate-100 relative">
                 <img 
                   src={srv.imageUrl || getFallbackImage(srv.name)} 
                   alt={srv.name} 
@@ -186,9 +186,9 @@ export default function WorkspacePage() {
               </div>
 
               {/* Content Section */}
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <h3 className="font-extrabold text-lg text-slate-900 leading-tight">
+              <div className="p-4 flex-1 flex flex-col">
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <h3 className="font-extrabold text-base text-slate-900 leading-tight">
                     {srv.name}
                   </h3>
                 </div>

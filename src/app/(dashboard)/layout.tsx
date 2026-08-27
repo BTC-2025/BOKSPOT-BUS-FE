@@ -359,7 +359,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {currentMerchant?.isCustomized === false && <OnboardingWizard />}
       <div className={`flex h-screen flex-col overflow-hidden bg-bg-primary text-text-primary ${themeClass}`}>
       {/* Top Header (100% width across the top) */}
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md px-6 shadow-md border-b border-border-brand/40 shrink-0">
+      <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md pl-6 pr-0 shadow-md border-b border-border-brand/40 shrink-0">
         {/* Left Column: Logo & Location */}
         <div className="flex-1 flex items-center gap-6">
           <Link href="/home/dashboard-home" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
@@ -601,10 +601,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="w-[50px] shrink-0 h-full flex items-center justify-center border-l border-white/10">
             <button
               onClick={() => setUtilityDrawerOpen(!utilityDrawerOpen)}
-              className={`relative transition-all cursor-pointer w-8 h-8 flex items-center justify-center ${
+              className={`relative w-9 h-9 flex items-center justify-center rounded-xl bg-[#5a4409] hover:bg-[#72560c] border border-[#fceea7]/30 transition-all cursor-pointer shadow-md ${
                 utilityDrawerOpen
-                  ? 'opacity-100 scale-105'
-                  : 'opacity-85 hover:opacity-100'
+                  ? 'opacity-100 scale-105 shadow-[0_0_10px_rgba(252,238,167,0.3)]'
+                  : 'opacity-85 hover:opacity-100 hover:scale-105'
               }`}
               title="Bokspot Utilities"
             >
@@ -615,7 +615,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </header>
 
       {/* New Horizontal Navigation Bar */}
-      <div className="bg-[#f9fafb] dark:bg-bg-secondary flex items-center px-6 py-2 shrink-0 shadow-sm border-b border-border-brand/40 relative z-40">
+      <div className={`bg-[#f9fafb] dark:bg-bg-secondary flex items-center px-6 py-2 shrink-0 shadow-sm border-b border-border-brand/40 relative z-40 transition-all duration-300 ${
+        utilityDrawerOpen ? (activeUtilityTab ? 'lg:pr-[370px]' : 'lg:pr-[50px]') : ''
+      }`}>
         {/* Left side subscription link */}
         <div className="flex-1 hidden md:flex items-center justify-start pl-2">
           <Link
