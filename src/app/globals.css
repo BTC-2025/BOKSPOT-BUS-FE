@@ -422,3 +422,16 @@ body {
 .light .profile-dropdown-card button:hover {
   background-color: rgba(0, 0, 0, 0.05) !important;
 }
+
+/* Custom Animated Light Background */
+@keyframes lightGradientScroll {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.light body {
+  background: linear-gradient(120deg, #ffffff, #fff5ee, #fff8f5, #fff0ea, #ffffff);
+  background-size: 400% 400%;
+  animation: lightGradientScroll 25s ease infinite;
+}

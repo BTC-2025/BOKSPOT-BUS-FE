@@ -8,7 +8,7 @@ import {
   Package, Menu, X, Bell, LogOut, Stethoscope, Dumbbell, Bed, 
   Scissors, Utensils, ShieldAlert, Check, Trash2, Info,
   ChevronDown, Building, Film, Sparkles, LogOut as LogOutIcon, Laptop, User,
-  Sun, Moon, Users, Mail, Search, UserCog, MapPin, Clock, ShieldCheck, MessageSquare, Calculator, Ticket, CheckCircle
+  Sun, Moon, Users, Mail, Search, UserCog, MapPin, Clock, ShieldCheck, MessageSquare, Calculator, Ticket, CheckCircle, Headset
 } from 'lucide-react';
 import { UtilityDrawer } from '@/components/UtilityDrawer';
 import { LocationSelectorModal } from '@/components/LocationSelectorModal';
@@ -285,7 +285,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: 'Staff Management', href: '/workspace/hotel-staff-roster', description: 'Manage employee assignments', type: 'page', icon: Users },
     { label: 'Customer Directory', href: '/tracks/customer-directory', description: 'Diner database', type: 'page', icon: User },
     { label: 'Business Settings', href: '/workspace/settings', description: 'Working hours & profile details', type: 'page', icon: Settings },
-    { label: 'Contact Us', href: '/workspace/contact-us', description: 'Support helpdesk & tickets', type: 'page', icon: Mail },
+    { label: 'Contact Us', href: '/workspace/contact-us', description: 'Support helpdesk & tickets', type: 'page', icon: Headset },
   ];
 
   const searchResults = searchQuery.trim() === '' ? [] : [
@@ -658,7 +658,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[#8b6508] dark:hover:text-[#8b6508] transition-colors"
             title="Support"
           >
-            <Info className="h-[15px] w-[15px]" />
+            <Headset className="h-[15px] w-[15px]" />
             Support
           </Link>
           <Link
