@@ -235,7 +235,7 @@ export default function SettingsPage() {
                 <button 
                   type="button"
                   onClick={() => window.location.href = '/workspace/about'}
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-md transition-colors whitespace-nowrap"
+                  className="px-5 py-2.5 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold text-xs shadow-md transition-colors whitespace-nowrap"
                 >
                   Setup Venue Profile &rarr;
                 </button>

@@ -47,7 +47,7 @@ export default function SlotManagerPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Listing Not Found</h2>
-        <button onClick={() => router.push(`/workspace/my-services/${serviceId}`)} className="px-6 py-2 bg-slate-900 text-white rounded-xl">Go Back</button>
+        <button onClick={() => router.push(`/workspace/my-services/${serviceId}`)} className="px-6 py-2 bg-[#8b6508] hover:bg-[#6c4e06] text-white rounded-xl">Go Back</button>
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function SlotManagerPage() {
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Price (₹)</label>
                   <input type="number" value={newPrice} onChange={e => setNewPrice(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#8b6508] focus:ring-1 focus:ring-[#8b6508] outline-none" placeholder="e.g. 1500" />
                 </div>
-                <button onClick={handleAddSlot} className="h-[42px] px-6 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2">
+                <button onClick={handleAddSlot} className="h-[42px] px-6 bg-[#8b6508] text-white font-bold rounded-xl hover:bg-[#6c4e06] transition-colors flex items-center gap-2">
                   <Plus size={16} /> Add
                 </button>
               </div>

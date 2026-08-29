@@ -61,8 +61,10 @@ export default function VenueProfilePage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach(file => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const img = new Image();
@@ -82,8 +84,8 @@ export default function VenueProfilePage() {
         img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
-      e.target.value = '';
-    }
+    });
+    e.target.value = '';
   };
 
   const handleRemoveImage = (index: number) => {
@@ -183,6 +185,7 @@ export default function VenueProfilePage() {
             <input
               type="file"
               accept="image/*"
+              multiple
               id="gallery-upload"
               onChange={handleFileChange}
               className="hidden"

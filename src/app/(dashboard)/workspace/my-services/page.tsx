@@ -219,7 +219,7 @@ export default function WorkspacePage() {
               </p>
               <button 
                 onClick={() => setShowServiceModal(true)}
-                className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-colors"
+                className="px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold text-sm transition-colors"
               >
                 Create First Category
               </button>

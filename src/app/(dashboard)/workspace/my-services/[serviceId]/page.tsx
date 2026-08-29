@@ -30,7 +30,7 @@ export default function ServiceListingsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Category Not Found</h2>
-        <button onClick={() => router.push('/workspace/my-services')} className="px-6 py-2 bg-slate-900 text-white rounded-xl">Go Back</button>
+        <button onClick={() => router.push('/workspace/my-services')} className="px-6 py-2 bg-[#8b6508] hover:bg-[#6c4e06] text-white rounded-xl">Go Back</button>
       </div>
     );
   }
@@ -101,7 +101,14 @@ export default function ServiceListingsPage() {
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="font-extrabold text-base text-slate-900 leading-tight">{list.name}</h3>
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className="font-extrabold text-base text-slate-900 leading-tight">{list.name}</h3>
+                  {list.price !== undefined && list.price > 0 && (
+                    <span className="text-xs font-bold text-[#8b6508] bg-[#8b6508]/10 px-2 py-1 rounded-md shrink-0">
+                      ₹{list.price}
+                    </span>
+                  )}
+                </div>
                 {list.description && <p className="text-sm text-slate-500 mt-2 line-clamp-2">{list.description}</p>}
                 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -117,7 +124,7 @@ export default function ServiceListingsPage() {
                       e.stopPropagation();
                       router.push(`/workspace/my-services/${serviceId}/listing/${list.id}/slots`);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#8b6508] hover:bg-[#6c4e06] text-white text-xs font-bold rounded-lg transition-colors"
                   >
                     <Calendar size={14} />
                     Calendar & Slots

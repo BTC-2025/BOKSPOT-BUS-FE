@@ -22,6 +22,7 @@ export default function ListingEditorPage() {
   const [serviceName, setServiceName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
+  const [basePrice, setBasePrice] = useState('0');
   
   // Config-Driven Metadata State
   const [metadata, setMetadata] = useState<Record<string, any>>({});
@@ -36,6 +37,7 @@ export default function ListingEditorPage() {
           setServiceName(list.name || '');
           setImageUrl(list.imageUrl || '');
           setDescription(list.description || '');
+          setBasePrice(list.price?.toString() || '0');
           setMetadata(list.metadata || {});
         }
       }
@@ -64,8 +66,8 @@ export default function ListingEditorPage() {
       imageUrl: imageUrl.trim() || undefined,
       description: description.trim() || undefined,
       active: true,
-      price: 0, // Legacy - not used anymore
-      duration: 30, // Legacy - not used anymore
+      price: parseFloat(basePrice) || 0,
+      duration: 30, // Default duration
       metadata
     };
 
@@ -147,7 +149,42 @@ export default function ListingEditorPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Listing Image URL</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Listing Image</label>
+                <div 
+                  onClick={() => document.getElementById('listing-image-upload')?.click()}
+                  className="w-full h-32 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#8b6508] bg-slate-50 flex flex-col items-center justify-center cursor-pointer transition-colors relative overflow-hidden group mb-3"
+                >
+                  {imageUrl ? (
+                    <>
+                      <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <span className="text-white font-bold text-sm flex items-center gap-2">
+                          Change Image
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center text-slate-500 group-hover:text-[#8b6508] transition-colors">
+                      <span className="font-bold text-sm">Click to choose local image</span>
+                      <span className="text-xs mt-1 opacity-70">PNG, JPG up to 5MB</span>
+                    </div>
+                  )}
+                </div>
+                <input 
+                  id="listing-image-upload"
+                  type="file" 
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setImageUrl(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  accept="image/*"
+                />
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Or enter Image URL</label>
                 <input
                   type="url"
                   value={imageUrl}
@@ -155,11 +192,23 @@ export default function ListingEditorPage() {
                   placeholder="https://example.com/image.jpg"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium bg-slate-50 focus:bg-white"
                 />
-                {imageUrl && (
-                  <div className="mt-4 h-48 w-full rounded-xl overflow-hidden border border-slate-200">
-                    <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Base Price (₹) <span className="text-red-500">*</span></label>
+                  <input
+                    type="number"
+                    value={basePrice}
+                    onChange={(e) => setBasePrice(e.target.value)}
+                    placeholder="e.g. 500"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium bg-slate-50 focus:bg-white"
+                    required
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">The starting price shown to customers.</p>
+                </div>
               </div>
 
               <div>
@@ -177,7 +226,7 @@ export default function ListingEditorPage() {
               <button 
                 onClick={() => setStep(2)}
                 disabled={!serviceName}
-                className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold disabled:opacity-50 hover:bg-slate-800 transition-colors"
+                className="px-8 py-3 bg-[#8b6508] text-white rounded-xl font-bold disabled:opacity-50 hover:bg-[#6c4e06] transition-colors"
               >
                 Next: Dynamic Details
               </button>
@@ -220,6 +269,7 @@ export default function ListingEditorPage() {
                   <p className="text-sm"><span className="text-slate-500">Name:</span> <strong>{serviceName}</strong></p>
                   <p className="text-sm"><span className="text-slate-500">Category:</span> <strong>{category.name}</strong></p>
                   <p className="text-sm"><span className="text-slate-500">Archetype:</span> <strong>{archetype}</strong></p>
+                  <p className="text-sm"><span className="text-slate-500">Base Price:</span> <strong>₹{basePrice || '0'}</strong></p>
                 </div>
               </div>
               
