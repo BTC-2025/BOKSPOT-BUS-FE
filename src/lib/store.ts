@@ -139,6 +139,7 @@ export interface CatalogService {
   listings?: CatalogListing[];
   imageUrl?: string;
   description?: string;
+  createdAt?: string;
   
   // Extended Details
   isTimingEnabled?: boolean;
@@ -5157,6 +5158,7 @@ export const useVendorStore = create<VendorStoreState>()(
       if (profileData.about || profileData.aboutText) payload.description = profileData.about || profileData.aboutText;
       if (profileData.amenities || profileData.thingsToKnow) payload.amenities = profileData.amenities || profileData.thingsToKnow;
       if (profileData.gallery) payload.images = profileData.gallery;
+        if (profileData.policies) payload.metadata = { policies: profileData.policies };
       
       const res = await fetch(`${baseUrl}/merchants/${merchantId}`, {
         method: 'PATCH',
@@ -5639,40 +5641,43 @@ export const useVendorStore = create<VendorStoreState>()(
                 id: s.id,
                 name: s.name,
                 merchant: fetchedMerchantName,
-              price: s.basePrice || 0,
-              duration: s.durationMinutes || 60,
-              category: s.category?.name || 'General',
-              active: s.isActive ?? true,
-              rating: s.rating || 0,
-              bookingsCount: s.reviewCount || 0,
-              imageUrl: s.images?.[0] || s.metadata?.images?.[0] || '',
-              description: s.description || '',
-              listings: s.metadata?.listings || [
-                {
-                  id: s.id,
-                  name: s.name,
-                  price: s.basePrice || 0,
-                  duration: s.durationMinutes || 60,
-                  imageUrl: s.images?.[0] || s.metadata?.images?.[0] || '',
-                  active: s.isActive ?? true
-                }
-              ],
-              isTimingEnabled: s.isTimingEnabled,
-              timingDetails: s.timingDetails,
-              isCapacityEnabled: s.isCapacityEnabled,
-              participantCapacity: s.participantCapacity,
-              isAddonsEnabled: s.isAddonsEnabled,
-              addOns: s.addOns || [],
-              isTipsEnabled: s.isTipsEnabled,
-              tipsAndGuidelines: s.tipsAndGuidelines,
-              isRestrictionsEnabled: s.isRestrictionsEnabled,
-              restrictions: s.restrictions,
-              isOffersEnabled: s.isOffersEnabled,
-              offersAndDiscounts: s.offersAndDiscounts,
-              isInstructionsEnabled: s.isInstructionsEnabled,
-              specialInstructions: s.specialInstructions
-            };
-          });
+                price: s.basePrice || 0,
+                duration: s.durationMinutes || 60,
+                category: s.category?.name || 'General',
+                active: s.isActive ?? true,
+                rating: s.rating || 0,
+                bookingsCount: s.reviewCount || 0,
+                imageUrl: s.images?.[0] || s.metadata?.mainImageUrl || s.metadata?.images?.[0] || '',
+                description: s.description || '',
+                city: s.merchant?.city || s.city || 'Chennai',
+                metadata: s.metadata || {},
+                createdAt: s.createdAt,
+                listings: s.metadata?.listings || [
+                  {
+                    id: s.id,
+                    name: s.name,
+                    price: s.basePrice || 0,
+                    duration: s.durationMinutes || 60,
+                    imageUrl: s.images?.[0] || s.metadata?.images?.[0] || '',
+                    active: s.isActive ?? true
+                  }
+                ],
+                isTimingEnabled: s.isTimingEnabled,
+                timingDetails: s.timingDetails,
+                isCapacityEnabled: s.isCapacityEnabled,
+                participantCapacity: s.participantCapacity,
+                isAddonsEnabled: s.isAddonsEnabled,
+                addOns: s.addOns || [],
+                isTipsEnabled: s.isTipsEnabled,
+                tipsAndGuidelines: s.tipsAndGuidelines,
+                isRestrictionsEnabled: s.isRestrictionsEnabled,
+                restrictions: s.restrictions,
+                isOffersEnabled: s.isOffersEnabled,
+                offersAndDiscounts: s.offersAndDiscounts,
+                isInstructionsEnabled: s.isInstructionsEnabled,
+                specialInstructions: s.specialInstructions
+              };
+            });
             
             set({ services: mapped });
           }
@@ -5748,6 +5753,7 @@ export const useVendorStore = create<VendorStoreState>()(
             maxCapacity: Number(service.maxCapacity) || 1,
             images: [service.imageUrl || ''],
             metadata: { 
+              ...(service.metadata || {}),
               merchantName: get().currentMerchant?.merchantName || service.merchant,
               listings: service.listings 
             },
@@ -5863,6 +5869,7 @@ export const useVendorStore = create<VendorStoreState>()(
             maxCapacity: Number((source as any).maxCapacity) || 1,
             images: [source.imageUrl || updated.imageUrl || ''],
             metadata: { 
+              ...(updated.metadata || {}),
               merchantName: get().currentMerchant?.merchantName || updated.merchant,
               listings: updated.listings 
             },

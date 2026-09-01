@@ -15,6 +15,9 @@ export default function VenueProfilePage() {
   const [thingsToKnow, setThingsToKnow] = useState<string[]>([]);
   const [newThing, setNewThing] = useState('');
   
+  const [policies, setPolicies] = useState<string[]>([]);
+  const [newPolicy, setNewPolicy] = useState('');
+  
   const [gallery, setGallery] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState('');
 
@@ -33,11 +36,17 @@ export default function VenueProfilePage() {
             setAboutText(data.description || '');
             setThingsToKnow(data.amenities || []);
             setGallery(data.images || []);
+            if (data.metadata?.policies) {
+              setPolicies(data.metadata.policies);
+            }
           } else {
             // Fallback to local state if backend fetch fails
             setAboutText(currentMerchant.aboutText || '');
             setThingsToKnow(currentMerchant.thingsToKnow || []);
             setGallery(currentMerchant.gallery || []);
+            if ((currentMerchant as any).policies) {
+              setPolicies((currentMerchant as any).policies);
+            }
           }
         } catch (err) {
           console.error('Failed to fetch merchant profile', err);
@@ -58,6 +67,17 @@ export default function VenueProfilePage() {
 
   const handleRemoveThing = (item: string) => {
     setThingsToKnow(thingsToKnow.filter(t => t !== item));
+  };
+
+  const handleAddPolicy = () => {
+    if (newPolicy.trim() && !policies.includes(newPolicy.trim())) {
+      setPolicies([...policies, newPolicy.trim()]);
+      setNewPolicy('');
+    }
+  };
+
+  const handleRemovePolicy = (item: string) => {
+    setPolicies(policies.filter(p => p !== item));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,8 +116,9 @@ export default function VenueProfilePage() {
     updateMerchantProfile(currentMerchant.id, {
       aboutText,
       thingsToKnow,
-      gallery
-    });
+      gallery,
+      policies
+    } as any);
     alert('Venue Profile saved successfully!');
   };
 
@@ -156,6 +177,39 @@ export default function VenueProfilePage() {
             />
             <button onClick={handleAddThing} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-xl font-bold transition-colors">
               Add
+            </button>
+          </div>
+        </div>
+
+        {/* Policies */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mb-4">
+            <Info className="text-orange-500" /> Policies
+          </h2>
+          <p className="text-sm text-slate-500 mb-4">Add your venue policies (e.g. No smoking, Check-in/out times, Cancellation policy).</p>
+          
+          <div className="flex flex-col gap-2 mb-4">
+            {policies.map((policy, idx) => (
+              <div key={idx} className="flex justify-between items-center bg-orange-50 text-orange-800 px-4 py-3 rounded-xl border border-orange-200">
+                <span className="font-medium text-sm">{policy}</span>
+                <button onClick={() => handleRemovePolicy(policy)} className="hover:text-red-500 ml-2">
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newPolicy}
+              onChange={(e) => setNewPolicy(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddPolicy()}
+              placeholder="e.g. Check-in after 2:00 PM"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-orange-500 transition-colors font-medium"
+            />
+            <button onClick={handleAddPolicy} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl font-bold transition-colors">
+              Add Policy
             </button>
           </div>
         </div>
