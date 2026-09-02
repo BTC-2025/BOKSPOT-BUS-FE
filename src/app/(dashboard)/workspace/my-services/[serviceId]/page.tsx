@@ -74,7 +74,7 @@ export default function ServiceListingsPage() {
             onClick={() => router.push(`/workspace/my-services/${serviceId}/listing/new`)}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white shadow-lg shadow-[#8b6508]/20 font-bold text-xs uppercase tracking-widest transition-colors"
           >
-            <Plus size={16} /> My Listing
+            <Plus size={16} /> Add Listing
           </button>
         </div>
       </div>
@@ -142,8 +142,14 @@ export default function ServiceListingsPage() {
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">No Listings Yet</h3>
               <p className="text-slate-500 max-w-md text-sm mb-6">
-                Click "My Listing" to create the first listing for {category.name}.
+                Click the button below to create the first listing for {category.name}.
               </p>
+              <button 
+                onClick={() => router.push(`/workspace/my-services/${serviceId}/listing/new`)}
+                className="px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold text-sm transition-colors shadow-lg shadow-[#8b6508]/20"
+              >
+                + Add First Listing
+              </button>
             </div>
           )}
         </div>

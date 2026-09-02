@@ -3,7 +3,7 @@
 import { useVendorStore, CatalogListing } from '@/lib/store';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, Save, Bed, Image as ImageIcon, Activity, Heart, Car, Ticket, Briefcase, Zap, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, Save, Bed, Image as ImageIcon, Activity, Heart, Car, Ticket, Briefcase, Zap, CheckCircle2, Plus } from 'lucide-react';
 import DynamicForm from '@/components/DynamicForm';
 import { CATEGORY_TO_ARCHETYPE_MAP, Archetype } from '@/lib/archetypes';
 
@@ -23,6 +23,7 @@ export default function ListingEditorPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState('0');
+  const [addons, setAddons] = useState<{name: string, price: number}[]>([]);
   
   // Config-Driven Metadata State
   const [metadata, setMetadata] = useState<Record<string, any>>({});
@@ -39,6 +40,7 @@ export default function ListingEditorPage() {
           setDescription(list.description || '');
           setBasePrice(list.price?.toString() || '0');
           setMetadata(list.metadata || {});
+          setAddons(list.metadata?.addons || []);
         }
       }
     }
@@ -68,7 +70,7 @@ export default function ListingEditorPage() {
       active: true,
       price: parseFloat(basePrice) || 0,
       duration: 30, // Default duration
-      metadata
+      metadata: { ...metadata, addons }
     };
 
     let updatedListings = category.listings || [];
@@ -219,6 +221,24 @@ export default function ListingEditorPage() {
                   placeholder="Describe this listing..."
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium bg-slate-50 focus:bg-white min-h-[120px]"
                 />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Add-ons / Extras (Optional)</label>
+                  <button onClick={() => setAddons([...addons, { name: '', price: 0 }])} className="text-xs font-bold text-[#8b6508] flex items-center gap-1 hover:underline bg-[#8b6508]/10 px-3 py-1.5 rounded-lg"><Plus size={14} /> Add Option</button>
+                </div>
+                {addons.length === 0 && <p className="text-sm text-slate-400 italic">No add-ons configured.</p>}
+                {addons.map((addon, idx) => (
+                  <div key={idx} className="flex items-center gap-3 mb-3 bg-slate-50 p-3 rounded-xl border border-slate-200 animate-fade-in">
+                    <input type="text" placeholder="Add-on Name (e.g. Extra Bed)" value={addon.name} onChange={(e) => { const newA = [...addons]; newA[idx].name = e.target.value; setAddons(newA); }} className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium focus:border-[#8b6508] focus:outline-none" />
+                    <div className="relative w-28">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">₹</span>
+                      <input type="number" placeholder="Price" value={addon.price} onChange={(e) => { const newA = [...addons]; newA[idx].price = Number(e.target.value); setAddons(newA); }} className="w-full pl-7 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm font-medium focus:border-[#8b6508] focus:outline-none" />
+                    </div>
+                    <button onClick={() => setAddons(addons.filter((_, i) => i !== idx))} className="text-red-500 hover:bg-red-50 hover:text-red-600 p-2.5 rounded-lg border border-transparent hover:border-red-100 transition-colors"><X size={16} strokeWidth={3} /></button>
+                  </div>
+                ))}
               </div>
             </div>
 

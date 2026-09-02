@@ -5867,7 +5867,7 @@ export const useVendorStore = create<VendorStoreState>()(
             durationMinutes: Number(source.duration) || 60,
             basePrice: Number(source.price) || 0,
             maxCapacity: Number((source as any).maxCapacity) || 1,
-            images: [source.imageUrl || updated.imageUrl || ''],
+            images: [updated.imageUrl || source.imageUrl || ''],
             metadata: { 
               ...(updated.metadata || {}),
               merchantName: get().currentMerchant?.merchantName || updated.merchant,

@@ -28,19 +28,12 @@ export default function WorkspacePage() {
   const [bookingTypeCity, setBookingTypeCity] = useState('Chennai');
   const [bookingTypeImage, setBookingTypeImage] = useState('');
 
-  // Category & Listing Form State
-  const [step, setStep] = useState(1);
+  // Category Form State
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   
-  // -- Step 1: Category
   const [categoryName, setCategoryName] = useState('');
   const [categoryImage, setCategoryImage] = useState('');
   const [categoryDesc, setCategoryDesc] = useState('');
-  
-  // -- Step 2: Listing
-  const [listingName, setListingName] = useState('');
-  const [listingPrice, setListingPrice] = useState('');
-  const [listingDesc, setListingDesc] = useState('');
 
   const GROUPED_CATEGORIES = {
     "Accommodation & Hospitality": [
@@ -108,25 +101,10 @@ export default function WorkspacePage() {
     setBookingTypeCity('Chennai');
   };
 
-  // Save Category & Listing (Level 2)
-  const handleSaveCategoryListing = (e: React.FormEvent) => {
+  // Save Category (Level 2)
+  const handleSaveCategory = (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 1 && !editingServiceId) {
-      if (!categoryName.trim()) return alert("Please enter a category name");
-      setStep(2);
-      return;
-    }
-    
-    if (!editingServiceId && !listingName.trim()) return alert("Please enter a listing name");
-
-    const newListing = {
-      id: crypto.randomUUID(),
-      name: listingName.trim(),
-      price: parseFloat(listingPrice) || 0,
-      description: listingDesc.trim() || undefined,
-      active: true,
-      duration: 30
-    };
+    if (!categoryName.trim()) return alert("Please enter a category name");
 
     const newService: CatalogService = {
       id: editingServiceId || crypto.randomUUID(),
@@ -140,7 +118,7 @@ export default function WorkspacePage() {
       bookingsCount: 0,
       imageUrl: categoryImage.trim() || undefined,
       description: categoryDesc.trim() || undefined,
-      listings: editingServiceId ? [] : [newListing],
+      listings: [],
       createdAt: new Date().toISOString()
     };
 
@@ -160,10 +138,6 @@ export default function WorkspacePage() {
     setCategoryName('');
     setCategoryImage('');
     setCategoryDesc('');
-    setListingName('');
-    setListingPrice('');
-    setListingDesc('');
-    setStep(1);
   };
 
   const openEditCategory = (e: React.MouseEvent, srv: CatalogService) => {
@@ -172,9 +146,6 @@ export default function WorkspacePage() {
     setCategoryName(srv.name);
     setCategoryImage(srv.imageUrl || '');
     setCategoryDesc(srv.description || '');
-    // Note: We don't load listing details in edit mode for this simplified flow,
-    // they can edit listings inside the detail page.
-    setStep(1);
     setShowCategoryModal(true);
   };
 
@@ -243,10 +214,6 @@ export default function WorkspacePage() {
                 setCategoryName('');
                 setCategoryImage('');
                 setCategoryDesc('');
-                setListingName('');
-                setListingPrice('');
-                setListingDesc('');
-                setStep(1);
                 setShowCategoryModal(true);
               }}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold tracking-wide transition-all shadow-md active:scale-95"
@@ -486,69 +453,49 @@ export default function WorkspacePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-black text-slate-900">{editingServiceId ? 'Edit Category' : 'Add Category & Listing'}</h2>
+              <h2 className="text-xl font-black text-slate-900">{editingServiceId ? 'Edit Category' : 'Add Category'}</h2>
               <button onClick={() => setShowCategoryModal(false)} className="h-8 w-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"><X size={16} /></button>
             </div>
             <div className="p-6 overflow-y-auto flex-1">
-              <form id="categoryListingForm" onSubmit={handleSaveCategoryListing} className="space-y-5">
-                {step === 1 || editingServiceId ? (
-                  <>
-                    <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">Step 1: Category Details</h3>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category Name</label>
-                      <input type="text" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} placeholder="e.g. Deluxe Room" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium" required />
+              <form id="categoryListingForm" onSubmit={handleSaveCategory} className="space-y-5">
+                  <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">Category Details</h3>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category Name</label>
+                    <input type="text" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} placeholder="e.g. Deluxe Room" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium" required />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category Image</label>
+                    <div onClick={() => document.getElementById('cat-image-upload')?.click()} className="w-full h-32 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#8b6508] bg-slate-50 flex flex-col items-center justify-center cursor-pointer transition-colors relative overflow-hidden group mb-3">
+                      {categoryImage ? (
+                        <>
+                          <img src={categoryImage} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span className="text-white font-bold text-sm flex items-center gap-2">Change Image</span></div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center text-slate-500 group-hover:text-[#8b6508] transition-colors"><span className="font-bold text-sm">Click to choose image</span></div>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category Image</label>
-                      <div onClick={() => document.getElementById('cat-image-upload')?.click()} className="w-full h-32 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#8b6508] bg-slate-50 flex flex-col items-center justify-center cursor-pointer transition-colors relative overflow-hidden group mb-3">
-                        {categoryImage ? (
-                          <>
-                            <img src={categoryImage} alt="Preview" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span className="text-white font-bold text-sm flex items-center gap-2">Change Image</span></div>
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center text-slate-500 group-hover:text-[#8b6508] transition-colors"><span className="font-bold text-sm">Click to choose image</span></div>
-                        )}
-                      </div>
-                      <input id="cat-image-upload" type="file" className="hidden" onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => setCategoryImage(reader.result as string);
-                          reader.readAsDataURL(file);
-                        }
-                      }} accept="image/*" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Description</label>
-                      <textarea value={categoryDesc} onChange={(e) => setCategoryDesc(e.target.value)} placeholder="Short description..." className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium min-h-[80px]" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-lg font-black text-slate-800 border-b border-slate-100 pb-2 mb-4">Step 2: First Listing Details</h3>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Listing Name</label>
-                      <input type="text" value={listingName} onChange={(e) => setListingName(e.target.value)} placeholder="e.g. Room 101" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium" required />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Price</label>
-                      <input type="number" value={listingPrice} onChange={(e) => setListingPrice(e.target.value)} placeholder="e.g. 1500" className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium" required />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Description</label>
-                      <textarea value={listingDesc} onChange={(e) => setListingDesc(e.target.value)} placeholder="Short description..." className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium min-h-[80px]" />
-                    </div>
-                  </>
-                )}
+                    <input id="cat-image-upload" type="file" className="hidden" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => setCategoryImage(reader.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }} accept="image/*" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Description</label>
+                    <textarea value={categoryDesc} onChange={(e) => setCategoryDesc(e.target.value)} placeholder="Short description..." className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium min-h-[80px]" />
+                  </div>
               </form>
             </div>
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
-              <button type="button" onClick={() => { if (step === 2 && !editingServiceId) setStep(1); else setShowCategoryModal(false); }} className="px-5 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-200 transition-colors">
-                {(step === 2 && !editingServiceId) ? 'Back' : 'Cancel'}
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end items-center gap-3 shrink-0">
+              <button type="button" onClick={() => setShowCategoryModal(false)} className="px-5 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-200 transition-colors">
+                Cancel
               </button>
               <button type="submit" form="categoryListingForm" className="px-6 py-2.5 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold transition-colors shadow-lg shadow-[#8b6508]/20">
-                {(step === 1 && !editingServiceId) ? 'Next Step' : 'Save'}
+                Save Category
               </button>
             </div>
           </div>
