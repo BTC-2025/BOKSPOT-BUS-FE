@@ -208,18 +208,26 @@ export default function WorkspacePage() {
               <Plus size={18} /> Add Booking Type
             </button>
           ) : (
-            <button 
-              onClick={() => {
-                setEditingServiceId(null);
-                setCategoryName('');
-                setCategoryImage('');
-                setCategoryDesc('');
-                setShowCategoryModal(true);
-              }}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold tracking-wide transition-all shadow-md active:scale-95"
-            >
-              <Plus size={18} /> Add Category & Listing
-            </button>
+            <>
+              <button 
+                onClick={() => {
+                  setEditingServiceId(null);
+                  setCategoryName('');
+                  setCategoryImage('');
+                  setCategoryDesc('');
+                  setShowCategoryModal(true);
+                }}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#8b6508] hover:bg-[#6c4e06] text-white font-bold tracking-wide transition-all shadow-md active:scale-95"
+              >
+                <Plus size={18} /> Add Category
+              </button>
+              <button
+                onClick={() => router.push('/workspace/about')}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold tracking-wide transition-all shadow-sm active:scale-95 border border-slate-200"
+              >
+                Venue Profile
+              </button>
+            </>
           )}
         </div>
       </div>

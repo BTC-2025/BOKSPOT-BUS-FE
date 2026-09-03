@@ -5401,7 +5401,15 @@ export const useVendorStore = create<VendorStoreState>()(
             found = PRESET_MERCHANTS[0];
           }
           const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
-          set({ currentMerchant: finalMerchant, loginRole: 'vendor', supervisorId: null });
+          set({ 
+            currentMerchant: finalMerchant, 
+            loginRole: 'vendor', 
+            supervisorId: null,
+            services: [],
+            bookings: [],
+            supportTickets: [],
+            staffAccounts: []
+          });
           
           // No mock seeding - user gets a blank slate when starting fresh
           return true;
@@ -5411,7 +5419,16 @@ export const useVendorStore = create<VendorStoreState>()(
       },
       
       logoutMerchant: () => {
-        set({ currentMerchant: null, loginRole: null, supervisorId: null, currentStaff: null });
+        set({ 
+          currentMerchant: null, 
+          loginRole: null, 
+          supervisorId: null, 
+          currentStaff: null,
+          services: [],
+          bookings: [],
+          supportTickets: [],
+          staffAccounts: []
+        });
       },
       
       switchStore: (merchantId) => {
@@ -5428,12 +5445,21 @@ export const useVendorStore = create<VendorStoreState>()(
             aboutText: `Welcome to ${categoryName} Care Hub. We provide professional bookings and top-tier services.`
           };
         }
-        if (found) {
-          const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
-          set({ currentMerchant: finalMerchant });
-          
-          // No mock seeding - user gets a blank slate when starting fresh
+        if (!found) {
+          found = PRESET_MERCHANTS[0];
         }
+        const finalMerchant = { ...found, ...(get().customMerchants[found.id] || {}) };
+        
+        // When switching stores, clear the previous store's data from memory so it doesn't bleed over
+        set({ 
+          currentMerchant: finalMerchant, 
+          loginRole: 'vendor', 
+          supervisorId: null,
+          services: [],
+          bookings: [],
+          supportTickets: [],
+          staffAccounts: []
+        });
       },
       
       checkInBooking: (bookingId) => {

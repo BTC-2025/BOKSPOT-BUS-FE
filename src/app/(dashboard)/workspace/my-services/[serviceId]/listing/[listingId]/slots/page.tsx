@@ -71,8 +71,13 @@ export default function SlotManagerPage() {
     const slotsForDay = schedule.filter(s => s.dayOfWeek === activeDay).sort((a, b) => a.startTime.localeCompare(b.startTime));
     const slotToRemove = slotsForDay[indexToRemove];
     
-    // Remove from main schedule array
-    setSchedule(schedule.filter(s => !(s.dayOfWeek === slotToRemove.dayOfWeek && s.startTime === slotToRemove.startTime && s.endTime === slotToRemove.endTime)));
+    // Remove exact object reference from main schedule array
+    const globalIndex = schedule.indexOf(slotToRemove);
+    if (globalIndex !== -1) {
+      const newSchedule = [...schedule];
+      newSchedule.splice(globalIndex, 1);
+      setSchedule(newSchedule);
+    }
   };
 
   const handleCopyFromMonday = () => {
