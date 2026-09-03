@@ -5612,9 +5612,9 @@ export const useVendorStore = create<VendorStoreState>()(
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const activeMerchantId = get().currentMerchant?.id || '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
           
-          // Add 10 second timeout so the app doesn't hang if backend is down
+          // Add 30 second timeout so the app doesn't hang if backend is down, but allows Render cold starts
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
           
           const res = await fetch(`${baseUrl}/services?merchantId=${activeMerchantId}`, { 
             cache: 'no-store',
@@ -5669,7 +5669,7 @@ export const useVendorStore = create<VendorStoreState>()(
                 merchant: fetchedMerchantName,
                 price: s.basePrice || 0,
                 duration: s.durationMinutes || 60,
-                category: s.category?.name || 'General',
+                category: s.metadata?.originalCategory || s.category?.name || 'General',
                 active: s.isActive ?? true,
                 rating: s.rating || 0,
                 bookingsCount: s.reviewCount || 0,
@@ -5781,6 +5781,7 @@ export const useVendorStore = create<VendorStoreState>()(
             metadata: { 
               ...(service.metadata || {}),
               merchantName: get().currentMerchant?.merchantName || service.merchant,
+              originalCategory: service.category,
               listings: service.listings 
             },
             isTimingEnabled: Boolean(service.isTimingEnabled),
