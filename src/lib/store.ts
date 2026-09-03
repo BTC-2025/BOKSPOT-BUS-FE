@@ -5612,9 +5612,9 @@ export const useVendorStore = create<VendorStoreState>()(
           const baseUrl = isProd ? 'https://bokspot-be.onrender.com/api/v1' : 'http://localhost:9000/api/v1';
           const activeMerchantId = get().currentMerchant?.id || '2cf63fd7-6710-4ac6-a3fa-8cbda29fdc0e';
           
-          // Add 30 second timeout so the app doesn't hang if backend is down, but allows Render cold starts
+          // Add 60 second timeout so the app doesn't hang if backend is down, but allows Render cold starts and large base64 image payloads
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const timeoutId = setTimeout(() => controller.abort(), 60000);
           
           const res = await fetch(`${baseUrl}/services?merchantId=${activeMerchantId}`, { 
             cache: 'no-store',
