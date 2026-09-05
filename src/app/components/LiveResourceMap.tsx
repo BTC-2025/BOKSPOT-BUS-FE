@@ -3,6 +3,21 @@
 import { useVendorStore } from '../../lib/store';
 import { Activity, Info, Map, Camera, Dumbbell, Baby, Wrench, Building2, Ticket } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Create a dynamic import for the real map component to avoid SSR issues with Leaflet
+// Defining this outside the component prevents it from unmounting/remounting on every state change/poll.
+const RealMap = dynamic(() => import('./RealMapComponent'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[380px] flex items-center justify-center bg-slate-50 border border-slate-200 rounded-2xl animate-pulse">
+      <div className="flex flex-col items-center">
+        <div className="h-6 w-6 border-2 border-[#8b6508] border-t-transparent rounded-full animate-spin mb-2" />
+        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Syncing Live Map Feed...</p>
+      </div>
+    </div>
+  )
+});
 
 export default function LiveResourceMap() {
   const { currentMerchant } = useVendorStore();
@@ -201,38 +216,23 @@ export default function LiveResourceMap() {
 
   // --- SERVICE / CARE (Service, CareServices) ---
   const isCare = arch === 'CareServices';
+
   return (
     <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative">
       <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
         {isCare ? <Baby size={18} className="text-rose-500" /> : <Wrench size={18} className="text-slate-700" />}
         {isCare ? 'Active Care Sessions' : 'Field Technician Map'}
       </h2>
-      <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden relative h-[250px]">
-        {/* Mock City Map Background */}
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cartographer.png')] mix-blend-multiply bg-blue-100" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
-        
-        {/* Mock Technician Pins */}
-        <div className="absolute top-[20%] left-[30%] group">
-          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg animate-pulse" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            Tech 1: Arrived
-          </div>
-        </div>
-
-        <div className="absolute top-[60%] left-[70%] group">
-          <div className="w-4 h-4 bg-amber-500 rounded-full border-2 border-white shadow-lg" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            Tech 2: En Route (12 mins)
-          </div>
-        </div>
-
-        <div className="absolute top-[40%] left-[50%] group">
-          <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-white border border-slate-200 text-slate-900 shadow-sm text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            Tech 3: Idle
-          </div>
-        </div>
+      <div className="w-full border border-slate-200 rounded-2xl overflow-hidden relative h-[380px]">
+        <RealMap 
+          center={[13.0827, 80.2707]} // Default to Chennai
+          zoom={12}
+          markers={[
+            { id: '1', lat: 13.0850, lng: 80.2750, name: 'Rohan', merchant: 'Apollo Dental', category: 'Root Canal Treatment', emoji: '🦷', price: '₹4,500', rating: 4.8 },
+            { id: '2', lat: 13.0720, lng: 80.2600, name: 'Vikram', merchant: 'City Clinic', category: 'General Checkup', emoji: '🩺', price: '₹500', rating: 4.5 },
+            { id: '3', lat: 13.0950, lng: 80.2800, name: 'Anjali', merchant: 'Care Plus', category: 'Blood Test', emoji: '🩸', price: '₹1,200', rating: 4.9 },
+          ]}
+        />
       </div>
     </div>
   );

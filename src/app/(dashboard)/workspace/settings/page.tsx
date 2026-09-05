@@ -36,6 +36,18 @@ export default function SettingsPage() {
   const [address, setAddress] = useState('42 Anna Nagar, Chennai');
   const [about, setAbout] = useState(currentMerchant?.aboutText || '');
   const [isSaved, setIsSaved] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const [activeModules, setActiveModules] = useState<string[]>(currentMerchant?.activeModules || ['bookings', 'staff', 'customers', 'map']);
   const [customDictionary, setCustomDictionary] = useState<Record<string, string>>(currentMerchant?.customDictionary || {});
@@ -308,13 +320,18 @@ export default function SettingsPage() {
             <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
               <Camera size={18} className="text-[#8b6508]" /> Brand Logo
             </h2>
-            <div className="aspect-square w-full max-w-[200px] mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-slate-100 hover:border-[#8b6508] transition-all">
-              <div className="h-20 w-20 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm mb-4">
-                <span className="text-3xl font-black text-[#8b6508]">{currentMerchant.logoLetter}</span>
+            <label className="aspect-square w-full max-w-[200px] mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-slate-100 hover:border-[#8b6508] transition-all relative">
+              <input type="file" className="hidden" accept="image/png, image/jpeg" onChange={handleLogoChange} />
+              <div className="h-20 w-20 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm mb-4 overflow-hidden">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-black text-[#8b6508]">{currentMerchant.logoLetter}</span>
+                )}
               </div>
               <p className="text-xs font-bold text-slate-500">Click to upload new logo</p>
               <p className="text-[10px] text-slate-400 mt-1">PNG, JPG up to 2MB</p>
-            </div>
+            </label>
           </div>
 
           {/* Supervisor details */}
