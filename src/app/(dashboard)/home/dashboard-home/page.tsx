@@ -111,6 +111,25 @@ export default function DashboardPage() {
   const maxWeekly = Math.max(...weeklyData);
   const carouselImages = DEFAULT_CAROUSEL_IMAGES[currentMerchant.archetype as keyof typeof DEFAULT_CAROUSEL_IMAGES] || DEFAULT_CAROUSEL_IMAGES.ServiceBooking;
 
+  const getBookingType = (serviceName: string, fallback?: string) => {
+    const name = (serviceName || '').toLowerCase();
+    if (name.includes('room') || name.includes('hotel') || name.includes('suite')) return 'Hotel Booking';
+    if (name.includes('cricket') || name.includes('ground 1')) return 'Cricket Ground Booking';
+    if (name.includes('football') || name.includes('turf')) return 'Football Turf Booking';
+    if (name.includes('ground')) return 'Cricket Ground Booking';
+    if (name.includes('hair') || name.includes('spa')) return 'Salon Booking';
+    if (name.includes('table') || name.includes('dine')) return 'Restaurant Booking';
+    return fallback || 'Service Booking';
+  };
+
+  const getCategoryName = (serviceName: string, originalCat: string) => {
+    if (originalCat && originalCat !== 'Category') return originalCat;
+    const name = (serviceName || '').toLowerCase();
+    if (name.includes('room')) return 'Deluxe Room';
+    if (name.includes('ground')) return 'Shed A';
+    return 'General';
+  };
+
   const handleAccept = async (booking: any) => {
     setAcceptingId(booking.id);
     try {
@@ -405,9 +424,9 @@ export default function DashboardPage() {
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded mb-1 inline-block">
-                          {currentMerchant.category || 'Cricket Ground'} - {booking.category || 'Category'}
-                        </span>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-blue-600 mb-0.5">
+                          {getBookingType(booking.serviceName, currentMerchant.category)} &bull; {getCategoryName(booking.serviceName, booking.category)}
+                        </p>
                         <p className="font-bold text-slate-900 text-sm">{booking.serviceName}</p>
                         <p className="text-[11px] text-slate-500 font-medium">Ref: #{booking.ref}</p>
                       </td>
