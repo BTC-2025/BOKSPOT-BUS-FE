@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from 'react';
 
 export default function SettingsPage() {
-  const { currentMerchant, loginRole, supervisorId, updateMerchantModules } = useVendorStore();
+  const { currentMerchant, loginRole, supervisorId, updateMerchantModules, updateMerchantProfile } = useVendorStore();
   const archetypeConfig = getArchetypeConfig(currentMerchant?.archetype || 'Service');
   const isService = currentMerchant?.archetype === 'Service';
   const [mounted, setMounted] = useState(false);
@@ -36,14 +36,38 @@ export default function SettingsPage() {
   const [address, setAddress] = useState('42 Anna Nagar, Chennai');
   const [about, setAbout] = useState(currentMerchant?.aboutText || '');
   const [isSaved, setIsSaved] = useState(false);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(currentMerchant?.logoUrl || null);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 200;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.6);
+          setLogoPreview(compressed);
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -72,6 +96,13 @@ export default function SettingsPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentMerchant) {
+      updateMerchantProfile(currentMerchant.id, {
+        merchantName: name,
+        aboutText: about,
+        logoUrl: logoPreview || undefined
+      });
+    }
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
@@ -135,32 +166,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {loginRole === 'supervisor' && (
-        <div className="bg-bg-secondary rounded-xl shadow-sm border border-border-brand p-4 animate-fade-in flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-              <span className="text-xs text-text-secondary font-bold uppercase tracking-wider">Console Secured - Supervisor Mode</span>
-            </div>
-            <p className="text-xs text-text-secondary">
-              <span className="opacity-70">Vendor ID:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 ml-1">{currentMerchant.vendorId || 'N/A'}</span>
-            </p>
-          </div>
-          <div className="space-y-1 text-left md:text-right">
-            <p className="text-xs text-text-secondary">
-              <span className="opacity-70">Merchant key:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 ml-1 capitalize">{currentMerchant.username}</span>
-            </p>
-            <p className="text-xs text-text-secondary">
-              <span className="opacity-70">BNX Mail:</span> <span className="font-mono font-bold text-slate-800 dark:text-slate-200 bg-slate-500/ dark:bg-white/5 p-0.5 rounded px-1.5 ml-1">{getBnxMailId()}</span>
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* Left: Main Form */}
-        <div className="lg:col-span-2 space-y-8">
+        {/* Main Form */}
+        <div className="space-y-8">
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
             <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
               <Building2 size={18} className="text-[#8b6508]" /> Core Business Details
@@ -311,70 +320,6 @@ export default function SettingsPage() {
             </form>
           </div>
         </div>
-
-        {/* Right: Sidebar Meta */}
-        <div className="space-y-8">
-          
-          {/* Logo Upload Box */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
-            <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-              <Camera size={18} className="text-[#8b6508]" /> Brand Logo
-            </h2>
-            <label className="aspect-square w-full max-w-[200px] mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-slate-100 hover:border-[#8b6508] transition-all relative">
-              <input type="file" className="hidden" accept="image/png, image/jpeg" onChange={handleLogoChange} />
-              <div className="h-20 w-20 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm mb-4 overflow-hidden">
-                {logoPreview ? (
-                  <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-black text-[#8b6508]">{currentMerchant.logoLetter}</span>
-                )}
-              </div>
-              <p className="text-xs font-bold text-slate-500">Click to upload new logo</p>
-              <p className="text-[10px] text-slate-400 mt-1">PNG, JPG up to 2MB</p>
-            </label>
-          </div>
-
-          {/* Supervisor details */}
-          {(loginRole === 'supervisor' || currentMerchant.assignSupervisor) && (
-            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
-              <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                <User size={18} className="text-[#8b6508]" /> Supervisor Access
-              </h2>
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Supervisor Name</span>
-                  <span className="text-sm text-slate-900 font-black block">{currentMerchant.supervisorName || supervisorId || 'Supervisor Agent'}</span>
-                </div>
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Contact Details</span>
-                  <span className="text-sm text-slate-900 font-black block">{currentMerchant.supervisorPhone || '+91 98765 43210'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Business Hours */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
-            <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-              <Clock size={18} className="text-[#8b6508]" /> Operating Hours
-            </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-xs font-bold text-slate-600">Mon - Fri</span>
-                <span className="text-xs font-black text-slate-900">{isHospital ? '24 Hours Open' : isService ? '08:00 AM - 06:00 PM' : '09:00 AM - 08:00 PM'}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-xs font-bold text-slate-600">Saturday</span>
-                <span className="text-xs font-black text-slate-900">10:00 AM - 05:00 PM</span>
-              </div>
-              <div className="flex justify-between items-center p-3 rounded-xl bg-red-50 border border-red-100">
-                <span className="text-xs font-bold text-red-600">Sunday</span>
-                <span className="text-xs font-black text-red-700">{isHospital ? 'Emergency Only' : isService ? 'On-Call Only' : 'Closed'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );

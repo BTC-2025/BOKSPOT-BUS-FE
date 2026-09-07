@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentMerchant, logoutMerchant, switchStore, loginRole, theme, setTheme, supervisorId, bookings, services } = useVendorStore();
+  const { currentMerchant, logoutMerchant, switchStore, loginRole, theme, setTheme, supervisorId, bookings, services, updateMerchantProfile } = useVendorStore();
   const [utilityDrawerOpen, setUtilityDrawerOpen] = useState(false);
   const [activeUtilityTab, setActiveUtilityTab] = useState<'calendar' | 'calc' | 'tasks' | 'contacts' | null>(null);
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
@@ -362,7 +362,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between vendor-navbar backdrop-blur-md pl-6 pr-0 shadow-md border-b border-border-brand/40 shrink-0">
         {/* Left Column: Logo & Location */}
         <div className="flex-1 flex items-center gap-6">
-          <Link href="/home/dashboard-home" className="flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
+          <Link href="/home/dashboard-home" className="flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
+            {currentMerchant?.logoUrl && (
+              <img src={currentMerchant.logoUrl} alt="Merchant Logo" className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl object-cover shadow-sm bg-white" />
+            )}
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
           
@@ -538,8 +541,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               aria-label="Toggle profile menu"
               title="Partner Profile Settings"
             >
-              <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
-                <User size={12} strokeWidth={2.5} className="text-[#0a3161]" />
+              <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
+                {currentMerchant?.logoUrl ? (
+                  <img src={currentMerchant.logoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={12} strokeWidth={2.5} className="text-[#0a3161]" />
+                )}
               </div>
               <span>{loginRole === 'supervisor' ? (supervisorId || 'Supervisor') : (currentMerchant.username || 'Partner')}</span>
               <ChevronDown className={`h-3 w-3 text-white transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
@@ -550,12 +557,52 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Google Style Profile Header */}
                 <div className="px-6 py-4 flex flex-col items-center min-w-0 text-center bg-bg-secondary">
                   <div className="relative mb-2">
-                    <div className="h-14 w-14 rounded-full bg-[#0a3161] text-white flex items-center justify-center text-2xl font-bold">
-                      {(currentMerchant.username || 'P').charAt(0).toUpperCase()}
+                    <div className="h-14 w-14 rounded-full bg-[#0a3161] text-white flex items-center justify-center text-2xl font-bold overflow-hidden shadow-sm">
+                      {currentMerchant?.logoUrl ? (
+                        <img src={currentMerchant.logoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        (currentMerchant.username || 'P').charAt(0).toUpperCase()
+                      )}
                     </div>
-                    <button className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm hover:bg-slate-50">
+                    <label className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 shadow-sm hover:bg-slate-50 cursor-pointer">
                       <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    </button>
+                      <input 
+                        type="file" 
+                        accept="image/png, image/jpeg" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file && currentMerchant) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const img = new Image();
+                              img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_SIZE = 200;
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                  if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                                } else {
+                                  if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx?.drawImage(img, 0, 0, width, height);
+                                const compressed = canvas.toDataURL('image/jpeg', 0.6);
+                                updateMerchantProfile(currentMerchant.id, {
+                                  ...currentMerchant,
+                                  logoUrl: compressed
+                                });
+                              };
+                              img.src = reader.result as string;
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                      />
+                    </label>
                   </div>
                   <span className="font-extrabold text-[15px] truncate max-w-full text-black dark:text-white capitalize">
                     {currentMerchant.username || 'Partner'}

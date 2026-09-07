@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import axios from 'axios';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export interface MedicalReport {
   id: string;
@@ -247,6 +249,7 @@ interface VendorStoreState {
   currentStaff: StaffMember | null;
   theme: 'system' | 'light' | 'dark';
   bookings: PersistedBooking[];
+  fetchBookings: () => Promise<void>;
   services: CatalogService[];
   fetchServices: () => Promise<void>;
   staffAccounts: StaffMember[];
@@ -5189,6 +5192,19 @@ export const useVendorStore = create<VendorStoreState>()(
       currentStaff: null,
       theme: 'system',
       bookings: [],
+      
+      fetchBookings: async () => {
+        try {
+          const res = await axios.get(`${API_BASE}/bookings/sync`);
+          if (res.data && Array.isArray(res.data)) {
+            set({ bookings: res.data });
+          }
+        } catch (error) {
+          console.error("Error fetching bookings:", error);
+          set({ bookings: INITIAL_BOOKINGS });
+        }
+      },
+      
       services: [],
       staffAccounts: [
         {
