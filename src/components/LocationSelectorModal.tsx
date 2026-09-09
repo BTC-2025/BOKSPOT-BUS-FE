@@ -59,6 +59,7 @@ export function LocationSelectorModal({ isOpen, onClose, city, setCity, setStatu
 
   const handleCitySelect = (selectedCity: string, lat?: number, lng?: number) => {
     setCity(selectedCity);
+    if (typeof window !== 'undefined') localStorage.setItem('bus-selected-city', selectedCity);
     onClose();
   };
 
@@ -79,8 +80,10 @@ export function LocationSelectorModal({ isOpen, onClose, city, setCity, setStatu
                 const address = data.address;
                 const cityOrTown = address.city || address.town || address.municipality || 'Current Location';
                 setCity(cityOrTown);
+                if (typeof window !== 'undefined') localStorage.setItem('bus-selected-city', cityOrTown);
               } else {
                 setCity('Current Location');
+                if (typeof window !== 'undefined') localStorage.setItem('bus-selected-city', 'Current Location');
               }
               onClose();
             })

@@ -2,6 +2,7 @@
 
 import { useVendorStore, CatalogService } from '@/lib/store';
 import { getArchetypeConfig } from '@/lib/businessDictionary';
+import { compressImage } from '@/lib/imageUtils';
 import { Plus, Trash2, Edit, X, Package, List } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -25,7 +26,6 @@ export default function WorkspacePage() {
 
   // Booking Type Form State
   const [bookingTypeCategory, setBookingTypeCategory] = useState('');
-  const [bookingTypeCity, setBookingTypeCity] = useState('Chennai');
   const [bookingTypeImage, setBookingTypeImage] = useState('');
 
   // Category Form State
@@ -87,7 +87,7 @@ export default function WorkspacePage() {
       active: true,
       rating: 5.0,
       bookingsCount: 0,
-      city: bookingTypeCity,
+      city: (typeof window !== 'undefined' ? localStorage.getItem('bus-selected-city') : null) || currentMerchant.city || 'Chennai',
       listings: [],
       metadata: { mainImageUrl: bookingTypeImage.trim() || undefined },
       createdAt: new Date().toISOString()
@@ -98,7 +98,6 @@ export default function WorkspacePage() {
     setShowBookingTypeModal(false);
     setBookingTypeCategory('');
     setBookingTypeImage('');
-    setBookingTypeCity('Chennai');
   };
 
   // Save Category (Level 2)
@@ -116,6 +115,7 @@ export default function WorkspacePage() {
       active: true,
       rating: 5.0,
       bookingsCount: 0,
+      city: (typeof window !== 'undefined' ? localStorage.getItem('bus-selected-city') : null) || currentMerchant.city || 'Chennai',
       imageUrl: categoryImage.trim() || undefined,
       description: categoryDesc.trim() || undefined,
       listings: [],
@@ -164,12 +164,13 @@ export default function WorkspacePage() {
 
   const groupedCategories = merchantServices.reduce((acc: any, srv: any) => {
     const cat = srv.category || 'Uncategorized';
-    if (!acc[cat]) acc[cat] = { category: cat, mainImage: null, count: 0, serviceId: null, createdAt: srv.createdAt };
+    if (!acc[cat]) acc[cat] = { category: cat, mainImage: null, count: 0, serviceId: null, createdAt: srv.createdAt, city: srv.city };
     
     if (srv.name === '__BOKSPOT_GROUP__') {
       acc[cat].mainImage = srv.metadata?.mainImageUrl || srv.imageUrl || acc[cat].mainImage;
       acc[cat].serviceId = srv.id;
       if (srv.createdAt) acc[cat].createdAt = srv.createdAt;
+      if (srv.city) acc[cat].city = srv.city;
     } else {
       acc[cat].count += 1; // Only count real categories
       if (!acc[cat].mainImage) acc[cat].mainImage = srv.imageUrl; // Fallback to first real category image
@@ -258,12 +259,7 @@ export default function WorkspacePage() {
                           const srv = merchantServices.find(s => s.id === info.serviceId);
                           if (srv) {
                             setBookingTypeCategory(srv.category || '');
-                            setBookingTypeCity(srv.city || 'Chennai');
                             setBookingTypeImage(srv.metadata?.mainImageUrl || srv.imageUrl || '');
-                            // Note: To fully support edit we'd need an ID in state. 
-                            // Since this is simplified, we might just delete and recreate, or we can use a small hack.
-                            // But user just wanted the design. Let's delete and add for now or just open the add modal 
-                            // and let them add a new one. I'll just open the modal.
                             setShowBookingTypeModal(true);
                           }
                         }} className="h-8 w-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-slate-700 shadow-sm transition-colors">
@@ -282,6 +278,11 @@ export default function WorkspacePage() {
                         {info.createdAt && (
                           <span className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-wider">
                             Added: {new Date(info.createdAt).toLocaleDateString()} {new Date(info.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}
+                          </span>
+                        )}
+                        {info.city && (
+                          <span className="text-[10px] text-[#8b6508] font-bold mt-1 uppercase tracking-wider flex items-center gap-1">
+                            📍 {info.city}
                           </span>
                         )}
                       </div>
@@ -410,16 +411,7 @@ export default function WorkspacePage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">City / Location</label>
-                  <select value={bookingTypeCity} onChange={(e) => setBookingTypeCity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#8b6508] focus:ring-2 focus:ring-[#8b6508]/20 transition-all font-medium">
-                    <option value="Chennai">Chennai</option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="Delhi">Delhi</option>
-                  </select>
-                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Main Cover Image (User App Front Page)</label>
                   <div onClick={() => document.getElementById('booking-image-upload')?.click()} className="w-full h-32 rounded-xl border-2 border-dashed border-slate-300 hover:border-[#8b6508] bg-slate-50 flex flex-col items-center justify-center cursor-pointer transition-colors relative overflow-hidden group mb-3">
@@ -437,12 +429,15 @@ export default function WorkspacePage() {
                       </div>
                     )}
                   </div>
-                  <input id="booking-image-upload" type="file" className="hidden" onChange={(e) => {
+                  <input id="booking-image-upload" type="file" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setBookingTypeImage(reader.result as string);
-                      reader.readAsDataURL(file);
+                      try {
+                        const compressed = await compressImage(file, 400, 400, 0.8);
+                        setBookingTypeImage(compressed);
+                      } catch (err) {
+                        console.error('Image compression failed', err);
+                      }
                     }
                   }} accept="image/*" />
                 </div>
@@ -483,12 +478,15 @@ export default function WorkspacePage() {
                         <div className="flex flex-col items-center text-slate-500 group-hover:text-[#8b6508] transition-colors"><span className="font-bold text-sm">Click to choose image</span></div>
                       )}
                     </div>
-                    <input id="cat-image-upload" type="file" className="hidden" onChange={(e) => {
+                    <input id="cat-image-upload" type="file" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => setCategoryImage(reader.result as string);
-                        reader.readAsDataURL(file);
+                        try {
+                          const compressed = await compressImage(file, 400, 400, 0.8);
+                          setCategoryImage(compressed);
+                        } catch (err) {
+                          console.error('Image compression failed', err);
+                        }
                       }
                     }} accept="image/*" />
                   </div>

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, Package, AlertTriangle, Tag, Users, CheckSquare, Info, X, Save, Bed, Image as ImageIcon, Activity, Heart, Car, Ticket, Briefcase, Zap, CheckCircle2, Plus } from 'lucide-react';
 import DynamicForm from '@/components/DynamicForm';
 import { CATEGORY_TO_ARCHETYPE_MAP, Archetype } from '@/lib/archetypes';
+import { compressImage } from '@/lib/imageUtils';
 
 export default function ListingEditorPage() {
   const router = useRouter();
@@ -176,12 +177,15 @@ export default function ListingEditorPage() {
                   id="listing-image-upload"
                   type="file" 
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setImageUrl(reader.result as string);
-                      reader.readAsDataURL(file);
+                      try {
+                        const compressed = await compressImage(file, 400, 400, 0.8);
+                        setImageUrl(compressed);
+                      } catch (err) {
+                        console.error('Image compression failed', err);
+                      }
                     }
                   }}
                   accept="image/*"

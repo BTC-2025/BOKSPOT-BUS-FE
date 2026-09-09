@@ -71,6 +71,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      const storedCity = localStorage.getItem('bus-selected-city');
+      if (storedCity) setCity(storedCity);
+    }
     if (useVendorStore.persist.hasHydrated()) {
       setHasHydrated(true);
     }
