@@ -154,13 +154,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           const merged = [...currentBookings];
 
           data.forEach((syncB: any) => {
-            const exists = merged.some((b) => b.ref === syncB.ref || b.id === syncB.id);
-            if (!exists) {
+            const index = merged.findIndex((b) => b.ref === syncB.ref || b.id === syncB.id);
+            if (index === -1) {
               merged.unshift({
                 ...syncB,
                 status: syncB.status === 'CONFIRMED' ? 'CONFIRMED' : syncB.status,
               });
               changed = true;
+            } else {
+              // Update if status changed or data differs
+              if (merged[index].status !== syncB.status) {
+                merged[index] = { ...merged[index], ...syncB };
+                changed = true;
+              }
             }
           });
 
@@ -363,9 +369,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Left Column: Logo & Location */}
         <div className="flex-1 flex items-center gap-6">
           <Link href="/home/dashboard-home" className="flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0">
-            {currentMerchant?.logoUrl && (
-              <img src={currentMerchant.logoUrl} alt="Merchant Logo" className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl object-cover shadow-sm bg-white" />
-            )}
             <img src="/logo.png?v=3" alt="BokSpot Logo" className="h-10 lg:h-12 object-contain" />
           </Link>
           

@@ -102,13 +102,33 @@ export default function DashboardPage() {
   );
   const activeBookings = [...liveForMerchant, ...localActive];
 
-  const completedBookings = merchantBookings.filter(b => b.status === 'COMPLETED');
-  const totalRevenue = merchantBookings.reduce((sum, b) => b.status === 'COMPLETED' ? sum + b.amount : sum, 0);
+  const completedBookings = liveForMerchant.filter(b => b.status === 'COMPLETED');
+  const totalRevenue = liveForMerchant.reduce((sum, b) => 
+    (b.status === 'COMPLETED' || b.status === 'CONFIRMED' || b.status === 'CHECKED_IN') ? sum + (b.amount || 0) : sum, 0
+  );
 
-  const occupancy = 78;
-  const metric3 = 42;
-  const weeklyData = [45, 52, 38, 65, 80, 42, 60];
-  const maxWeekly = Math.max(...weeklyData);
+  const pendingBookings = liveForMerchant.filter(b => b.status === 'PENDING').length;
+  
+  // Calculate unique active customers
+  const uniqueCustomers = new Set(activeBookings.map(b => b.customerPhone || b.customerName)).size;
+  const occupancy = uniqueCustomers; // Replaces previous mock percentage
+
+  // Calculate active staff (staff assigned to active bookings)
+  const activeStaffIds = new Set(activeBookings.map(b => b.assignedDoctorId).filter(Boolean));
+  const metric3 = activeStaffIds.size > 0 ? activeStaffIds.size : 1; // Default to 1 if no staff explicitly assigned yet
+
+  // Calculate actual weekly trend
+  const daysMap = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+  liveForMerchant.forEach(b => {
+    const d = new Date(b.bookedAt || b.date);
+    if (!isNaN(d.getTime())) {
+      const day = d.getDay();
+      const adjustedDay = day === 0 ? 6 : day - 1;
+      daysMap[adjustedDay]++;
+    }
+  });
+  const weeklyData = daysMap;
+  const maxWeekly = Math.max(...weeklyData, 1);
   const carouselImages = DEFAULT_CAROUSEL_IMAGES[currentMerchant.archetype as keyof typeof DEFAULT_CAROUSEL_IMAGES] || DEFAULT_CAROUSEL_IMAGES.ServiceBooking;
 
   const getBookingType = (serviceName: string, fallback?: string) => {
@@ -285,7 +305,7 @@ export default function DashboardPage() {
             <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full"><TrendingUp size={12} /> +12.5%</span>
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Today's Revenue</p>
-          <h3 className="text-2xl font-black text-slate-900">₹{(totalRevenue + 15400).toLocaleString()}</h3>
+          <h3 className="text-2xl font-black text-slate-900">₹{totalRevenue.toLocaleString()}</h3>
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-[#8b6508]/30 transition-colors">
@@ -294,7 +314,7 @@ export default function DashboardPage() {
             <span className="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full"><ArrowUpRight size={12} /> +4.2%</span>
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{archetypeConfig.metric1Title || 'Total Bookings'}</p>
-          <h3 className="text-2xl font-black text-slate-900">{merchantBookings.length + 84}</h3>
+          <h3 className="text-2xl font-black text-slate-900">{liveForMerchant.length}</h3>
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-[#8b6508]/30 transition-colors">
@@ -312,7 +332,7 @@ export default function DashboardPage() {
             <span className="flex items-center gap-1 text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full"><TrendingUp size={12} /> Peak</span>
           </div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{archetypeConfig.activeStaffLabel || 'Live Capacity'}</p>
-          <h3 className="text-2xl font-black text-slate-900">{metric3}%</h3>
+          <h3 className="text-2xl font-black text-slate-900">{metric3}</h3>
         </div>
       </div>
 
